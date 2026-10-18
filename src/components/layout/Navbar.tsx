@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X, Sparkles } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-40 w-full bg-[#0a0a0a]/90 backdrop-blur-md border-b border-gym-border">
+    <nav className="sticky top-0 z-40 w-full bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-zinc-200 dark:border-gym-border transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo Brand */}
@@ -25,21 +26,21 @@ export function Navbar() {
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="text-xl sm:text-2xl font-black tracking-wider text-white group-hover:text-gym-lime transition-colors">
+                <span className="text-xl sm:text-2xl font-black tracking-wider text-zinc-900 dark:text-white group-hover:text-gym-lime transition-colors">
                   SYNDIQ
                 </span>
                 <span className="text-xl sm:text-2xl font-black tracking-wider text-gym-lime">
                   FIT
                 </span>
               </div>
-              <span className="text-[11px] font-bold tracking-[0.25em] text-zinc-400 uppercase">
+              <span className="text-[11px] font-bold tracking-[0.25em] text-zinc-500 dark:text-zinc-400 uppercase">
                 INTELLIGENT TRAINING
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-300">
+          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-600 dark:text-zinc-300">
             <Link href="/" className="hover:text-gym-lime transition-colors">
               Home
             </Link>
@@ -57,8 +58,9 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop CTA */}
+          {/* Desktop CTA & Theme Toggle */}
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <Link
               href="/questionnaire"
               className="px-5 py-2.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-xs sm:text-sm shadow-lime-sm transition-all hover:scale-105 flex items-center gap-2"
@@ -68,12 +70,13 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile menu trigger */}
-          <div className="flex md:hidden">
+          {/* Mobile Actions (Theme Toggle & Menu Trigger) */}
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle navigation menu"
-              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 transition-colors"
+              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-colors"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -83,52 +86,57 @@ export function Navbar() {
 
       {/* Mobile Drawer */}
       {isOpen && (
-        <div className="md:hidden bg-[#0d0d0d] border-b border-gym-border px-5 py-6 space-y-4 animate-fadeIn">
-          <div className="flex flex-col space-y-2 font-bold text-sm sm:text-base text-zinc-300">
+        <div className="md:hidden bg-white dark:bg-[#0d0d0d] border-b border-zinc-200 dark:border-gym-border px-5 py-6 space-y-4 animate-fadeIn shadow-xl">
+          <div className="flex flex-col space-y-2 font-bold text-sm sm:text-base text-zinc-700 dark:text-zinc-300">
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-800 hover:text-gym-lime transition-colors"
+              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-gym-lime transition-colors"
             >
               Home
             </Link>
             <Link
               href="/questionnaire"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-800 hover:text-gym-lime transition-colors"
+              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-gym-lime transition-colors"
             >
               Create Program
             </Link>
             <Link
               href="/program"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-800 hover:text-gym-lime transition-colors"
+              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-gym-lime transition-colors"
             >
               My Program
             </Link>
             <Link
               href="/muscle-map"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-800 hover:text-gym-lime transition-colors"
+              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-gym-lime transition-colors"
             >
               Muscle Map
             </Link>
             <Link
               href="/about"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-800 hover:text-gym-lime transition-colors"
+              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-gym-lime transition-colors"
             >
               About Syndiq fit
             </Link>
             <Link
               href="/disclaimer"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-800 hover:text-gym-lime text-xs sm:text-sm text-zinc-400 transition-colors"
+              className="px-3.5 py-3 min-h-[44px] flex items-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-gym-lime text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 transition-colors"
             >
               Health Disclaimer
             </Link>
           </div>
-          <div className="pt-2">
+
+          <div className="pt-2 flex flex-col gap-3">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">Appearance</span>
+              <ThemeToggle showLabel />
+            </div>
             <Link
               href="/questionnaire"
               onClick={() => setIsOpen(false)}

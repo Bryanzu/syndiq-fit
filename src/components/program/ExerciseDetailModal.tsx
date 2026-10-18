@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { WorkoutExerciseItem, MuscleGroup } from '@/types/workout';
+import { useModalScrollLock } from '@/hooks/useModalScrollLock';
 import { X, Play, ArrowRightLeft, Clock, Dumbbell, ShieldAlert, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface ExerciseDetailModalProps {
@@ -19,19 +20,7 @@ export function ExerciseDetailModal({
   onOpenVideo,
   onOpenSwap,
 }: ExerciseDetailModalProps) {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+  const { handleBackdropClick } = useModalScrollLock(isOpen, onClose);
 
   if (!isOpen || !item) return null;
 
@@ -44,50 +33,68 @@ export function ExerciseDetailModal({
       .join(' ');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-black/80 dark:bg-black/85 backdrop-blur-sm animate-fadeIn"
+      onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="exercise-detail-title"
+    >
       <div
-        className="relative w-full max-w-2xl bg-gym-card border border-gym-border rounded-2xl overflow-hidden shadow-2xl animate-scaleUp max-h-[90vh] flex flex-col"
+        className="relative w-full max-w-2xl bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl animate-scaleUp max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className="flex items-start justify-between p-6 border-b border-gym-border bg-[#141414]">
-          <div className="space-y-1.5">
+        {/* Modal Header - Fixed/Sticky */}
+        <div className="flex items-start justify-between p-4 sm:p-6 border-b border-zinc-200 dark:border-gym-border bg-slate-50 dark:bg-[#141414] shrink-0 sticky top-0 z-10 transition-colors">
+          <div className="space-y-1.5 pr-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 text-xs font-bold uppercase rounded-md bg-zinc-800 text-gym-lime border border-zinc-700">
-                {exercise.equipment}
+              <span className="px-2.5 py-0.5 text-xs font-bold uppercase rounded-md bg-zinc-100 dark:bg-zinc-800 text-gym-limeDark dark:text-gym-lime border border-zinc-200 dark:border-zinc-700">
+                {exercise.equipment.replace('_', ' ')}
               </span>
               {item.isSubstituted && (
-                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
                   <ShieldAlert className="w-3 h-3" />
                   <span>{item.substitutionReason || 'Adapted'}</span>
                 </span>
               )}
             </div>
-            <h2 className="text-2xl font-extrabold text-white tracking-tight">{exercise.name}</h2>
+            <h2
+              id="exercise-detail-title"
+              className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight"
+            >
+              {exercise.name}
+            </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            aria-label="Close dialog"
+            className="p-2 rounded-xl text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 text-sm">
+        {/* Modal Body - Scrollable Area */}
+        <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain touch-pan-y space-y-5 sm:space-y-6 text-sm flex-1 min-h-0 modal-content-scroll">
           {/* Prescription Banner (Sets, Reps, Rest) */}
-          <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-[#161616] border border-gym-border">
+          <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-[#161616] border border-zinc-200 dark:border-gym-border">
             <div className="text-center">
-              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">Sets</span>
-              <span className="text-xl font-black text-white">{item.sets}</span>
+              <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                Sets
+              </span>
+              <span className="text-xl font-black text-zinc-900 dark:text-white">{item.sets}</span>
             </div>
-            <div className="text-center border-x border-zinc-800">
-              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">Reps</span>
-              <span className="text-xl font-black text-gym-lime">{item.reps}</span>
+            <div className="text-center border-x border-zinc-200 dark:border-zinc-800">
+              <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                Reps
+              </span>
+              <span className="text-xl font-black text-gym-limeDark dark:text-gym-lime">{item.reps}</span>
             </div>
             <div className="text-center">
-              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">Rest</span>
-              <span className="text-xl font-black text-white flex items-center justify-center gap-1">
+              <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                Rest
+              </span>
+              <span className="text-xl font-black text-zinc-900 dark:text-white flex items-center justify-center gap-1">
                 <Clock className="w-4 h-4 text-zinc-400" />
                 {item.restSeconds}s
               </span>
@@ -96,12 +103,14 @@ export function ExerciseDetailModal({
 
           {/* Target Muscles */}
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Target Muscles</h4>
+            <h4 className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
+              Target Muscles
+            </h4>
             <div className="flex flex-wrap gap-2">
               {exercise.primaryMuscles.map((m) => (
                 <span
                   key={m}
-                  className="px-3 py-1 rounded-full text-xs font-bold bg-gym-lime/10 text-gym-lime border border-gym-lime/40"
+                  className="px-3 py-1 rounded-full text-xs font-bold bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/40"
                 >
                   Primary: {formatMuscle(m)}
                 </span>
@@ -109,7 +118,7 @@ export function ExerciseDetailModal({
               {exercise.secondaryMuscles.map((m) => (
                 <span
                   key={m}
-                  className="px-3 py-1 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700"
+                  className="px-3 py-1 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700"
                 >
                   Secondary: {formatMuscle(m)}
                 </span>
@@ -118,24 +127,28 @@ export function ExerciseDetailModal({
           </div>
 
           {/* Why You're Doing It */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-900 to-[#18181b] border border-zinc-800 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-gym-lime uppercase tracking-wider">
+          <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-50 to-slate-100 dark:from-zinc-900 dark:to-[#18181b] border border-zinc-200 dark:border-zinc-800 space-y-1.5">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-gym-limeDark dark:text-gym-lime uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Why It's In Your Program</span>
             </div>
-            <p className="text-zinc-300 text-sm leading-relaxed">{exercise.whyIncluded}</p>
+            <p className="text-zinc-700 dark:text-zinc-300 text-xs sm:text-sm leading-relaxed">
+              {exercise.whyIncluded}
+            </p>
           </div>
 
           {/* Step-by-Step Instructions */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">How to Perform Properly</h4>
+            <h4 className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
+              How to Perform Properly
+            </h4>
             <div className="space-y-2.5">
               {exercise.instructions.map((step, idx) => (
-                <div key={idx} className="flex items-start gap-3 text-zinc-300">
-                  <div className="w-5 h-5 rounded-full bg-zinc-800 text-gym-lime font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 border border-zinc-700">
+                <div key={idx} className="flex items-start gap-3 text-zinc-700 dark:text-zinc-300">
+                  <div className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 text-gym-limeDark dark:text-gym-lime font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 border border-zinc-200 dark:border-zinc-700">
                     {idx + 1}
                   </div>
-                  <p className="text-sm leading-snug">{step}</p>
+                  <p className="text-xs sm:text-sm leading-snug pt-0.5">{step}</p>
                 </div>
               ))}
             </div>
@@ -143,30 +156,31 @@ export function ExerciseDetailModal({
 
           {/* Intensity Note if applicable */}
           {item.intensityNote && (
-            <div className="p-3.5 rounded-xl bg-[#141414] border border-zinc-800 flex items-start gap-2.5 text-xs text-zinc-400">
-              <CheckCircle2 className="w-4 h-4 text-gym-lime shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-zinc-800 flex items-start gap-2.5 text-xs text-zinc-600 dark:text-zinc-400">
+              <CheckCircle2 className="w-4 h-4 text-gym-limeDark dark:text-gym-lime shrink-0 mt-0.5" />
               <div>
-                <span className="font-semibold text-zinc-200">Coach Guidance:</span> {item.intensityNote}
+                <span className="font-semibold text-zinc-900 dark:text-zinc-200">Coach Guidance:</span>{' '}
+                {item.intensityNote}
               </div>
             </div>
           )}
         </div>
 
-        {/* Modal Actions Footer */}
-        <div className="p-5 border-t border-gym-border bg-[#141414] flex flex-wrap items-center justify-between gap-3">
+        {/* Modal Actions Footer - Fixed/Sticky */}
+        <div className="p-3.5 sm:p-5 border-t border-zinc-200 dark:border-gym-border bg-slate-50 dark:bg-[#141414] flex flex-wrap items-center justify-between gap-3 shrink-0 sticky bottom-0 z-10 transition-colors">
           <button
             type="button"
             onClick={onOpenSwap}
-            className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold text-xs transition-colors flex items-center gap-2 border border-zinc-700"
+            className="px-4 py-2.5 min-h-[44px] rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2 border border-zinc-300 dark:border-zinc-700"
           >
-            <ArrowRightLeft className="w-4 h-4 text-gym-lime" />
+            <ArrowRightLeft className="w-4 h-4 text-gym-limeDark dark:text-gym-lime" />
             <span>Swap Exercise</span>
           </button>
 
           <button
             type="button"
             onClick={onOpenVideo}
-            className="px-5 py-2.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-bold text-xs shadow-lime-sm transition-all hover:scale-105 flex items-center gap-2"
+            className="px-5 py-2.5 min-h-[44px] rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-xs sm:text-sm shadow-lime-sm transition-all hover:scale-105 flex items-center gap-2"
           >
             <Play className="w-4 h-4 fill-black" />
             <span>Watch Video Demo</span>

@@ -2,7 +2,16 @@
 
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserProfile, Gender, AgeCategory, ExperienceLevel, FitnessGoal, TrainingFrequency, WorkoutDuration, GoalCategory } from '@/types/questionnaire';
+import {
+  UserProfile,
+  Gender,
+  AgeCategory,
+  ExperienceLevel,
+  FitnessGoal,
+  TrainingFrequency,
+  WorkoutDuration,
+  GoalCategory,
+} from '@/types/questionnaire';
 import { InjuryArea, MuscleGroup } from '@/types/workout';
 import { SyndiqEquipmentId, EquipmentCategory } from '@/types/equipment';
 import {
@@ -173,14 +182,14 @@ export function QuestionnaireWizard() {
     <div className="w-full max-w-3xl mx-auto space-y-8 animate-fadeIn">
       {/* Progress Bar & Step Header */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
-          <span className="flex items-center gap-1.5 text-gym-lime">
+        <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+          <span className="flex items-center gap-1.5 text-gym-limeDark dark:text-gym-lime">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Step {currentStep} of {totalSteps}</span>
           </span>
           <span>{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
         </div>
-        <div className="w-full h-2 bg-[#18181b] rounded-full overflow-hidden border border-zinc-800">
+        <div className="w-full h-2 bg-zinc-200 dark:bg-[#18181b] rounded-full overflow-hidden border border-zinc-300 dark:border-zinc-800">
           <div
             className="h-full bg-gradient-to-r from-gym-lime to-gym-limeLight transition-all duration-500 shadow-lime-sm"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
@@ -190,10 +199,10 @@ export function QuestionnaireWizard() {
 
       {/* STEP 1: SEX / GENDER */}
       {currentStep === 1 && (
-        <div className="bg-gym-card border border-gym-border rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white">What is your sex?</h2>
-            <p className="text-sm text-zinc-400">
+            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">What is your sex?</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Helps Syndiq fit calibrate baseline volume ratios and split balancing while ensuring access to full-body strength training.
             </p>
           </div>
@@ -207,23 +216,23 @@ export function QuestionnaireWizard() {
                   onClick={() => setGender(opt.value)}
                   className={`p-6 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-[#18181b] border-gym-lime shadow-lime-md'
-                      : 'bg-[#121212] border-gym-border hover:border-zinc-700 hover:bg-[#161616]'
+                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-md'
+                      : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-slate-100 dark:hover:bg-[#161616]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xl font-black text-white">{opt.label}</span>
+                    <span className="text-xl font-black text-zinc-900 dark:text-white">{opt.label}</span>
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center border ${
                         isSelected
                           ? 'bg-gym-lime border-gym-lime text-black'
-                          : 'border-zinc-700 bg-zinc-800'
+                          : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
                       }`}
                     >
                       {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{opt.description}</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{opt.description}</p>
                 </div>
               );
             })}
@@ -233,10 +242,10 @@ export function QuestionnaireWizard() {
 
       {/* STEP 2: AGE */}
       {currentStep === 2 && (
-        <div className="bg-gym-card border border-gym-border rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white">What is your age bracket?</h2>
-            <p className="text-sm text-zinc-400">
+            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">What is your age bracket?</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Age influences joint loading, recovery intervals, rest periods, and warm-up recommendations.
             </p>
           </div>
@@ -250,23 +259,23 @@ export function QuestionnaireWizard() {
                   onClick={() => setAge(opt.value)}
                   className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-[#18181b] border-gym-lime shadow-lime-sm'
-                      : 'bg-[#121212] border-gym-border hover:border-zinc-700 hover:bg-[#161616]'
+                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm'
+                      : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-slate-100 dark:hover:bg-[#161616]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-base font-bold text-white">{opt.label}</span>
+                    <span className="text-base font-bold text-zinc-900 dark:text-white">{opt.label}</span>
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center border ${
                         isSelected
                           ? 'bg-gym-lime border-gym-lime text-black'
-                          : 'border-zinc-700 bg-zinc-800'
+                          : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
                       }`}
                     >
                       {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-400">{opt.description}</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">{opt.description}</p>
                 </div>
               );
             })}
@@ -276,10 +285,10 @@ export function QuestionnaireWizard() {
 
       {/* STEP 3: EXPERIENCE LEVEL */}
       {currentStep === 3 && (
-        <div className="bg-gym-card border border-gym-border rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white">What is your lifting experience?</h2>
-            <p className="text-sm text-zinc-400">
+            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">What is your lifting experience?</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Determines exercise complexity, rep schemes, and technical intensity (e.g., machine focus vs heavy barbell compounds).
             </p>
           </div>
@@ -293,15 +302,15 @@ export function QuestionnaireWizard() {
                   onClick={() => setExperience(opt.value)}
                   className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-[#18181b] border-gym-lime shadow-lime-sm'
-                      : 'bg-[#121212] border-gym-border hover:border-zinc-700 hover:bg-[#161616]'
+                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm'
+                      : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-slate-100 dark:hover:bg-[#161616]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-base font-extrabold text-white">{opt.label}</span>
+                      <span className="text-base font-extrabold text-zinc-900 dark:text-white">{opt.label}</span>
                       {opt.badge && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gym-lime/10 text-gym-lime border border-gym-lime/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/30">
                           {opt.badge}
                         </span>
                       )}
@@ -310,13 +319,13 @@ export function QuestionnaireWizard() {
                       className={`w-5 h-5 rounded-full flex items-center justify-center border ${
                         isSelected
                           ? 'bg-gym-lime border-gym-lime text-black'
-                          : 'border-zinc-700 bg-zinc-800'
+                          : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
                       }`}
                     >
                       {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-400">{opt.description}</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">{opt.description}</p>
                 </div>
               );
             })}
@@ -326,16 +335,16 @@ export function QuestionnaireWizard() {
 
       {/* STEP 4: PRIMARY FITNESS GOAL */}
       {currentStep === 4 && (
-        <div className="bg-gym-card border border-gym-border rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white">What is your primary goal?</h2>
-            <p className="text-sm text-zinc-400">
+            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">What is your primary goal?</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               The engine weights volume and movement order to emphasize your priority while ensuring full-body structural balance.
             </p>
           </div>
 
           {/* Goal Category Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-zinc-800">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-zinc-200 dark:border-zinc-800">
             {(
               [
                 { id: 'body_composition', label: 'Body Composition' },
@@ -348,10 +357,10 @@ export function QuestionnaireWizard() {
                 key={cat.id}
                 type="button"
                 onClick={() => setGoalCategory(cat.id)}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all ${
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all min-h-[36px] ${
                   goalCategory === cat.id
                     ? 'bg-gym-lime text-black shadow-lime-sm'
-                    : 'text-zinc-400 hover:text-white bg-zinc-900'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-900'
                 }`}
               >
                 {cat.label}
@@ -369,23 +378,23 @@ export function QuestionnaireWizard() {
                   onClick={() => setGoal(opt.id)}
                   className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-[#18181b] border-gym-lime shadow-lime-sm'
-                      : 'bg-[#121212] border-gym-border hover:border-zinc-700 hover:bg-[#161616]'
+                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm'
+                      : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-slate-100 dark:hover:bg-[#161616]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm font-bold text-white line-clamp-1">{opt.label}</span>
+                    <span className="text-sm font-bold text-zinc-900 dark:text-white line-clamp-1">{opt.label}</span>
                     <div
                       className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${
                         isSelected
                           ? 'bg-gym-lime border-gym-lime text-black'
-                          : 'border-zinc-700 bg-zinc-800'
+                          : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
                       }`}
                     >
                       {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-400 line-clamp-2">{opt.description}</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">{opt.description}</p>
                 </div>
               );
             })}
@@ -395,10 +404,10 @@ export function QuestionnaireWizard() {
 
       {/* STEP 5: TRAINING FREQUENCY */}
       {currentStep === 5 && (
-        <div className="bg-gym-card border border-gym-border rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white">How many days can you train per week?</h2>
-            <p className="text-sm text-zinc-400">
+            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">How many days can you train per week?</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Select your weekly availability or choose "Recommend for me" to let Syndiq fit choose the ideal split.
             </p>
           </div>
@@ -412,15 +421,15 @@ export function QuestionnaireWizard() {
                   onClick={() => setFrequency(opt.value)}
                   className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-[#18181b] border-gym-lime shadow-lime-sm'
-                      : 'bg-[#121212] border-gym-border hover:border-zinc-700 hover:bg-[#161616]'
+                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm'
+                      : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-slate-100 dark:hover:bg-[#161616]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-bold text-white">{opt.label}</span>
+                      <span className="text-base font-bold text-zinc-900 dark:text-white">{opt.label}</span>
                       {opt.badge && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gym-lime/10 text-gym-lime border border-gym-lime/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/30">
                           {opt.badge}
                         </span>
                       )}
@@ -429,13 +438,13 @@ export function QuestionnaireWizard() {
                       className={`w-5 h-5 rounded-full flex items-center justify-center border shrink-0 ${
                         isSelected
                           ? 'bg-gym-lime border-gym-lime text-black'
-                          : 'border-zinc-700 bg-zinc-800'
+                          : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
                       }`}
                     >
                       {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-400">{opt.description}</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">{opt.description}</p>
                 </div>
               );
             })}
@@ -445,10 +454,10 @@ export function QuestionnaireWizard() {
 
       {/* STEP 6: SESSION DURATION */}
       {currentStep === 6 && (
-        <div className="bg-gym-card border border-gym-border rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white">How much time do you have per workout?</h2>
-            <p className="text-sm text-zinc-400">
+            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">How much time do you have per workout?</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Duration dynamically determines how many exercises and sets are programmed so your workout realistically fits your schedule.
             </p>
           </div>
@@ -462,23 +471,23 @@ export function QuestionnaireWizard() {
                   onClick={() => setDuration(opt.value)}
                   className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-[#18181b] border-gym-lime shadow-lime-sm'
-                      : 'bg-[#121212] border-gym-border hover:border-zinc-700 hover:bg-[#161616]'
+                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm'
+                      : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-slate-100 dark:hover:bg-[#161616]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-base font-bold text-white">{opt.label}</span>
+                    <span className="text-base font-bold text-zinc-900 dark:text-white">{opt.label}</span>
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center border shrink-0 ${
                         isSelected
                           ? 'bg-gym-lime border-gym-lime text-black'
-                          : 'border-zinc-700 bg-zinc-800'
+                          : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
                       }`}
                     >
                       {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-400">{opt.description}</p>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">{opt.description}</p>
                 </div>
               );
             })}
@@ -488,29 +497,29 @@ export function QuestionnaireWizard() {
 
       {/* STEP 7: EQUIPMENT SELECTOR */}
       {currentStep === 7 && (
-        <div className="bg-gym-card border border-gym-border rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
           <div className="space-y-2">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <h2 className="text-2xl sm:text-3xl font-black text-white">What equipment do you have access to?</h2>
-              <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-extrabold bg-gym-lime/10 text-gym-lime border border-gym-lime/30 shrink-0">
+              <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">What equipment do you have access to?</h2>
+              <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-extrabold bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/30 shrink-0">
                 {equipment.length} Pieces Selected
               </span>
             </div>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
               <strong>Workouts tailored to your gym.</strong> Every gym has different equipment. Syndiq Fit lets you select the equipment available to you and generates workout programs tailored to your goals, experience, available equipment, and training time.
             </p>
           </div>
 
           {/* Quick Presets */}
           <div className="space-y-2 pt-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">
               Quick Setup Presets
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => handleApplyPreset('commercial')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-900 border border-gym-border hover:border-gym-lime hover:text-gym-lime text-xs font-bold text-zinc-200 transition-all text-center"
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-gym-border hover:border-gym-lime text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-gym-lime transition-all text-center min-h-[44px]"
               >
                 <Building2 className="w-3.5 h-3.5 shrink-0" />
                 <span>Commercial Gym</span>
@@ -518,7 +527,7 @@ export function QuestionnaireWizard() {
               <button
                 type="button"
                 onClick={() => handleApplyPreset('home')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-900 border border-gym-border hover:border-gym-lime hover:text-gym-lime text-xs font-bold text-zinc-200 transition-all text-center"
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-gym-border hover:border-gym-lime text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-gym-lime transition-all text-center min-h-[44px]"
               >
                 <Home className="w-3.5 h-3.5 shrink-0" />
                 <span>Home Dumbbells</span>
@@ -526,7 +535,7 @@ export function QuestionnaireWizard() {
               <button
                 type="button"
                 onClick={() => handleApplyPreset('all')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-900 border border-gym-border hover:border-gym-lime hover:text-gym-lime text-xs font-bold text-zinc-200 transition-all text-center"
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-gym-border hover:border-gym-lime text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-gym-lime transition-all text-center min-h-[44px]"
               >
                 <CheckSquare className="w-3.5 h-3.5 shrink-0" />
                 <span>Select All ({ALL_SYNDIQ_EQUIPMENT_IDS.length})</span>
@@ -534,7 +543,7 @@ export function QuestionnaireWizard() {
               <button
                 type="button"
                 onClick={() => handleApplyPreset('clear')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-900 border border-gym-border hover:border-red-500 hover:text-red-400 text-xs font-bold text-zinc-400 transition-all text-center"
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-gym-border hover:border-red-500 hover:text-red-500 text-xs font-bold text-zinc-600 dark:text-zinc-400 transition-all text-center min-h-[44px]"
               >
                 <RotateCcw className="w-3.5 h-3.5 shrink-0" />
                 <span>Clear All</span>
@@ -551,13 +560,13 @@ export function QuestionnaireWizard() {
                 value={equipmentSearchQuery}
                 onChange={(e) => setEquipmentSearchQuery(e.target.value)}
                 placeholder="Search equipment by name or alias (e.g. barbell, cables, leg press, lat pulldown)..."
-                className="w-full bg-zinc-900/90 border border-gym-border rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-gym-lime"
+                className="w-full bg-white dark:bg-zinc-900/90 border border-zinc-300 dark:border-gym-border rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-gym-lime"
               />
               {equipmentSearchQuery && (
                 <button
                   type="button"
                   onClick={() => setEquipmentSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-white"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -569,10 +578,10 @@ export function QuestionnaireWizard() {
               <button
                 type="button"
                 onClick={() => setSelectedEquipmentCategory('all')}
-                className={`px-3 py-1.5 rounded-lg font-bold shrink-0 transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg font-bold shrink-0 transition-all flex items-center gap-1.5 min-h-[36px] ${
                   selectedEquipmentCategory === 'all'
-                    ? 'bg-gym-lime text-black'
-                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-gym-border'
+                    ? 'bg-gym-lime text-black font-extrabold shadow-sm'
+                    : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-gym-border'
                 }`}
               >
                 <span>All Equipment</span>
@@ -590,10 +599,10 @@ export function QuestionnaireWizard() {
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedEquipmentCategory(cat.id)}
-                    className={`px-3 py-1.5 rounded-lg font-bold shrink-0 transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-lg font-bold shrink-0 transition-all flex items-center gap-1.5 min-h-[36px] ${
                       isActive
-                        ? 'bg-gym-lime text-black'
-                        : 'bg-zinc-900 text-zinc-400 hover:text-white border border-gym-border'
+                        ? 'bg-gym-lime text-black font-extrabold shadow-sm'
+                        : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-gym-border'
                     }`}
                   >
                     <span>{cat.label}</span>
@@ -609,13 +618,16 @@ export function QuestionnaireWizard() {
           {/* Category Bulk Action */}
           {selectedEquipmentCategory !== 'all' && (
             <div className="flex items-center justify-between px-1 text-xs">
-              <span className="text-zinc-400">
-                Category: <strong className="text-white">{EQUIPMENT_CATEGORIES.find((c) => c.id === selectedEquipmentCategory)?.label}</strong>
+              <span className="text-zinc-600 dark:text-zinc-400">
+                Category:{' '}
+                <strong className="text-zinc-900 dark:text-white">
+                  {EQUIPMENT_CATEGORIES.find((c) => c.id === selectedEquipmentCategory)?.label}
+                </strong>
               </span>
               <button
                 type="button"
                 onClick={handleToggleCategoryAll}
-                className="text-gym-lime hover:underline font-bold"
+                className="text-gym-limeDark dark:text-gym-lime hover:underline font-bold"
               >
                 {areAllInCategorySelected ? 'Deselect all in category' : 'Select all in category'}
               </button>
@@ -626,7 +638,7 @@ export function QuestionnaireWizard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[46vh] overflow-y-auto pr-1">
             {filteredEquipment.length === 0 ? (
               <div className="col-span-full py-8 text-center space-y-2">
-                <p className="text-sm font-semibold text-zinc-400">
+                <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
                   No equipment matching &quot;{equipmentSearchQuery}&quot;
                 </p>
                 <button
@@ -635,7 +647,7 @@ export function QuestionnaireWizard() {
                     setEquipmentSearchQuery('');
                     setSelectedEquipmentCategory('all');
                   }}
-                  className="text-xs font-bold text-gym-lime hover:underline"
+                  className="text-xs font-bold text-gym-limeDark dark:text-gym-lime hover:underline"
                 >
                   Clear search and reset filters
                 </button>
@@ -649,16 +661,16 @@ export function QuestionnaireWizard() {
                     onClick={() => handleToggleEquipment(item.id)}
                     className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-2.5 ${
                       isChecked
-                        ? 'bg-[#18181b] border-gym-lime/70 shadow-lime-sm'
-                        : 'bg-[#121212] border-gym-border hover:border-zinc-700 opacity-65 hover:opacity-100'
+                        ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime/70 shadow-lime-sm'
+                        : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 opacity-75 hover:opacity-100'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-0.5">
-                        <span className="text-xs sm:text-sm font-black text-white block leading-snug">
+                        <span className="text-xs sm:text-sm font-black text-zinc-900 dark:text-white block leading-snug">
                           {item.name}
                         </span>
-                        <span className="text-[10px] uppercase font-bold text-gym-lime tracking-wider">
+                        <span className="text-[10px] uppercase font-bold text-gym-limeDark dark:text-gym-lime tracking-wider">
                           {EQUIPMENT_CATEGORIES.find((c) => c.id === item.category)?.label}
                         </span>
                       </div>
@@ -666,14 +678,14 @@ export function QuestionnaireWizard() {
                         className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
                           isChecked
                             ? 'bg-gym-lime border-gym-lime text-black'
-                            : 'border-zinc-700 bg-zinc-800'
+                            : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
                         }`}
                       >
                         {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                       </div>
                     </div>
 
-                    <p className="text-xs text-zinc-400 leading-relaxed">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
                       {item.description}
                     </p>
 
@@ -689,10 +701,10 @@ export function QuestionnaireWizard() {
           </div>
 
           {/* Beginner Guidance Notice */}
-          <div className="p-4 rounded-2xl bg-zinc-900/80 border border-gym-border flex items-start gap-3 text-xs text-zinc-400">
-            <Info className="w-4 h-4 text-gym-lime shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-gym-border flex items-start gap-3 text-xs text-zinc-600 dark:text-zinc-400">
+            <Info className="w-4 h-4 text-gym-limeDark dark:text-gym-lime shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong className="text-zinc-200">Can&apos;t recognise an item?</strong> Skip it and continue. Syndiq Fit will only prescribe exercises matching equipment you confirm. You can also pick bodyweight-only if you have no gym access.
+              <strong className="text-zinc-900 dark:text-zinc-200">Can&apos;t recognise an item?</strong> Skip it and continue. Syndiq Fit will only prescribe exercises matching equipment you confirm. You can also pick bodyweight-only if you have no gym access.
             </p>
           </div>
         </div>
@@ -700,17 +712,17 @@ export function QuestionnaireWizard() {
 
       {/* STEP 8: INJURIES, LIMITATIONS & REVIEW */}
       {currentStep === 8 && (
-        <div className="bg-gym-card border border-gym-border rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white">Any injuries or joint limitations?</h2>
-            <p className="text-sm text-zinc-400">
+            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">Any injuries or joint limitations?</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Select any areas requiring caution. Contraindicated movements will automatically be replaced with joint-safe alternatives.
             </p>
           </div>
 
           {/* Medical Disclaimer Banner */}
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs sm:text-sm text-amber-300">
-            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs sm:text-sm text-amber-800 dark:text-amber-300">
+            <AlertCircle className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
               <strong>Medical Disclaimer:</strong> Syndiq fit provides fitness programming for healthy individuals. If you have acute pain, recent surgery, or a clinical spinal condition, consult a physician or physical therapist before exercising.
             </p>
@@ -726,19 +738,19 @@ export function QuestionnaireWizard() {
                   onClick={() => handleToggleInjury(opt.id)}
                   className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start justify-between gap-3 ${
                     isChecked
-                      ? 'bg-[#18181b] border-gym-lime shadow-lime-sm'
-                      : 'bg-[#121212] border-gym-border hover:border-zinc-700'
+                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm'
+                      : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700'
                   }`}
                 >
                   <div className="space-y-0.5">
-                    <span className="text-xs sm:text-sm font-bold text-white block">{opt.label}</span>
-                    <span className="text-xs text-zinc-400 line-clamp-1">{opt.affectedMovements}</span>
+                    <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white block">{opt.label}</span>
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1">{opt.affectedMovements}</span>
                   </div>
                   <div
                     className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 mt-0.5 ${
                       isChecked
                         ? 'bg-gym-lime border-gym-lime text-black'
-                        : 'border-zinc-700 bg-zinc-800'
+                        : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
                     }`}
                   >
                     {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
@@ -750,7 +762,7 @@ export function QuestionnaireWizard() {
 
           {/* Custom Injury Notes */}
           <div className="space-y-2 pt-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-300 block">
+            <label className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 block">
               Specific Pain Description (Optional)
             </label>
             <textarea
@@ -758,7 +770,7 @@ export function QuestionnaireWizard() {
               onChange={(e) => setInjuryNotes(e.target.value)}
               placeholder="e.g. Sharp pain in right shoulder when pressing overhead; lower back tight after long standing."
               rows={2}
-              className="w-full bg-[#141414] border border-gym-border rounded-xl p-3 text-xs text-zinc-200 focus:outline-none focus:border-gym-lime resize-none placeholder:text-zinc-600"
+              className="w-full bg-white dark:bg-[#141414] border border-zinc-300 dark:border-gym-border rounded-xl p-3 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-gym-lime resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
             />
           </div>
         </div>
@@ -770,7 +782,7 @@ export function QuestionnaireWizard() {
           <button
             type="button"
             onClick={() => setCurrentStep((s) => Math.max(1, s - 1))}
-            className="px-5 sm:px-6 py-3.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-sm border border-zinc-800 transition-colors flex items-center justify-center gap-2 min-h-[48px]"
+            className="px-5 sm:px-6 py-3.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-300 font-bold text-sm border border-zinc-300 dark:border-zinc-800 transition-colors flex items-center justify-center gap-2 min-h-[48px]"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>

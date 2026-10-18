@@ -12,10 +12,10 @@ export default function QuestionnairePage() {
             <Sparkles className="w-3.5 h-3.5" />
             <span>PERSONALIZED PROGRAM GENERATOR</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
             Build Your Workout Plan
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
             Provide your profile details below. Syndiq fit will assemble a balanced, equipment-matched gym program for you.
           </p>
         </div>

@@ -128,7 +128,7 @@ function ProgramContent() {
     return (
       <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
         <div className="w-10 h-10 border-4 border-gym-lime border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Loading workout program...</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Loading workout program...</p>
       </div>
     );
   }
@@ -137,11 +137,11 @@ function ProgramContent() {
   if (!program) {
     return (
       <div className="w-full max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
-        <div className="w-20 h-20 mx-auto rounded-3xl bg-zinc-900 border border-gym-border flex items-center justify-center text-gym-lime shadow-lime-sm">
+        <div className="w-20 h-20 mx-auto rounded-3xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-gym-border flex items-center justify-center text-gym-limeDark dark:text-gym-lime shadow-lime-sm">
           <Dumbbell className="w-10 h-10" />
         </div>
-        <h2 className="text-3xl font-black text-white">No Active Workout Program</h2>
-        <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
+        <h2 className="text-3xl font-black text-zinc-900 dark:text-white">No Active Workout Program</h2>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
           You haven't generated a personalized workout program yet. Complete our 2-minute questionnaire to receive an equipment-matched plan.
         </p>
         <Link
@@ -167,7 +167,8 @@ function ProgramContent() {
       : '';
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 animate-fadeIn">
+    <>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 animate-fadeIn">
       {/* Plan Header */}
       <PlanHeader
         program={program}
@@ -179,8 +180,8 @@ function ProgramContent() {
       {/* Day Schedule Selection Tabs */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-extrabold text-white">Training Schedule</h2>
-          <span className="text-xs text-zinc-400">Click a day to view exercises</span>
+          <h2 className="text-xl font-extrabold text-zinc-900 dark:text-white">Training Schedule</h2>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">Click a day to view exercises</span>
         </div>
         <DayTabs
           days={program.days}
@@ -197,14 +198,14 @@ function ProgramContent() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Exercises */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="flex items-center justify-between bg-[#121212] border border-gym-border px-5 py-3.5 rounded-2xl">
+          <div className="flex items-center justify-between bg-slate-50 dark:bg-[#121212] border border-zinc-200 dark:border-gym-border px-5 py-3.5 rounded-2xl transition-colors">
             <div>
-              <span className="text-xs font-bold text-gym-lime uppercase tracking-wider block">
+              <span className="text-xs font-bold text-gym-limeDark dark:text-gym-lime uppercase tracking-wider block">
                 Day {currentDay.dayNumber} Routine
               </span>
-              <h3 className="text-base font-bold text-white">{currentDay.title}</h3>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white">{currentDay.title}</h3>
             </div>
-            <span className="text-xs font-semibold text-zinc-400">
+            <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
               {currentDay.exercises.length} Exercises (~{currentDay.estimatedDuration} min)
             </span>
           </div>
@@ -234,10 +235,10 @@ function ProgramContent() {
         {/* Right Column: Interactive Anatomical Muscle Map */}
         <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-300">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
               Target Muscle Activation
             </h3>
-            <span className="text-xs text-zinc-400">Hover exercises to highlight</span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">Hover exercises to highlight</span>
           </div>
 
           <BodyVisualizer
@@ -248,24 +249,24 @@ function ProgramContent() {
             allowGenderToggle={false}
           />
 
-          <div className="p-4 rounded-2xl bg-[#121212] border border-gym-border text-xs text-zinc-400 space-y-1">
-            <span className="font-bold text-zinc-200 block">Biomechanical Balance:</span>
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#121212] border border-zinc-200 dark:border-gym-border text-xs text-zinc-600 dark:text-zinc-400 space-y-1 transition-colors">
+            <span className="font-bold text-zinc-900 dark:text-zinc-200 block">Biomechanical Balance:</span>
             <p>
               Day {currentDay.dayNumber} targets{' '}
-              <strong className="text-gym-lime">{currentDay.focusMuscles.join(', ')}</strong> with compound volume and targeted assistance to prevent muscular asymmetries.
+              <strong className="text-gym-limeDark dark:text-gym-lime">{currentDay.focusMuscles.join(', ')}</strong> with compound volume and targeted assistance to prevent muscular asymmetries.
             </p>
           </div>
         </div>
       </div>
+    </div>
 
-      {/* Video Modal */}
-      <VideoModal
+    {/* Modals rendered outside animated stacking context */}
+    <VideoModal
         exercise={selectedExerciseForVideo}
         isOpen={Boolean(selectedExerciseForVideo)}
         onClose={() => setSelectedExerciseForVideo(null)}
       />
 
-      {/* Exercise Detail Modal */}
       <ExerciseDetailModal
         item={selectedItemForDetails}
         isOpen={Boolean(selectedItemForDetails)}
@@ -284,7 +285,6 @@ function ProgramContent() {
         }}
       />
 
-      {/* Exercise Swap Modal */}
       <ExerciseSwapModal
         item={selectedItemForSwap}
         profile={program.userProfile}
@@ -294,13 +294,12 @@ function ProgramContent() {
         onSelectAlternative={handleSelectAlternative}
       />
 
-      {/* Share / QR Modal */}
       <ShareQrModal
         shareUrl={shareUrl}
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
       />
-    </div>
+    </>
   );
 }
 

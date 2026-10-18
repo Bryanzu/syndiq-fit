@@ -47,19 +47,19 @@ export function BodyVisualizer({
 
   return (
     <div
-      className={`flex flex-col items-center bg-gym-card border border-gym-border rounded-2xl p-4 sm:p-5 transition-all w-full ${className}`}
+      className={`flex flex-col items-center bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all w-full shadow-sm ${className}`}
     >
       {/* Top Controls: View Toggle (Dual/Front/Back) & Gender Switcher */}
-      <div className="w-full flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-gym-border/60">
+      <div className="w-full flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-zinc-200 dark:border-gym-border/60">
         {/* Dual / Front / Back Tabs */}
-        <div className="flex items-center gap-1 bg-[#18181b] p-1 rounded-xl border border-[#27272a]">
+        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-[#18181b] p-1 rounded-xl border border-zinc-200 dark:border-[#27272a]">
           <button
             type="button"
             onClick={() => setActiveTab('both')}
-            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all min-h-[36px] ${
               activeTab === 'both'
                 ? 'bg-gym-lime text-black shadow-lime-sm font-bold'
-                : 'text-zinc-400 hover:text-white'
+                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
             }`}
           >
             Dual View
@@ -67,10 +67,10 @@ export function BodyVisualizer({
           <button
             type="button"
             onClick={() => setActiveTab('front')}
-            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all min-h-[36px] ${
               activeTab === 'front'
                 ? 'bg-gym-lime text-black shadow-lime-sm font-bold'
-                : 'text-zinc-400 hover:text-white'
+                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
             }`}
           >
             Front
@@ -78,10 +78,10 @@ export function BodyVisualizer({
           <button
             type="button"
             onClick={() => setActiveTab('back')}
-            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all min-h-[36px] ${
               activeTab === 'back'
                 ? 'bg-gym-lime text-black shadow-lime-sm font-bold'
-                : 'text-zinc-400 hover:text-white'
+                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
             }`}
           >
             Back
@@ -90,17 +90,17 @@ export function BodyVisualizer({
 
         {/* Gender Toggle Pill (Always available or controlled) */}
         {allowGenderToggle && (
-          <div className="flex items-center gap-1 bg-[#18181b] p-1 rounded-xl border border-[#27272a]">
+          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-[#18181b] p-1 rounded-xl border border-zinc-200 dark:border-[#27272a]">
             <button
               type="button"
               onClick={() => {
                 setCurrentGender('male');
                 onGenderChange?.('male');
               }}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all min-h-[36px] ${
                 currentGender === 'male'
-                  ? 'bg-zinc-700 text-white font-bold'
-                  : 'text-zinc-400 hover:text-white'
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-700 font-bold shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
               }`}
             >
               Male
@@ -111,10 +111,10 @@ export function BodyVisualizer({
                 setCurrentGender('female');
                 onGenderChange?.('female');
               }}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all min-h-[36px] ${
                 currentGender === 'female'
-                  ? 'bg-zinc-700 text-white font-bold'
-                  : 'text-zinc-400 hover:text-white'
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-700 font-bold shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
               }`}
             >
               Female
@@ -129,7 +129,7 @@ export function BodyVisualizer({
           <>
             {(activeTab === 'both' || activeTab === 'front') && (
               <div className="flex flex-col items-center flex-1 max-w-[170px] sm:max-w-[200px]">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 mb-1.5">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 mb-1.5">
                   Front
                 </span>
                 <SvgBodyFront
@@ -143,7 +143,7 @@ export function BodyVisualizer({
 
             {(activeTab === 'both' || activeTab === 'back') && (
               <div className="flex flex-col items-center flex-1 max-w-[170px] sm:max-w-[200px]">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 mb-1.5">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 mb-1.5">
                   Back
                 </span>
                 <SvgBodyBack
@@ -159,7 +159,7 @@ export function BodyVisualizer({
           <>
             {(activeTab === 'both' || activeTab === 'front') && (
               <div className="flex flex-col items-center flex-1 max-w-[170px] sm:max-w-[200px]">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 mb-1.5">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 mb-1.5">
                   Front
                 </span>
                 <SvgBodyFemaleFront
@@ -173,7 +173,7 @@ export function BodyVisualizer({
 
             {(activeTab === 'both' || activeTab === 'back') && (
               <div className="flex flex-col items-center flex-1 max-w-[170px] sm:max-w-[200px]">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 mb-1.5">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 mb-1.5">
                   Back
                 </span>
                 <SvgBodyFemaleBack
@@ -191,15 +191,17 @@ export function BodyVisualizer({
       {/* Selected Muscle Indicator Pill (Always reserves space to avoid layout shift) */}
       <div className="min-h-[36px] flex items-center justify-center my-1">
         {selectedMuscle ? (
-          <div className="flex items-center gap-2 bg-[#18181b] border border-gym-lime/40 px-3 py-1 rounded-full text-xs animate-fadeIn">
+          <div className="flex items-center gap-2 bg-zinc-100 dark:bg-[#18181b] border border-gym-lime/50 px-3 py-1 rounded-full text-xs animate-fadeIn">
             <span className="w-2 h-2 rounded-full bg-gym-lime animate-pulse"></span>
-            <span className="text-zinc-300">Selected:</span>
-            <span className="font-bold text-gym-lime">{formatMuscleName(selectedMuscle)}</span>
+            <span className="text-zinc-700 dark:text-zinc-300">Selected:</span>
+            <span className="font-bold text-gym-limeDark dark:text-gym-lime">
+              {formatMuscleName(selectedMuscle)}
+            </span>
             {onMuscleClick && (
               <button
                 type="button"
                 onClick={() => onMuscleClick(selectedMuscle)}
-                className="ml-1 text-zinc-400 hover:text-white font-bold"
+                className="ml-1 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white font-bold"
                 title="Clear selection"
               >
                 ×
@@ -207,12 +209,14 @@ export function BodyVisualizer({
             )}
           </div>
         ) : (
-          <span className="text-[11px] text-zinc-400">Tap any muscle group to inspect exercises</span>
+          <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+            Tap any muscle group to inspect exercises
+          </span>
         )}
       </div>
 
       {/* Visual Legend */}
-      <div className="flex flex-wrap items-center justify-center gap-4 mt-2 pt-3 border-t border-gym-border/60 text-xs text-zinc-400 w-full">
+      <div className="flex flex-wrap items-center justify-center gap-4 mt-2 pt-3 border-t border-zinc-200 dark:border-gym-border/60 text-xs text-zinc-500 dark:text-zinc-400 w-full">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-[#84cc16] shadow-[0_0_8px_#84cc16]"></span>
           <span className="text-[11px]">Primary Target</span>
@@ -222,7 +226,7 @@ export function BodyVisualizer({
           <span className="text-[11px]">Secondary / Synergist</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#1f2937] border border-zinc-700"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#1f2937] border border-zinc-600"></span>
           <span className="text-[11px]">Resting</span>
         </div>
       </div>

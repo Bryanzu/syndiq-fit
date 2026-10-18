@@ -9,18 +9,18 @@ export default function DemoPage() {
       <div className="space-y-3 text-center sm:text-left">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-gym-lime transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 hover:text-gym-limeDark dark:hover:text-gym-lime transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Home</span>
         </Link>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gym-lime/10 border border-gym-lime/30 text-[11px] font-bold text-gym-lime mb-2">
-              <Sparkles className="w-3.5 h-3.5 fill-gym-lime" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gym-lime/10 border border-gym-lime/30 text-[11px] font-bold text-gym-limeDark dark:text-gym-lime mb-2">
+              <Sparkles className="w-3.5 h-3.5 fill-gym-limeDark dark:fill-gym-lime" />
               <span>OFFICIAL PRODUCT WALKTHROUGH</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
               Syndiq Fit Video Demo
             </h1>
           </div>
@@ -33,7 +33,7 @@ export default function DemoPage() {
             <span>Download Video (.webm)</span>
           </a>
         </div>
-        <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
           Watch the end-to-end walkthrough demonstrating female body visualization, flexible equipment configuration, deterministic workout assembly, and intelligent exercise replacement.
         </p>
       </div>
@@ -54,52 +54,52 @@ export default function DemoPage() {
 
       {/* Walkthrough Chapters / Highlights */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-6 rounded-2xl bg-[#121212] border border-gym-border space-y-3">
-          <div className="flex items-center gap-2 text-gym-lime font-bold text-sm">
+        <div className="p-6 rounded-2xl bg-gym-card border border-gym-border shadow-sm space-y-3">
+          <div className="flex items-center gap-2 text-gym-limeDark dark:text-gym-lime font-bold text-sm">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>1. Tailored Equipment Rebranding</span>
           </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
             Demonstrates the new branding across the landing page, showing that Syndiq Fit adapts to whatever equipment you have available across 6 core categories.
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-[#121212] border border-gym-border space-y-3">
-          <div className="flex items-center gap-2 text-gym-lime font-bold text-sm">
+        <div className="p-6 rounded-2xl bg-gym-card border border-gym-border shadow-sm space-y-3">
+          <div className="flex items-center gap-2 text-gym-limeDark dark:text-gym-lime font-bold text-sm">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>2. Female Profile & Flexible Equipment Selector</span>
           </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
             Walks through the questionnaire with female selection, testing quick presets (&quot;Home Dumbbells&quot; and &quot;Commercial Gym&quot;), category tabs, and real-time alias search.
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-[#121212] border border-gym-border space-y-3">
-          <div className="flex items-center gap-2 text-gym-lime font-bold text-sm">
+        <div className="p-6 rounded-2xl bg-gym-card border border-gym-border shadow-sm space-y-3">
+          <div className="flex items-center gap-2 text-gym-limeDark dark:text-gym-lime font-bold text-sm">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>3. Generated Program & Female Muscle Map</span>
           </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
             Verifies that the generated program automatically renders the female anatomical silhouette without showing any male/female toggle switcher. Exercise hovers highlight active muscles dynamically.
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-[#121212] border border-gym-border space-y-3">
-          <div className="flex items-center gap-2 text-gym-lime font-bold text-sm">
+        <div className="p-6 rounded-2xl bg-gym-card border border-gym-border shadow-sm space-y-3">
+          <div className="flex items-center gap-2 text-gym-limeDark dark:text-gym-lime font-bold text-sm">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>4. Exercise Replacement & Standalone Map</span>
           </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
             Demonstrates swapping an exercise with duplicate prevention, and tests the standalone muscle map where interactive Male/Female switching remains available.
           </p>
         </div>
       </div>
 
       {/* Try It CTA */}
-      <div className="p-8 rounded-3xl bg-gradient-to-r from-zinc-900 to-[#141414] border border-gym-lime/40 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div className="p-8 rounded-3xl bg-gradient-to-r from-zinc-100 to-zinc-200/80 dark:from-zinc-900 dark:to-[#141414] border border-gym-lime/40 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
         <div className="space-y-1 text-center sm:text-left">
-          <h3 className="text-xl sm:text-2xl font-black text-white">Experience It Live</h3>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <h3 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white">Experience It Live</h3>
+          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
             Generate your own custom workout plan matched to your gym and goals.
           </p>
         </div>
