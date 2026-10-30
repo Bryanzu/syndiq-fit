@@ -2,13 +2,14 @@
 
 import React from 'react';
 import { WorkoutProgram } from '@/types/workout';
-import { FileDown, QrCode, RotateCcw, ShieldAlert, User, Dumbbell, Clock, Flame, Calendar } from 'lucide-react';
+import { FileDown, QrCode, RotateCcw, ShieldAlert, User, Dumbbell, Clock, Flame, Calendar, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface PlanHeaderProps {
   program: WorkoutProgram;
   onDownloadPdf: () => void;
   onOpenShare: () => void;
+  onClearProgram?: () => void;
   isGeneratingPdf?: boolean;
 }
 
@@ -16,6 +17,7 @@ export function PlanHeader({
   program,
   onDownloadPdf,
   onOpenShare,
+  onClearProgram,
   isGeneratingPdf = false,
 }: PlanHeaderProps) {
   const profile = program.userProfile;
@@ -35,8 +37,8 @@ export function PlanHeader({
   return (
     <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl transition-colors">
       {/* Top Bar: Title & Primary Actions */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-gym-border">
-        <div className="space-y-2">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-gym-border">
+        <div className="space-y-2 min-w-0 max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-gym-lime text-black shadow-lime-sm">
               Syndiq fit Official Plan
@@ -46,16 +48,16 @@ export function PlanHeader({
               <span>{program.days.length} Days / Week</span>
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-900 dark:text-white tracking-tight break-words">
             {program.name}
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm max-w-2xl leading-relaxed">
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
             {program.description}
           </p>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           <button
             type="button"
             onClick={onDownloadPdf}
@@ -83,59 +85,88 @@ export function PlanHeader({
             <RotateCcw className="w-4 h-4" />
             <span className="hidden sm:inline">Modify</span>
           </Link>
+
+          {onClearProgram && (
+            <button
+              type="button"
+              onClick={onClearProgram}
+              className="px-3.5 py-3 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/80 transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
+              title="Clear Active Program"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Clear Plan</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Member Profile Metrics Pills */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border/80 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border/80 flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
             <User className="w-4 h-4" />
           </div>
-          <div>
-            <span className="text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider">Lifter</span>
-            <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white capitalize">
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] sm:text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider truncate">Lifter</span>
+            <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white capitalize truncate block">
               {profile.gender}, {profile.age}y
             </span>
           </div>
         </div>
 
-        <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border/80 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
+        <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border/80 flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
             <Dumbbell className="w-4 h-4" />
           </div>
-          <div>
-            <span className="text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider">Experience</span>
-            <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] sm:text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider truncate">Experience</span>
+            <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white truncate block">
               {formatExp(profile.experience)}
             </span>
           </div>
         </div>
 
-        <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border/80 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
+        <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border/80 flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
             <Clock className="w-4 h-4" />
           </div>
-          <div>
-            <span className="text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider">Duration</span>
-            <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">
-              {profile.duration} Mins / Session
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] sm:text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider truncate">Duration</span>
+            <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white truncate block">
+              {profile.duration} Mins
             </span>
           </div>
         </div>
 
-        <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border/80 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
+        <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border/80 flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
             <Flame className="w-4 h-4" />
           </div>
-          <div>
-            <span className="text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider">Focus</span>
-            <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white truncate max-w-[130px] block">
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] sm:text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider truncate">Focus</span>
+            <span className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white truncate block">
               {formatGoal(profile.goal)}
             </span>
           </div>
         </div>
       </div>
+
+      {/* Secondary Goals display if present */}
+      {profile.secondaryGoals && profile.secondaryGoals.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+          <span className="font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            Secondary Priorities:
+          </span>
+          {profile.secondaryGoals.map((sec) => (
+            <span
+              key={sec}
+              className="px-2.5 py-1 rounded-lg bg-gym-lime/10 dark:bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/30 font-bold"
+            >
+              {formatGoal(sec)}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Injury Notice Banner if present */}
       {profile.injuries && profile.injuries.length > 0 && !profile.injuries.includes('none') && (

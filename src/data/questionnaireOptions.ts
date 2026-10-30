@@ -126,3 +126,25 @@ export const INJURY_OPTIONS: InjuryOption[] = [
   { id: 'neck', label: 'Neck / Cervical Tension', affectedMovements: 'Avoids heavy shrugs, behind-the-neck movements, and decline setups.' },
   { id: 'other', label: 'Other Limitation', affectedMovements: 'Describe your symptoms in the notes box below.' },
 ];
+
+export function isGoalContradictory(
+  primaryGoal: FitnessGoal,
+  candidateGoal: FitnessGoal
+): { isContradictory: boolean; reason?: string } {
+  if (primaryGoal === candidateGoal) {
+    return { isContradictory: true, reason: 'Already selected as your primary goal.' };
+  }
+  if (primaryGoal === 'fat_loss' && candidateGoal === 'muscle_building') {
+    return { isContradictory: true, reason: 'Aggressive fat loss focuses on a caloric deficit, competing with maximal muscle building.' };
+  }
+  if (primaryGoal === 'muscle_building' && candidateGoal === 'fat_loss') {
+    return { isContradictory: true, reason: 'Maximal muscle building requires a surplus, competing with fat loss caloric deficits.' };
+  }
+  if (primaryGoal === 'fat_loss' && candidateGoal === 'maintain_fitness') {
+    return { isContradictory: true, reason: 'Fat loss focuses on weight reduction while maintenance preserves current body mass.' };
+  }
+  if (primaryGoal === 'build_strength' && candidateGoal === 'beginner_strength') {
+    return { isContradictory: true, reason: 'Maximal strength programming assumes beyond-beginner baseline strength.' };
+  }
+  return { isContradictory: false };
+}

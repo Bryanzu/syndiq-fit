@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   UserProfile,
@@ -22,6 +22,7 @@ import {
   FREQUENCY_OPTIONS,
   DURATION_OPTIONS,
   INJURY_OPTIONS,
+  isGoalContradictory,
 } from '@/data/questionnaireOptions';
 import {
   EQUIPMENT_LIBRARY,
@@ -31,7 +32,7 @@ import {
   ALL_SYNDIQ_EQUIPMENT_IDS,
 } from '@/data/equipment';
 import { generateWorkoutProgram } from '@/engine/programAssembler';
-import { saveActiveProgram } from '@/lib/storage';
+import { saveActiveProgram, loadSavedProfile } from '@/lib/storage';
 import {
   ArrowRight,
   ArrowLeft,
@@ -68,8 +69,9 @@ export function QuestionnaireWizard() {
   const [gender, setGender] = useState<Gender>('male');
   const [age, setAge] = useState<AgeCategory>('21-30');
   const [experience, setExperience] = useState<ExperienceLevel>('beginner');
-  const [goalCategory, setGoalCategory] = useState<GoalCategory>('body_composition');
+  const [goalCategory, setGoalCategory] = useState<GoalCategory | 'all'>('all');
   const [goal, setGoal] = useState<FitnessGoal>('muscle_building');
+  const [secondaryGoals, setSecondaryGoals] = useState<FitnessGoal[]>([]);
   const [frequency, setFrequency] = useState<TrainingFrequency>('recommend');
   const [duration, setDuration] = useState<WorkoutDuration>(60);
   const [equipment, setEquipment] = useState<SyndiqEquipmentId[]>(STANDARD_COMMERCIAL_GYM_IDS);
@@ -78,6 +80,23 @@ export function QuestionnaireWizard() {
   const [injuries, setInjuries] = useState<InjuryArea[]>(['none']);
   const [injuryNotes, setInjuryNotes] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Pre-fill questionnaire from previously saved profile if available
+  useEffect(() => {
+    const saved = loadSavedProfile();
+    if (saved) {
+      if (saved.gender) setGender(saved.gender);
+      if (saved.age) setAge(saved.age);
+      if (saved.experience) setExperience(saved.experience);
+      if (saved.goal) setGoal(saved.goal);
+      if (saved.secondaryGoals && saved.secondaryGoals.length > 0) setSecondaryGoals(saved.secondaryGoals);
+      if (saved.frequency) setFrequency(saved.frequency);
+      if (saved.duration) setDuration(saved.duration);
+      if (saved.availableEquipment && saved.availableEquipment.length > 0) setEquipment(saved.availableEquipment);
+      if (saved.injuries && saved.injuries.length > 0) setInjuries(saved.injuries);
+      if (saved.injuryNotes) setInjuryNotes(saved.injuryNotes);
+    }
+  }, []);
 
   // Toggle injury selection
   const handleToggleInjury = (id: InjuryArea) => {
@@ -161,6 +180,7 @@ export function QuestionnaireWizard() {
       age,
       experience,
       goal,
+      secondaryGoals: secondaryGoals.length > 0 ? secondaryGoals : undefined,
       frequency,
       duration,
       availableEquipment: equipment,
@@ -333,71 +353,210 @@ export function QuestionnaireWizard() {
         </div>
       )}
 
-      {/* STEP 4: PRIMARY FITNESS GOAL */}
+      {/* STEP 4: PRIMARY FITNESS GOAL & SECONDARY PRIORITIES */}
       {currentStep === 4 && (
-        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm transition-colors">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 space-y-8 shadow-sm transition-colors">
+          {/* Primary Goal Header */}
           <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/30 uppercase tracking-wider">
+              <Target className="w-3.5 h-3.5" />
+              <span>Primary Objective (Single Selection)</span>
+            </div>
             <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">What is your primary goal?</h2>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              The engine weights volume and movement order to emphasize your priority while ensuring full-body structural balance.
+              The engine weights volume, exercise sequencing, and intensity zones to center your program around this single core priority.
             </p>
           </div>
 
-          {/* Goal Category Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-zinc-200 dark:border-zinc-800">
-            {(
-              [
-                { id: 'body_composition', label: 'Body Composition' },
-                { id: 'strength', label: 'Strength' },
-                { id: 'specific_emphasis', label: 'Muscle Focus' },
-                { id: 'general', label: 'General / Health' },
-              ] as const
-            ).map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setGoalCategory(cat.id)}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all min-h-[36px] ${
-                  goalCategory === cat.id
-                    ? 'bg-gym-lime text-black shadow-lime-sm'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-900'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Goals for selected category */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            {GOAL_OPTIONS.filter((g) => g.category === goalCategory).map((opt) => {
-              const isSelected = goal === opt.id;
-              return (
-                <div
-                  key={opt.id}
-                  onClick={() => setGoal(opt.id)}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm'
-                      : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-slate-100 dark:hover:bg-[#161616]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm font-bold text-zinc-900 dark:text-white line-clamp-1">{opt.label}</span>
-                    <div
-                      className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${
-                        isSelected
-                          ? 'bg-gym-lime border-gym-lime text-black'
-                          : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
+          {/* Goal Category Tabs - Includes 'All' as default */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+              <span>Filter by category or explore all:</span>
+              <span className="hidden sm:inline-block text-[11px] text-zinc-400">Scroll horizontally for more &rarr;</span>
+            </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-zinc-200 dark:border-zinc-800 -mx-2 px-2">
+              {(
+                [
+                  { id: 'all' as const, label: 'All Goals', count: GOAL_OPTIONS.length },
+                  { id: 'body_composition' as const, label: 'Body Comp', count: GOAL_OPTIONS.filter((g) => g.category === 'body_composition').length },
+                  { id: 'strength' as const, label: 'Strength', count: GOAL_OPTIONS.filter((g) => g.category === 'strength').length },
+                  { id: 'specific_emphasis' as const, label: 'Muscle Focus', count: GOAL_OPTIONS.filter((g) => g.category === 'specific_emphasis').length },
+                  { id: 'general' as const, label: 'General / Health', count: GOAL_OPTIONS.filter((g) => g.category === 'general').length },
+                ]
+              ).map((cat) => {
+                const isActive = goalCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setGoalCategory(cat.id)}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 min-h-[40px] shrink-0 ${
+                      isActive
+                        ? 'bg-gym-lime text-black shadow-lime-sm font-extrabold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800'
+                    }`}
+                  >
+                    <span>{cat.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                        isActive ? 'bg-black/20 text-black' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
                       }`}
                     >
-                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                      {cat.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Primary Goals Grid */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(goalCategory === 'all' ? GOAL_OPTIONS : GOAL_OPTIONS.filter((g) => g.category === goalCategory)).map((opt) => {
+                const isSelected = goal === opt.id;
+                return (
+                  <div
+                    key={opt.id}
+                    onClick={() => {
+                      setGoal(opt.id);
+                      // Remove newly selected primary goal from secondary goals
+                      const updatedSec = secondaryGoals.filter((g) => g !== opt.id);
+                      // Filter out any secondary goal that contradicts the new primary goal
+                      const validSec = updatedSec.filter((g) => !isGoalContradictory(opt.id, g).isContradictory);
+                      setSecondaryGoals(validSec);
+                    }}
+                    className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                      isSelected
+                        ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm ring-1 ring-gym-lime'
+                        : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-slate-100 dark:hover:bg-[#161616]'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <span className="text-sm font-bold text-zinc-900 dark:text-white leading-snug">{opt.label}</span>
+                        <div
+                          className={`w-5 h-5 rounded-full flex items-center justify-center border shrink-0 mt-0.5 ${
+                            isSelected
+                              ? 'bg-gym-lime border-gym-lime text-black'
+                              : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800'
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                      </div>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed mb-2">{opt.description}</p>
+                    </div>
+                    {goalCategory === 'all' && (
+                      <div className="pt-2 border-t border-zinc-200/60 dark:border-zinc-800/60">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                          {opt.category.replace('_', ' ')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SECONDARY PRIORITIES SECTION */}
+          <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                  <Sparkles className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
+                  <span>Secondary Priorities (Optional)</span>
+                </div>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  Complementary training objectives woven into accessory slots and movement variations without diluting your primary focus.
+                </p>
+              </div>
+
+              {secondaryGoals.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSecondaryGoals([])}
+                  className="self-start sm:self-auto px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Clear ({secondaryGoals.length})</span>
+                </button>
+              )}
+            </div>
+
+            {/* Notice if no secondary goals selected */}
+            {secondaryGoals.length === 0 && (
+              <div className="p-3.5 rounded-xl bg-zinc-100/70 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+                <span>No secondary priorities selected. You can pick below or skip to continue with pure primary goal programming.</span>
+              </div>
+            )}
+
+            {/* Secondary Goals Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[380px] overflow-y-auto pr-1">
+              {GOAL_OPTIONS.map((opt) => {
+                const isPrimary = goal === opt.id;
+                const contradiction = isGoalContradictory(goal, opt.id);
+                const isDisabled = isPrimary || contradiction.isContradictory;
+                const isSelected = secondaryGoals.includes(opt.id);
+
+                return (
+                  <div
+                    key={`sec-${opt.id}`}
+                    onClick={() => {
+                      if (isDisabled) return;
+                      if (isSelected) {
+                        setSecondaryGoals(secondaryGoals.filter((g) => g !== opt.id));
+                      } else {
+                        setSecondaryGoals([...secondaryGoals, opt.id]);
+                      }
+                    }}
+                    className={`p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
+                      isDisabled
+                        ? 'opacity-40 cursor-not-allowed bg-zinc-100/50 dark:bg-zinc-900/30 border-dashed border-zinc-200 dark:border-zinc-800'
+                        : isSelected
+                        ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime shadow-lime-sm cursor-pointer'
+                        : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer'
+                    }`}
+                  >
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-bold leading-tight ${isDisabled ? 'text-zinc-400 dark:text-zinc-500' : 'text-zinc-900 dark:text-white'}`}>
+                          {opt.label}
+                        </span>
+                        {isPrimary && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0">
+                            Primary
+                          </span>
+                        )}
+                      </div>
+                      {contradiction.isContradictory && !isPrimary && (
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium block leading-tight">
+                          {contradiction.reason}
+                        </span>
+                      )}
+                      {!contradiction.isContradictory && (
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1 leading-tight">
+                          {opt.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="shrink-0 mt-0.5">
+                      {isDisabled ? (
+                        <div className="w-4 h-4 rounded border border-zinc-300 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800 opacity-50" />
+                      ) : isSelected ? (
+                        <div className="w-4 h-4 rounded bg-gym-lime border border-gym-lime flex items-center justify-center text-black">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      ) : (
+                        <div className="w-4 h-4 rounded border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800" />
+                      )}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">{opt.description}</p>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

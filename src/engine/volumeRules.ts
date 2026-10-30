@@ -166,6 +166,37 @@ export function adaptExerciseVolume(
     intensityNote = 'Target muscle priority: full range of motion with intentional mind-muscle connection.';
   }
 
+  // 4b. Secondary Goals Nuance (complements primary goal)
+  if (profile.secondaryGoals && profile.secondaryGoals.length > 0) {
+    const hasSecondaryStrength = profile.secondaryGoals.includes('build_strength') || profile.secondaryGoals.includes('overall_strength');
+    const hasSecondaryEndurance = profile.secondaryGoals.includes('endurance') || profile.secondaryGoals.includes('fat_loss');
+    const hasSecondaryGlute = profile.secondaryGoals.includes('glute_emphasis');
+    const hasSecondaryCore = profile.secondaryGoals.includes('core_emphasis');
+
+    if (hasSecondaryStrength && exercise.tier === 1 && profile.goal !== 'fat_loss') {
+      if (!reps.includes('s') && !reps.includes('m') && reps === '8-12') {
+        reps = '6-8';
+      }
+      restSeconds = Math.max(90, restSeconds + 15);
+      if (!intensityNote) {
+        intensityNote = 'Secondary strength priority: maintain strict form with progressive overload on this compound.';
+      }
+    } else if (hasSecondaryEndurance && exercise.tier === 3) {
+      restSeconds = Math.max(45, restSeconds - 15);
+      if (!intensityNote) {
+        intensityNote = 'Secondary endurance priority: maintain crisp pacing and elevated heart rate.';
+      }
+    } else if (hasSecondaryGlute && isPosteriorOrGlute && profile.goal !== 'glute_emphasis') {
+      if (!intensityNote) {
+        intensityNote = 'Secondary glute priority: maintain full hip extension and deliberate glute contraction.';
+      }
+    } else if (hasSecondaryCore && (exercise.primaryMuscles.includes('abs') || exercise.primaryMuscles.includes('obliques'))) {
+      if (!intensityNote) {
+        intensityNote = 'Secondary core stability: maintain continuous abdominal bracing and control.';
+      }
+    }
+  }
+
   // 5. Age Scaling (51+ joint safety & recovery)
   if (profile.age === '51-60' || profile.age === '61+') {
     restSeconds += 30;

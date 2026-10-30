@@ -128,7 +128,7 @@ export function BodyVisualizer({
         {currentGender === 'male' ? (
           <>
             {(activeTab === 'both' || activeTab === 'front') && (
-              <div className="flex flex-col items-center flex-1 max-w-[170px] sm:max-w-[200px]">
+              <div className="flex flex-col items-center flex-1 min-w-0 max-w-[170px] sm:max-w-[200px]">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 mb-1.5">
                   Front
                 </span>
@@ -142,7 +142,7 @@ export function BodyVisualizer({
             )}
 
             {(activeTab === 'both' || activeTab === 'back') && (
-              <div className="flex flex-col items-center flex-1 max-w-[170px] sm:max-w-[200px]">
+              <div className="flex flex-col items-center flex-1 min-w-0 max-w-[170px] sm:max-w-[200px]">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 mb-1.5">
                   Back
                 </span>
@@ -158,7 +158,7 @@ export function BodyVisualizer({
         ) : (
           <>
             {(activeTab === 'both' || activeTab === 'front') && (
-              <div className="flex flex-col items-center flex-1 max-w-[170px] sm:max-w-[200px]">
+              <div className="flex flex-col items-center flex-1 min-w-0 max-w-[170px] sm:max-w-[200px]">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 mb-1.5">
                   Front
                 </span>
@@ -172,7 +172,7 @@ export function BodyVisualizer({
             )}
 
             {(activeTab === 'both' || activeTab === 'back') && (
-              <div className="flex flex-col items-center flex-1 max-w-[170px] sm:max-w-[200px]">
+              <div className="flex flex-col items-center flex-1 min-w-0 max-w-[170px] sm:max-w-[200px]">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 mb-1.5">
                   Back
                 </span>

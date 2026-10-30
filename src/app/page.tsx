@@ -110,6 +110,53 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* HUMAN FITNESS PHOTOGRAPHY SHOWCASE */}
+      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card 1: Strength & Conditioning */}
+          <div className="relative rounded-3xl overflow-hidden border border-zinc-200 dark:border-gym-border bg-zinc-950 shadow-md group min-h-[280px] sm:min-h-[340px]">
+            <Image
+              src="/images/fitness-hero.jpg"
+              alt="Dedicated athlete training in gym"
+              fill
+              className="object-cover opacity-75 group-hover:scale-105 transition-transform duration-700"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6 text-white space-y-1.5">
+              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gym-lime text-black inline-block shadow-lime-sm">
+                Built For Real Lifters
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black">Coached Movement Patterns</h3>
+              <p className="text-xs sm:text-sm text-zinc-300 max-w-md">
+                Every exercise is selected for joint safety, progression, and real-world muscular development.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2: Accessible Equipment & Nutrition */}
+          <div className="relative rounded-3xl overflow-hidden border border-zinc-200 dark:border-gym-border bg-zinc-950 shadow-md group min-h-[280px] sm:min-h-[340px]">
+            <Image
+              src="/images/training-weights.jpg"
+              alt="Athlete training with dumbbells in a modern fitness gym"
+              fill
+              className="object-cover opacity-75 group-hover:scale-105 transition-transform duration-700"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6 text-white space-y-1.5">
+              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gym-lime text-black inline-block shadow-lime-sm">
+                Tailored Training
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black">Dumbbells, Cables & Barbells</h3>
+              <p className="text-xs sm:text-sm text-zinc-300 max-w-md">
+                Whether you train in a home corner or a commercial fitness center, your split matches your exact gear.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* HOW SYNDIQ FIT WORKS */}
       <section className="w-full bg-zinc-100/70 dark:bg-[#0d0d0d] border-y border-gym-border py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">

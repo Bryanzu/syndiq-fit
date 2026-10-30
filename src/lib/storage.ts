@@ -37,6 +37,54 @@ export function loadSavedProfile(): UserProfile | null {
 
 export function clearActiveProgram(): void {
   if (typeof window === 'undefined') return;
+  // Clear the active generated workout schedule while preserving reusable questionnaire preferences
   localStorage.removeItem(STORAGE_KEY_PROGRAM);
-  localStorage.removeItem(STORAGE_KEY_PROFILE);
 }
+
+export function hasActiveProgram(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!localStorage.getItem(STORAGE_KEY_PROGRAM);
+}
+
+const STORAGE_KEY_MEAL_PLAN = 'syndiq_meal_plan';
+const STORAGE_KEY_MEAL_INVENTORY = 'syndiq_meal_inventory';
+
+export function saveActiveMealPlan(plan: any): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY_MEAL_PLAN, JSON.stringify(plan));
+  } catch (err) {
+    console.error('Failed to save meal plan to localStorage:', err);
+  }
+}
+
+export function loadActiveMealPlan(): any | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_MEAL_PLAN);
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    console.error('Failed to load meal plan from localStorage:', err);
+    return null;
+  }
+}
+
+export function saveMealPlanInventory(inventory: any[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY_MEAL_INVENTORY, JSON.stringify(inventory));
+  } catch (err) {
+    console.error('Failed to save meal inventory to localStorage:', err);
+  }
+}
+
+export function loadMealPlanInventory(): any[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_MEAL_INVENTORY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+

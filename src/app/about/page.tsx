@@ -131,6 +131,17 @@ export default function AboutPage() {
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
+
+      {/* Community Testing Feedback Link */}
+      <div className="text-center pt-2">
+        <Link
+          href="/feedback"
+          className="text-xs font-semibold text-zinc-500 hover:text-gym-limeDark dark:hover:text-gym-lime transition-colors inline-flex items-center gap-1"
+        >
+          <span>Testing Syndiq Fit? Submit Feedback &amp; Suggestions</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
     </div>
   );
 }

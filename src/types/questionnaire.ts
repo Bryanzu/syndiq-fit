@@ -45,6 +45,7 @@ export interface UserProfile {
   age: AgeCategory;
   experience: ExperienceLevel;
   goal: FitnessGoal;
+  secondaryGoals?: FitnessGoal[];
   frequency: TrainingFrequency;
   duration: WorkoutDuration;
   availableEquipment: SyndiqEquipmentId[];

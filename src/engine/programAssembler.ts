@@ -99,11 +99,10 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
       if (candidates.length > 0) {
         // Multi-factor deterministic ranking
         candidates.sort((a, b) => {
-          // Goal priority match
-          const aGoalMatch = isGoalPriority(a, profile.goal, profile.musclePreferences);
-          const bGoalMatch = isGoalPriority(b, profile.goal, profile.musclePreferences);
-          if (aGoalMatch && !bGoalMatch) return -1;
-          if (!aGoalMatch && bGoalMatch) return 1;
+          // Goal priority match (Primary goal > Secondary goals > Neutral)
+          const aGoalScore = getGoalPriorityScore(a, profile.goal, profile.secondaryGoals, profile.musclePreferences);
+          const bGoalScore = getGoalPriorityScore(b, profile.goal, profile.secondaryGoals, profile.musclePreferences);
+          if (aGoalScore !== bGoalScore) return bGoalScore - aGoalScore;
 
           // Tier preference
           if (slot.tierPreference) {
@@ -241,10 +240,15 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
     };
   });
 
+  const secondaryDesc =
+    profile.secondaryGoals && profile.secondaryGoals.length > 0
+      ? ` Complementary priorities: ${profile.secondaryGoals.map(getGoalLabel).join(', ')}.`
+      : '';
+
   const program: WorkoutProgram = {
     id: `syndiq-${Date.now()}`,
     name: `${getGoalLabel(profile.goal)} — ${frequency}-Day Program`,
-    description: `Customized for a ${profile.gender === 'male' ? 'male' : 'female'} lifter (${profile.age} yrs), focusing on ${getGoalLabel(profile.goal)} with ~${profile.duration}-minute sessions.`,
+    description: `Customized for a ${profile.gender === 'male' ? 'male' : 'female'} lifter (${profile.age} yrs), focusing on ${getGoalLabel(profile.goal)} with ~${profile.duration}-minute sessions.${secondaryDesc}`,
     userProfile: profile,
     days,
     createdAt: new Date().toISOString(),
@@ -259,17 +263,30 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
   return program;
 }
 
-function isGoalPriority(
+function getGoalPriorityScore(
   exercise: Exercise,
-  goal: string,
+  primaryGoal: string,
+  secondaryGoals?: string[],
   userPreferences?: MuscleGroup[]
-): boolean {
+): number {
   if (userPreferences && userPreferences.length > 0) {
     if (exercise.primaryMuscles.some((m) => userPreferences.includes(m))) {
-      return true;
+      return 3;
     }
   }
 
+  if (matchesGoal(exercise, primaryGoal)) {
+    return 2;
+  }
+
+  if (secondaryGoals && secondaryGoals.some((sg) => matchesGoal(exercise, sg))) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function matchesGoal(exercise: Exercise, goal: string): boolean {
   if (goal === 'chest_emphasis' && exercise.primaryMuscles.includes('chest')) return true;
   if (goal === 'back_emphasis' && (exercise.primaryMuscles.includes('lats') || exercise.primaryMuscles.includes('upper_back'))) return true;
   if (goal === 'shoulder_emphasis' && (exercise.primaryMuscles.includes('front_delts') || exercise.primaryMuscles.includes('side_delts'))) return true;
@@ -278,6 +295,9 @@ function isGoalPriority(
   if (goal === 'glute_emphasis' && (exercise.primaryMuscles.includes('glutes') || exercise.primaryMuscles.includes('hamstrings'))) return true;
   if (goal === 'core_emphasis' && (exercise.primaryMuscles.includes('abs') || exercise.primaryMuscles.includes('obliques'))) return true;
   if (goal === 'lean_toned' && (exercise.primaryMuscles.includes('glutes') || exercise.primaryMuscles.includes('abs'))) return true;
+  if (goal === 'build_strength' && exercise.tier === 1) return true;
+  if (goal === 'fat_loss' && (exercise.movementPattern === 'conditioning' || exercise.tier === 3)) return true;
+  if (goal === 'endurance' && (exercise.movementPattern === 'conditioning' || exercise.tier === 3)) return true;
   return false;
 }
 

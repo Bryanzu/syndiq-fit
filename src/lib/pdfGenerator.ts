@@ -62,8 +62,12 @@ export async function generateWorkoutPdf(program: WorkoutProgram): Promise<void>
   y += 105;
 
   // --- LIFTER PROFILE SECTION ---
+  const hasSecondary = profile.secondaryGoals && profile.secondaryGoals.length > 0;
+  const hasInjuries = profile.injuries && profile.injuries.length > 0 && !profile.injuries.includes('none');
+  const profileBoxHeight = hasSecondary && hasInjuries ? 76 : (hasSecondary || hasInjuries ? 64 : 52);
+
   doc.setFillColor(24, 24, 27);
-  doc.roundedRect(margin, y, contentWidth, 55, 6, 6, 'F');
+  doc.roundedRect(margin, y, contentWidth, profileBoxHeight, 6, 6, 'F');
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
@@ -71,27 +75,35 @@ export async function generateWorkoutPdf(program: WorkoutProgram): Promise<void>
   doc.text('MEMBER PROFILE', margin + 15, y + 16);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(230, 230, 230);
 
   const col1 = `Lifter: ${profile.gender.toUpperCase()}, ${profile.age} yrs`;
-  const col2 = `Experience: ${profile.experience.replace('_', ' ').toUpperCase()}`;
-  const col3 = `Duration: ${profile.duration} Mins/Session`;
-  const col4 = `Frequency: ${program.days.length} Days/Week`;
+  const col2 = `Exp: ${profile.experience.replace(/_/g, ' ').toUpperCase()}`;
+  const col3 = `Duration: ${profile.duration}m | ${program.days.length}d/wk`;
+  const col4 = `Primary: ${profile.goal.replace(/_/g, ' ').toUpperCase()}`;
 
-  doc.text(col1, margin + 15, y + 32);
-  doc.text(col2, margin + 140, y + 32);
-  doc.text(col3, margin + 290, y + 32);
-  doc.text(col4, margin + 410, y + 32);
+  doc.text(col1, margin + 15, y + 31);
+  doc.text(col2, margin + 140, y + 31);
+  doc.text(col3, margin + 265, y + 31);
+  doc.text(col4, margin + 395, y + 31);
 
-  // Injury disclaimer text if any
-  if (profile.injuries && profile.injuries.length > 0 && !profile.injuries.includes('none')) {
-    doc.setTextColor(251, 191, 36);
-    doc.setFontSize(8);
-    doc.text(`Joint Adaptations: ${profile.injuries.join(', ')}`, margin + 15, y + 46);
+  let extraY = y + 44;
+  if (hasSecondary) {
+    doc.setTextColor(132, 204, 22);
+    doc.setFontSize(7.5);
+    doc.text(`Secondary: ${profile.secondaryGoals!.map((g) => g.replace(/_/g, ' ').toUpperCase()).join(', ')}`, margin + 15, extraY);
+    extraY += 11;
   }
 
-  y += 70;
+  // Injury disclaimer text if any
+  if (hasInjuries) {
+    doc.setTextColor(251, 191, 36);
+    doc.setFontSize(7.5);
+    doc.text(`Joint Adaptations: ${profile.injuries.join(', ')}`, margin + 15, extraY);
+  }
+
+  y += profileBoxHeight + 15;
 
   // --- DAYS & EXERCISES ---
   program.days.forEach((day) => {

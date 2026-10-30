@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Dumbbell, Sparkles, Activity, Info } from 'lucide-react';
+import { Home, Dumbbell, Sparkles, Activity, Utensils } from 'lucide-react';
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -16,7 +16,7 @@ export function BottomNav() {
       isActive: pathname === '/',
     },
     {
-      label: 'My Workout',
+      label: 'Workout',
       href: '/program',
       icon: Dumbbell,
       isActive: pathname === '/program',
@@ -29,16 +29,16 @@ export function BottomNav() {
       isCenterAction: true,
     },
     {
-      label: 'Muscle Map',
+      label: 'Meals',
+      href: '/meal-planner',
+      icon: Utensils,
+      isActive: pathname === '/meal-planner',
+    },
+    {
+      label: 'Muscles',
       href: '/muscle-map',
       icon: Activity,
       isActive: pathname === '/muscle-map',
-    },
-    {
-      label: 'About',
-      href: '/about',
-      icon: Info,
-      isActive: pathname === '/about' || pathname === '/disclaimer',
     },
   ];
 

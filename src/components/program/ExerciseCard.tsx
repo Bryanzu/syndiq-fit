@@ -52,11 +52,11 @@ export function ExerciseCard({
       {/* Top Bar: Order number, Name, Equipment & Substitution Badge */}
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-2.5">
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
             <span className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-gym-limeDark dark:text-gym-lime font-black text-xs sm:text-sm flex items-center justify-center shrink-0 mt-0.5">
               {index + 1}
             </span>
-            <div className="space-y-0.5">
+            <div className="space-y-0.5 min-w-0 flex-1">
               <h3
                 onClick={onOpenDetails}
                 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white group-hover:text-gym-limeDark dark:group-hover:text-gym-lime transition-colors cursor-pointer leading-snug"

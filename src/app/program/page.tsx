@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { WorkoutProgram, WorkoutExerciseItem, Exercise, MuscleGroup } from '@/types/workout';
-import { loadActiveProgram, saveActiveProgram } from '@/lib/storage';
+import { loadActiveProgram, saveActiveProgram, clearActiveProgram } from '@/lib/storage';
 import { decodeProfileFromQuery, encodeProfileToQuery } from '@/lib/share';
 import { generateWorkoutProgram } from '@/engine/programAssembler';
 import { PlanHeader } from '@/components/program/PlanHeader';
@@ -16,9 +17,10 @@ import { VideoModal } from '@/components/program/VideoModal';
 import { ShareQrModal } from '@/components/program/ShareQrModal';
 import { BodyVisualizer } from '@/components/body/BodyVisualizer';
 import { adaptExerciseVolume, calculateWorkoutDuration } from '@/engine/volumeRules';
-import { Sparkles, Dumbbell } from 'lucide-react';
+import { Sparkles, Dumbbell, Trash2, X, AlertTriangle } from 'lucide-react';
 
 function ProgramContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [program, setProgram] = useState<WorkoutProgram | null>(null);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
@@ -34,6 +36,7 @@ function ProgramContent() {
   const [selectedExerciseForVideo, setSelectedExerciseForVideo] = useState<Exercise | null>(null);
   const [selectedItemForSwap, setSelectedItemForSwap] = useState<WorkoutExerciseItem | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
   // Load active plan from query param or localStorage
   useEffect(() => {
@@ -124,6 +127,15 @@ function ProgramContent() {
     saveActiveProgram(updatedProgram);
   };
 
+  // Handle program reset / clear
+  const handleConfirmClearProgram = () => {
+    clearActiveProgram();
+    setProgram(null);
+    setIsClearModalOpen(false);
+    // Remove query params to ensure refreshing page doesn't repopulate
+    router.replace('/program');
+  };
+
   if (isLoading) {
     return (
       <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
@@ -136,21 +148,47 @@ function ProgramContent() {
   // Empty state if no program exists
   if (!program) {
     return (
-      <div className="w-full max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
-        <div className="w-20 h-20 mx-auto rounded-3xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-gym-border flex items-center justify-center text-gym-limeDark dark:text-gym-lime shadow-lime-sm">
-          <Dumbbell className="w-10 h-10" />
+      <div className="w-full max-w-3xl mx-auto px-4 py-10 sm:py-16 animate-fadeIn space-y-6">
+        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl overflow-hidden shadow-xl transition-colors">
+          <div className="relative h-60 sm:h-80 w-full bg-zinc-950 overflow-hidden">
+            <Image
+              src="/images/workout-empty.jpg"
+              alt="Syndiq Fit strength training equipment and weights"
+              fill
+              className="object-cover opacity-80 hover:scale-105 transition-transform duration-700"
+              sizes="(max-width: 768px) 100vw, 768px"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
+              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gym-lime text-black inline-block shadow-lime-sm">
+                Ready For Training
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black">No Active Workout Program</h2>
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-10 space-y-6 text-center">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
+              You haven&apos;t generated a personalized workout program yet, or your previous schedule was cleared. Your questionnaire answers (experience, goal, and gym equipment) are kept safe so you can generate a new split in seconds.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/questionnaire"
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-sm shadow-lime-md transition-all hover:scale-105 min-h-[48px]"
+              >
+                <Sparkles className="w-4 h-4 fill-black" />
+                <span>Create New Program</span>
+              </Link>
+              <Link
+                href="/meal-planner"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-sm transition-colors min-h-[48px]"
+              >
+                <span>View Meal Planner</span>
+              </Link>
+            </div>
+          </div>
         </div>
-        <h2 className="text-3xl font-black text-zinc-900 dark:text-white">No Active Workout Program</h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
-          You haven't generated a personalized workout program yet. Complete our 2-minute questionnaire to receive an equipment-matched plan.
-        </p>
-        <Link
-          href="/questionnaire"
-          className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-sm shadow-lime-md transition-all hover:scale-105"
-        >
-          <Sparkles className="w-4 h-4 fill-black" />
-          <span>Create My Program</span>
-        </Link>
       </div>
     );
   }
@@ -174,6 +212,7 @@ function ProgramContent() {
         program={program}
         onDownloadPdf={handleDownloadPdf}
         onOpenShare={() => setIsShareModalOpen(true)}
+        onClearProgram={() => setIsClearModalOpen(true)}
         isGeneratingPdf={isGeneratingPdf}
       />
 
@@ -197,7 +236,7 @@ function ProgramContent() {
       {/* Main Grid: Left Exercise Cards, Right Sticky Body Visualizer */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Exercises */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className="lg:col-span-7 min-w-0 space-y-4">
           <div className="flex items-center justify-between bg-slate-50 dark:bg-[#121212] border border-zinc-200 dark:border-gym-border px-5 py-3.5 rounded-2xl transition-colors">
             <div>
               <span className="text-xs font-bold text-gym-limeDark dark:text-gym-lime uppercase tracking-wider block">
@@ -233,7 +272,7 @@ function ProgramContent() {
         </div>
 
         {/* Right Column: Interactive Anatomical Muscle Map */}
-        <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-4">
+        <div className="lg:col-span-5 min-w-0 lg:sticky lg:top-24 space-y-4">
           <div className="flex items-center justify-between px-1">
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
               Target Muscle Activation
@@ -299,6 +338,65 @@ function ProgramContent() {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
       />
+
+      {/* Clear Active Program Confirmation Dialog */}
+      {isClearModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="clear-program-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setIsClearModalOpen(false)}
+        >
+          <div
+            className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative animate-scaleUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsClearModalOpen(false)}
+                className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl"
+                aria-label="Close dialog"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <h3 id="clear-program-title" className="text-xl font-black text-zinc-900 dark:text-white">
+                Clear Active Workout Program?
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                This will remove your current active workout schedule from this device. Your questionnaire answers (goals, equipment, and experience) will be kept safe so you can generate a new program anytime.
+              </p>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                Note: Your Nigerian meal planner, food inventory, and feedback comments are preserved.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsClearModalOpen(false)}
+                className="flex-1 px-4 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs sm:text-sm transition-colors min-h-[44px]"
+              >
+                Keep Program
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmClearProgram}
+                className="flex-1 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all min-h-[44px]"
+              >
+                Yes, Clear Program
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
