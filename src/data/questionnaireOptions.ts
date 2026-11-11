@@ -12,47 +12,47 @@ export const GENDER_OPTIONS: OptionItem<Gender>[] = [
   {
     value: 'male',
     label: 'Male',
-    description: 'Strength & hypertrophy programming optimized for male physiological baselines.',
+    description: 'Male starting volumes and split.',
   },
   {
     value: 'female',
     label: 'Female',
-    description: 'Comprehensive strength & conditioning designed for female physiological baselines.',
+    description: 'Female starting volumes and split.',
   },
 ];
 
 export const AGE_OPTIONS: OptionItem<AgeCategory>[] = [
-  { value: '<=20', label: '20 & under', description: 'High recovery capacity; focus on foundational movement mechanics.' },
-  { value: '21-30', label: '21 – 30', description: 'Peak training tolerance; suitable for high intensity and progressive overload.' },
-  { value: '31-40', label: '31 – 40', description: 'Balanced performance; progressive volume with structured recovery.' },
-  { value: '41-50', label: '41 – 50', description: 'Strength and longevity; emphasis on joint integrity and sustained progression.' },
-  { value: '51-60', label: '51 – 60', description: 'Joint-friendly compound lifts, extended rest, and mobility integration.' },
-  { value: '61+', label: '61+', description: 'Longevity, bone density, functional strength, and low joint impact.' },
+  { value: '<=20', label: '20 & under', description: 'You recover fast. We focus on good form.' },
+  { value: '21-30', label: '21 – 30', description: 'Your prime years for pushing hard.' },
+  { value: '31-40', label: '31 – 40', description: 'Steady progress with planned recovery.' },
+  { value: '41-50', label: '41 – 50', description: 'Strong lifts, kinder to your joints.' },
+  { value: '51-60', label: '51 – 60', description: 'Joint-friendly lifts and longer rests.' },
+  { value: '61+', label: '61+', description: 'Strength for everyday life, low impact.' },
 ];
 
 export const EXPERIENCE_OPTIONS: OptionItem<ExperienceLevel>[] = [
   {
     value: 'complete_beginner',
     label: 'Complete Beginner',
-    description: 'Brand new to lifting. Guided machines, safe dumbbells, and form-first rep ranges.',
+    description: 'Never lifted. We start with machines and light dumbbells.',
     badge: 'Form First',
   },
   {
     value: 'beginner',
     label: 'Beginner (< 1 Year)',
-    description: 'Familiar with basic gym machines; ready for foundational compound movements.',
+    description: 'You know the machines and are ready for the big lifts.',
     badge: 'Rapid Gains',
   },
   {
     value: 'intermediate',
     label: 'Intermediate (1–3 Years)',
-    description: 'Consistent lifting history; comfortable with barbells and structured progressive overload.',
+    description: 'You train regularly and are comfortable with a barbell.',
     badge: 'Hypertrophy',
   },
   {
     value: 'advanced',
     label: 'Advanced (3+ Years)',
-    description: 'High technical proficiency; ready for higher volume splits and targeted intensity.',
+    description: 'Years under the bar. Ready for more volume.',
     badge: 'High Volume',
   },
 ];
@@ -66,29 +66,29 @@ export interface GoalItem {
 
 export const GOAL_OPTIONS: GoalItem[] = [
   // Body Composition
-  { id: 'muscle_building', label: 'Muscle Building (Hypertrophy)', category: 'body_composition', description: 'Maximize muscle size and fullness across the entire body.' },
-  { id: 'fat_loss', label: 'Fat Loss & Definition', category: 'body_composition', description: 'High-density workouts with crisp rest intervals to maximize caloric expenditure.' },
-  { id: 'lean_toned', label: 'Lean & Toned Physique', category: 'body_composition', description: 'Moderate resistance and athletic circuits for defined, athletic musculature.' },
-  { id: 'general_fitness', label: 'General Fitness & Health', category: 'body_composition', description: 'Well-rounded physical strength, cardiovascular health, and day-to-day vitality.' },
+  { id: 'muscle_building', label: 'Build muscle', category: 'body_composition', description: 'More size everywhere.' },
+  { id: 'fat_loss', label: 'Lose fat', category: 'body_composition', description: 'Faster-paced sessions that burn more.' },
+  { id: 'lean_toned', label: 'Lean and toned', category: 'body_composition', description: 'Lighter weights, more movement, visible definition.' },
+  { id: 'general_fitness', label: 'General fitness', category: 'body_composition', description: 'A bit of everything. Feel better day to day.' },
 
   // Strength
-  { id: 'build_strength', label: 'Build Maximal Strength', category: 'strength', description: 'Focus on heavy compound movements (squat, bench, hinge) in lower rep ranges.' },
-  { id: 'overall_strength', label: 'Overall Functional Strength', category: 'strength', description: 'Balanced multi-joint strength applicable to daily life and sports.' },
-  { id: 'beginner_strength', label: 'Beginner Strength Foundation', category: 'strength', description: 'Learn key movement patterns safely while building baseline tendon and muscle strength.' },
+  { id: 'build_strength', label: 'Max strength', category: 'strength', description: 'Heavy squats, presses and pulls for low reps.' },
+  { id: 'overall_strength', label: 'All-round strength', category: 'strength', description: 'Strong in every direction, for life and sport.' },
+  { id: 'beginner_strength', label: 'Starter strength', category: 'strength', description: 'Learn the main lifts safely and build a base.' },
 
   // Specific Emphasis
-  { id: 'chest_emphasis', label: 'Chest Development', category: 'specific_emphasis', description: 'Prioritize chest volume and pressing while maintaining balanced full-body training.' },
-  { id: 'back_emphasis', label: 'Back & V-Taper Development', category: 'specific_emphasis', description: 'Emphasize vertical pulls and horizontal rows for upper back thickness and lats.' },
-  { id: 'shoulder_emphasis', label: 'Shoulder & Delt Width', category: 'specific_emphasis', description: 'Extra focus on side and rear delts to build broad, 3D shoulder shape.' },
-  { id: 'arm_emphasis', label: 'Arm Development (Biceps & Triceps)', category: 'specific_emphasis', description: 'Dedicated direct arm volume paired with heavy compound pushes and pulls.' },
-  { id: 'leg_emphasis', label: 'Leg & Quad Development', category: 'specific_emphasis', description: 'High-quad stimulus with progressive squat and press patterns.' },
-  { id: 'glute_emphasis', label: 'Glute Development', category: 'specific_emphasis', description: 'Hip thrusts, Romanian deadlifts, and lunges dialed for maximum glute growth.' },
-  { id: 'core_emphasis', label: 'Core & Midsection Stability', category: 'specific_emphasis', description: 'Direct anti-extension, rotation, and bracing movements for a solid midsection.' },
+  { id: 'chest_emphasis', label: 'Bigger chest', category: 'specific_emphasis', description: 'Extra pressing and chest work. The rest stays balanced.' },
+  { id: 'back_emphasis', label: 'Wider back', category: 'specific_emphasis', description: 'More rows and pull-downs for a thicker, wider back.' },
+  { id: 'shoulder_emphasis', label: 'Broader shoulders', category: 'specific_emphasis', description: 'More side and rear delt work for width.' },
+  { id: 'arm_emphasis', label: 'Bigger arms', category: 'specific_emphasis', description: 'Extra biceps and triceps on top of the big lifts.' },
+  { id: 'leg_emphasis', label: 'Stronger legs', category: 'specific_emphasis', description: 'More squats and leg presses.' },
+  { id: 'glute_emphasis', label: 'Glutes', category: 'specific_emphasis', description: 'Hip thrusts, Romanian deadlifts and lunges.' },
+  { id: 'core_emphasis', label: 'Core', category: 'specific_emphasis', description: 'Direct ab and bracing work for a solid middle.' },
 
   // General
-  { id: 'athletic_performance', label: 'Athletic Performance', category: 'general', description: 'Explosive power, strength balance, and multi-planar conditioning.' },
-  { id: 'endurance', label: 'Muscular Endurance', category: 'general', description: 'Higher rep capacity and stamina with sustained work intervals.' },
-  { id: 'maintain_fitness', label: 'Maintain Current Fitness', category: 'general', description: 'Time-efficient sessions designed to preserve muscle and strength.' },
+  { id: 'athletic_performance', label: 'Athletic', category: 'general', description: 'Power, balance and conditioning.' },
+  { id: 'endurance', label: 'Endurance', category: 'general', description: 'Higher reps and shorter rests.' },
+  { id: 'maintain_fitness', label: 'Stay in shape', category: 'general', description: 'Short sessions that keep what you have.' },
 ];
 
 export const FREQUENCY_OPTIONS: OptionItem<TrainingFrequency>[] = [
@@ -101,11 +101,11 @@ export const FREQUENCY_OPTIONS: OptionItem<TrainingFrequency>[] = [
 ];
 
 export const DURATION_OPTIONS: OptionItem<WorkoutDuration>[] = [
-  { value: 30, label: '30 Minutes', description: 'Express: 3 focused compound movements, super-efficient pacing.' },
-  { value: 45, label: '45 Minutes', description: 'Compact: 4 exercises with solid multi-joint volume.' },
-  { value: 60, label: '60 Minutes', description: 'Standard: 5–6 exercises with balanced compounds and isolation.' },
-  { value: 90, label: '90 Minutes', description: 'Extended: 7–8 exercises with complete accessory and direct arm/core work.' },
-  { value: 120, label: '120 Minutes', description: 'Maximum: 8–9 exercises with full warm-up, heavy compounds, accessories, and conditioning.' },
+  { value: 30, label: '30 Minutes', description: '4 exercises. In and out.' },
+  { value: 45, label: '45 Minutes', description: '5 exercises. The essentials.' },
+  { value: 60, label: '60 Minutes', description: '6 exercises. Big lifts plus accessories.' },
+  { value: 90, label: '90 Minutes', description: '8 exercises. Room for arms and core.' },
+  { value: 120, label: '120 Minutes', description: '10 exercises. The full session.' },
 ];
 
 export interface InjuryOption {
@@ -115,7 +115,7 @@ export interface InjuryOption {
 }
 
 export const INJURY_OPTIONS: InjuryOption[] = [
-  { id: 'none', label: 'No Injuries or Limitations', affectedMovements: 'Full exercise library available without restriction.' },
+  { id: 'none', label: 'No injuries', affectedMovements: 'Full exercise library available without restriction.' },
   { id: 'shoulder', label: 'Shoulder Pain / Impingement', affectedMovements: 'Swaps heavy barbell overhead pressing for neutral-grip and machine presses.' },
   { id: 'knee', label: 'Knee Pain / Patellar Issues', affectedMovements: 'Replaces deep squats and lunges with controlled leg press, glute bridges, and hamstring curls.' },
   { id: 'lower_back', label: 'Lower Back / Spine Strain', affectedMovements: 'Substitutes spinal-loading deadlifts and squats with chest-supported rows and leg press.' },
@@ -135,10 +135,10 @@ export function isGoalContradictory(
     return { isContradictory: true, reason: 'Already selected as your primary goal.' };
   }
   if (primaryGoal === 'fat_loss' && candidateGoal === 'muscle_building') {
-    return { isContradictory: true, reason: 'Aggressive fat loss focuses on a caloric deficit, competing with maximal muscle building.' };
+    return { isContradictory: true, reason: 'Hard to do both at once: losing fat means eating less, building muscle means eating more.' };
   }
   if (primaryGoal === 'muscle_building' && candidateGoal === 'fat_loss') {
-    return { isContradictory: true, reason: 'Maximal muscle building requires a surplus, competing with fat loss caloric deficits.' };
+    return { isContradictory: true, reason: 'Hard to do both at once: building muscle means eating more, losing fat means eating less.' };
   }
   if (primaryGoal === 'fat_loss' && candidateGoal === 'maintain_fitness') {
     return { isContradictory: true, reason: 'Fat loss focuses on weight reduction while maintenance preserves current body mass.' };

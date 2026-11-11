@@ -27,7 +27,7 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
         {/* Sticky Header */}
         <div className="flex items-center justify-between p-6 border-b border-gym-border shrink-0 bg-gym-card backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gym-lime/20 border border-gym-lime/40 flex items-center justify-center text-gym-limeDark dark:text-gym-lime">
+            <div className="w-10 h-10 rounded-3xl bg-gym-lime/20 border border-gym-lime/40 flex items-center justify-center text-gym-limeDark dark:text-gym-lime">
               <Scale className="w-5 h-5" />
             </div>
             <div>
@@ -42,7 +42,7 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl"
+            className="p-2 text-gym-textMuted hover:text-gym-textMuted rounded-2xl"
             aria-label="Close portion guide"
           >
             <X className="w-5 h-5" />
@@ -52,19 +52,19 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
         {/* Scrollable Content */}
         <div className="p-6 overflow-y-auto space-y-6 text-xs sm:text-sm">
           {/* Section 1: Serving vs Portion */}
-          <div className="space-y-2 bg-gym-cardAlt p-4 rounded-2xl /80 dark:border-zinc-800/80">
+          <div className="space-y-2 bg-gym-cardAlt p-4 rounded-3xl /80">
             <span className="text-xs font-semibold uppercase tracking-wider text-gym-limeDark dark:text-gym-lime flex items-center gap-1.5">
               <PieChart className="w-4 h-4" />
               <span>1. Serving vs. Portion</span>
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              <div className="p-3 bg-gym-card rounded-xl space-y-1">
+              <div className="p-3 bg-gym-card rounded-2xl space-y-1">
                 <span className="font-bold text-gym-text block">A &ldquo;Serving&rdquo; (Reference)</span>
                 <p className="text-gym-textMuted text-xs">
                   The standard recipe unit calculated by the planner (e.g., 1 plate of Jollof Rice with 1 chicken piece).
                 </p>
               </div>
-              <div className="p-3 bg-gym-card rounded-xl space-y-1">
+              <div className="p-3 bg-gym-card rounded-2xl space-y-1">
                 <span className="font-bold text-gym-text block">Your &ldquo;Portion&rdquo; (What You Eat)</span>
                 <p className="text-gym-textMuted text-xs">
                   The actual quantity you consume. You can adjust this up or down based on your hunger and training intensity.
@@ -80,25 +80,25 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
               <span>2. Fractions & Multipliers Explained</span>
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-              <div className="p-3 rounded-xl bg-gym-cardAlt ">
+              <div className="p-3 rounded-2xl bg-gym-cardAlt ">
                 <span className="text-base font-bold text-gym-limeDark dark:text-gym-lime block">¾ (0.75x)</span>
                 <span className="text-xs font-bold text-gym-text block">¾ of a serving</span>
-                <span className="text-xs text-zinc-500">Lighter meal, 25% fewer calories</span>
+                <span className="text-xs text-gym-textMuted">Lighter meal, 25% fewer calories</span>
               </div>
-              <div className="p-3 rounded-xl bg-gym-cardAlt ">
+              <div className="p-3 rounded-2xl bg-gym-cardAlt ">
                 <span className="text-base font-bold text-gym-limeDark dark:text-gym-lime block">1.0x</span>
                 <span className="text-xs font-bold text-gym-text block">1 standard serving</span>
-                <span className="text-xs text-zinc-500">The baseline balanced recipe</span>
+                <span className="text-xs text-gym-textMuted">The baseline balanced recipe</span>
               </div>
-              <div className="p-3 rounded-xl bg-gym-cardAlt ">
+              <div className="p-3 rounded-2xl bg-gym-cardAlt ">
                 <span className="text-base font-bold text-gym-limeDark dark:text-gym-lime block">1¼ (1.25x)</span>
                 <span className="text-xs font-bold text-gym-text block">1 and ¼ servings</span>
-                <span className="text-xs text-zinc-500">Extra fuel for training recovery</span>
+                <span className="text-xs text-gym-textMuted">Extra fuel for training recovery</span>
               </div>
-              <div className="p-3 rounded-xl bg-gym-cardAlt ">
+              <div className="p-3 rounded-2xl bg-gym-cardAlt ">
                 <span className="text-base font-bold text-gym-limeDark dark:text-gym-lime block">1½ (1.5x)</span>
                 <span className="text-xs font-bold text-gym-text block">1 and ½ servings</span>
-                <span className="text-xs text-zinc-500">Large meal for muscle building</span>
+                <span className="text-xs text-gym-textMuted">Large meal for muscle building</span>
               </div>
             </div>
           </div>
@@ -110,8 +110,8 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
               <span>3. Estimating Portions Without a Kitchen Scale</span>
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-2xl bg-gym-cardAlt flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-gym-lime/20 text-gym-limeDark dark:text-gym-lime shrink-0">
+              <div className="p-3.5 rounded-3xl bg-gym-cardAlt flex items-start gap-3">
+                <div className="p-2 rounded-2xl bg-gym-lime/20 text-gym-limeDark dark:text-gym-lime shrink-0">
                   <Beef className="w-4 h-4" />
                 </div>
                 <div>
@@ -124,8 +124,8 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-gym-cardAlt flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-500 shrink-0">
+              <div className="p-3.5 rounded-3xl bg-gym-cardAlt flex items-start gap-3">
+                <div className="p-2 rounded-2xl bg-amber-500/20 text-amber-500 shrink-0">
                   <Utensils className="w-4 h-4" />
                 </div>
                 <div>
@@ -138,8 +138,8 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-gym-cardAlt flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-500 shrink-0">
+              <div className="p-3.5 rounded-3xl bg-gym-cardAlt flex items-start gap-3">
+                <div className="p-2 rounded-2xl bg-emerald-500/20 text-emerald-500 shrink-0">
                   <Hand className="w-4 h-4" />
                 </div>
                 <div>
@@ -152,8 +152,8 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-gym-cardAlt flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-red-500/20 text-red-500 shrink-0">
+              <div className="p-3.5 rounded-3xl bg-gym-cardAlt flex items-start gap-3">
+                <div className="p-2 rounded-2xl bg-red-500/20 text-red-500 shrink-0">
                   <Flame className="w-4 h-4" />
                 </div>
                 <div>
@@ -169,7 +169,7 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
           </div>
 
           {/* Section 4: Raw vs Cooked Clarification */}
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 space-y-1.5">
+          <div className="p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 space-y-1.5">
             <span className="font-bold text-xs flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
               <span>Raw Ingredients vs. Cooked Food</span>
@@ -185,7 +185,7 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs sm:text-sm transition-all"
+            className="px-6 py-2.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-semibold text-xs sm:text-sm transition-all"
           >
             Got It
           </button>

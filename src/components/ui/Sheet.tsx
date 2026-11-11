@@ -12,6 +12,11 @@ interface SheetProps {
   zClass?: string;
   /** Tailwind max-width class for the panel on larger screens */
   maxWidth?: string;
+  /**
+   * A view-transition name shared with the element this sheet grew out of. When set, the browser
+   * morphs that element into the sheet, so the sheet's own slide-up animation is switched off.
+   */
+  morphName?: string;
   children: React.ReactNode;
 }
 
@@ -31,6 +36,7 @@ export function Sheet({
   labelledBy,
   zClass = 'z-[100]',
   maxWidth = 'max-w-2xl',
+  morphName,
   children,
 }: SheetProps) {
   const { handleBackdropClick } = useModalScrollLock(isOpen, onClose);
@@ -76,12 +82,15 @@ export function Sheet({
   };
 
   const moved = dragging || dragY > 0 || closing;
-  const panelStyle: React.CSSProperties | undefined = moved
-    ? {
-        transform: closing ? 'translateY(100%)' : `translateY(${dragY}px)`,
-        transition: dragging ? 'none' : 'transform 0.18s ease-out',
-      }
-    : undefined;
+  const panelStyle: React.CSSProperties = {
+    ...(morphName ? ({ viewTransitionName: morphName, animation: 'none' } as React.CSSProperties) : {}),
+    ...(moved
+      ? {
+          transform: closing ? 'translateY(100%)' : `translateY(${dragY}px)`,
+          transition: dragging ? 'none' : 'transform 0.18s ease-out',
+        }
+      : {}),
+  };
 
   return (
     <div

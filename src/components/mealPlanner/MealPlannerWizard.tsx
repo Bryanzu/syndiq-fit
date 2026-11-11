@@ -160,7 +160,7 @@ export function MealPlannerWizard({
           </span>
           <span>{step === 1 ? 'Profile & Nutrition Target' : 'Nigerian Food Inventory'}</span>
         </div>
-        <div className="w-full h-2 bg-zinc-200 dark:bg-[#18181b] rounded-full overflow-hidden ">
+        <div className="w-full h-2 bg-gym-cardInner rounded-full overflow-hidden ">
           <div
             className="h-full bg-gradient-to-r from-gym-lime to-gym-limeLight transition-all duration-500 "
             style={{ width: `${(step / 2) * 100}%` }}
@@ -170,17 +170,17 @@ export function MealPlannerWizard({
 
       {/* STEP 1: PROFILE & NUTRITION TARGETS */}
       {step === 1 && (
-        <div className="bg-white dark:bg-gym-card rounded-2xl p-6 sm:p-10 space-y-8 transition-colors">
+        <div className="glass rounded-[32px] p-5 sm:p-10 space-y-8">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/30 uppercase tracking-wider">
               <Target className="w-3.5 h-3.5" />
-              <span>Nigerian Precision Nutrition</span>
+              <span>Your targets</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-gym-text">
-              Calibrate Your Energy & Protein Target
+              Set your targets
             </h2>
             <p className="text-sm text-gym-textMuted">
-              Syndiq Fit uses the scientific Mifflin-St Jeor formula and ISSN protein positioning to construct an accurate daily target for your physique goal.
+              Tell us about you and we’ll work out your daily calories and protein.
             </p>
           </div>
 
@@ -196,7 +196,7 @@ export function MealPlannerWizard({
                     key={g}
                     type="button"
                     onClick={() => setGender(g)}
-                    className={`py-3 rounded-2xl border font-bold text-sm capitalize transition-all min-h-[46px] ${
+                    className={`py-3 rounded-3xl border font-bold text-sm capitalize transition-all min-h-[46px] ${
                       gender === g
                         ? 'bg-gym-lime/15 border-gym-lime text-gym-limeDark dark:text-gym-lime ring-1 ring-gym-lime'
                         : 'bg-gym-cardAlt border-gym-border text-gym-silver'
@@ -218,9 +218,9 @@ export function MealPlannerWizard({
                 max="75"
                 value={age}
                 onChange={(e) => setAge(Number(e.target.value))}
-                className="w-full accent-gym-lime h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg cursor-pointer"
+                className="w-full accent-gym-lime h-2 bg-gym-cardInner rounded-lg cursor-pointer"
               />
-              <div className="flex justify-between text-xs text-zinc-400">
+              <div className="flex justify-between text-xs text-gym-textMuted">
                 <span>16y</span>
                 <span>45y</span>
                 <span>75y</span>
@@ -245,7 +245,7 @@ export function MealPlannerWizard({
               step="0.5"
               value={weightKg}
               onChange={(e) => setWeightKg(Number(e.target.value))}
-              className="w-full accent-gym-lime h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg cursor-pointer"
+              className="w-full accent-gym-lime h-2 bg-gym-cardInner rounded-lg cursor-pointer"
             />
           </div>
 
@@ -267,14 +267,14 @@ export function MealPlannerWizard({
               step="1"
               value={heightCm}
               onChange={(e) => setHeightCm(Number(e.target.value))}
-              className="w-full accent-gym-lime h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg cursor-pointer"
+              className="w-full accent-gym-lime h-2 bg-gym-cardInner rounded-lg cursor-pointer"
             />
           </div>
 
           {/* Activity Level */}
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-gym-silver flex items-center">
-              <span>Weekly Activity Level</span>
+              <span>How active are you?</span>
               <InfoTooltip
                 title="Activity Level"
                 content="How much physical movement and structured workouts you perform in a typical week. Used to calculate your daily energy expenditure (TDEE)."
@@ -293,14 +293,14 @@ export function MealPlannerWizard({
                   key={act.id}
                   type="button"
                   onClick={() => setActivityLevel(act.id)}
-                  className={`p-3 rounded-2xl border text-left transition-all ${
+                  className={`p-3 rounded-3xl border text-left transition-all ${
                     activityLevel === act.id
-                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime ring-1 ring-gym-lime'
+                      ? 'bg-gym-lime/10 border-gym-lime ring-1 ring-gym-lime'
                       : 'bg-gym-cardAlt border-gym-border text-gym-silver'
                   }`}
                 >
                   <span className="text-xs font-semibold text-gym-text block">{act.label}</span>
-                  <span className="text-xs text-zinc-500 block leading-tight">{act.sub}</span>
+                  <span className="text-xs text-gym-textMuted block leading-tight">{act.sub}</span>
                 </button>
               ))}
             </div>
@@ -309,24 +309,24 @@ export function MealPlannerWizard({
           {/* Primary Fitness Goal */}
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-gym-silver">
-              Primary Physique & Nutrition Goal
+              Your goal
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {(
                 [
-                  { id: 'muscle_building', label: 'Hypertrophy / Muscle Building', desc: 'Caloric surplus with 2.0g/kg protein to pack on lean mass.' },
-                  { id: 'fat_loss', label: 'Fat Loss & Conditioning', desc: '450 kcal deficit with high protein to strip fat while preserving muscle.' },
-                  { id: 'strength', label: 'Maximal Strength', desc: 'Sustained energy surplus for heavy multi-joint performance.' },
-                  { id: 'maintain', label: 'Maintain Current Fitness', desc: 'Energy balance and muscle retention for active busy schedules.' },
+                  { id: 'muscle_building', label: 'Build muscle', desc: 'Caloric surplus with 2.0g/kg protein to pack on lean mass.' },
+                  { id: 'fat_loss', label: 'Lose fat', desc: '450 kcal deficit with high protein to strip fat while preserving muscle.' },
+                  { id: 'strength', label: 'Get stronger', desc: 'Sustained energy surplus for heavy multi-joint performance.' },
+                  { id: 'maintain', label: 'Stay as I am', desc: 'Energy balance and muscle retention for active busy schedules.' },
                 ] as const
               ).map((g) => (
                 <button
                   key={g.id}
                   type="button"
                   onClick={() => setGoal(g.id)}
-                  className={`p-4 rounded-2xl border text-left transition-all ${
+                  className={`p-4 rounded-3xl border text-left transition-all ${
                     goal === g.id
-                      ? 'bg-gym-lime/10 dark:bg-[#18181b] border-gym-lime ring-1 ring-gym-lime'
+                      ? 'bg-gym-lime/10 border-gym-lime ring-1 ring-gym-lime'
                       : 'bg-gym-cardAlt border-gym-border text-gym-silver'
                   }`}
                 >
@@ -334,7 +334,7 @@ export function MealPlannerWizard({
                     <span className="text-xs font-semibold text-gym-text">{g.label}</span>
                     {goal === g.id && <Check className="w-3.5 h-3.5 text-gym-lime stroke-[3]" />}
                   </div>
-                  <p className="text-xs text-zinc-500 leading-tight">{g.desc}</p>
+                  <p className="text-xs text-gym-textMuted leading-tight">{g.desc}</p>
                 </button>
               ))}
             </div>
@@ -344,7 +344,7 @@ export function MealPlannerWizard({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-gym-silver">
-                Daily Meal Frequency
+                Meals per day
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {[
@@ -355,14 +355,14 @@ export function MealPlannerWizard({
                     key={m.count}
                     type="button"
                     onClick={() => setMealsPerDay(m.count)}
-                    className={`p-3 rounded-2xl border text-left transition-all ${
+                    className={`p-3 rounded-3xl border text-left transition-all ${
                       mealsPerDay === m.count
                         ? 'bg-gym-lime/15 border-gym-lime text-gym-text ring-1 ring-gym-lime'
                         : 'bg-gym-cardAlt border-gym-border text-gym-silver'
                     }`}
                   >
                     <span className="text-xs font-bold block">{m.label}</span>
-                    <span className="text-xs text-zinc-500">{m.sub}</span>
+                    <span className="text-xs text-gym-textMuted">{m.sub}</span>
                   </button>
                 ))}
               </div>
@@ -370,9 +370,9 @@ export function MealPlannerWizard({
 
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-gym-silver flex items-center">
-                <span>Budget Optimization</span>
+                <span>Budget</span>
                 <InfoTooltip
-                  title="Budget Optimization"
+                  title="Budget"
                   content="The planner tries to build meals around foods you already have in your kitchen and affordable additional market purchases, while minimizing unnecessary spending. It does not guarantee the lowest price in every local market."
                 />
               </label>
@@ -398,14 +398,14 @@ export function MealPlannerWizard({
                     key={b.id}
                     type="button"
                     onClick={() => setBudgetLevel(b.id)}
-                    className={`p-2.5 rounded-2xl border text-center transition-all ${
+                    className={`p-2.5 rounded-3xl border text-center transition-all ${
                       budgetLevel === b.id
                         ? 'bg-gym-lime/15 border-gym-lime text-gym-text ring-1 ring-gym-lime font-bold'
                         : 'bg-gym-cardAlt border-gym-border text-gym-silver'
                     }`}
                   >
                     <span className="text-xs block font-bold">{b.label}</span>
-                    <span className="text-[9px] text-zinc-500 block leading-tight">{b.sub}</span>
+                    <span className="text-[9px] text-gym-textMuted block leading-tight">{b.sub}</span>
                   </button>
                 ))}
               </div>
@@ -413,53 +413,53 @@ export function MealPlannerWizard({
           </div>
 
           {/* Live Calibrated Target Preview Box */}
-          <div className="p-5 rounded-2xl bg-zinc-900 text-white dark:bg-[#161616] border border-zinc-800 space-y-3">
+          <div className="p-5 rounded-3xl bg-zinc-900 text-white border border-gym-border space-y-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-gym-lime flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Calculated Daily Baseline</span>
+              <span>Your daily targets</span>
             </span>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
               <div>
-                <span className="text-xs text-zinc-400 flex items-center">
-                  <span>Daily Target Energy</span>
+                <span className="text-xs text-gym-textMuted flex items-center">
+                  <span>Calories</span>
                   <InfoTooltip
-                    title="Daily Target Energy"
+                    title="Calories"
                     content="Estimated total calories you need per day based on your body weight, activity level, and goal (caloric deficit for fat loss, surplus for muscle building). It is an evidence-based guideline, not an exact measurement."
                   />
                 </span>
                 <span className="text-xl sm:text-2xl font-bold text-white">{liveTargets.targetCalories} kcal</span>
-                <span className="text-xs text-zinc-500 flex items-center">
+                <span className="text-xs text-gym-textMuted flex items-center">
                   <span>TDEE: {liveTargets.tdee} kcal</span>
                   <InfoTooltip
-                    title="Total Daily Energy Expenditure"
+                    title="Calories you burn"
                     content="Your total daily calories burned, combining your resting metabolic rate (BMR) with all daily walking, occupation movement, and exercise."
                   />
                 </span>
               </div>
 
               <div>
-                <span className="text-xs text-zinc-400 flex items-center">
-                  <span>Target Daily Protein</span>
+                <span className="text-xs text-gym-textMuted flex items-center">
+                  <span>Protein</span>
                   <InfoTooltip
-                    title="Daily Protein Target"
+                    title="Protein"
                     content="The estimated amount of dietary protein to consume daily for muscle repair and recovery (1.5–2.0 g/kg bodyweight based on International Society of Sports Nutrition guidelines)."
                   />
                 </span>
                 <span className="text-xl sm:text-2xl font-bold text-gym-lime">{liveTargets.targetProteinGrams}g</span>
-                <span className="text-xs text-zinc-500 block">~{liveTargets.proteinPerKg}g per kg bodyweight</span>
+                <span className="text-xs text-gym-textMuted block">~{liveTargets.proteinPerKg}g per kg bodyweight</span>
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <span className="text-xs text-zinc-400 flex items-center">
+                <span className="text-xs text-gym-textMuted flex items-center">
                   <span>BMR Baseline</span>
                   <InfoTooltip
-                    title="Basal Metabolic Rate (BMR)"
+                    title="Calories at rest"
                     content="BMR is the estimated energy your body burns at complete rest just to maintain basic life functions (breathing, circulation, organ function). It is not the same as total daily calorie needs (TDEE)."
                   />
                 </span>
                 <span className="text-xl sm:text-2xl font-bold text-zinc-300">{liveTargets.bmr} kcal</span>
-                <span className="text-xs text-zinc-500 block">Resting metabolic rate</span>
+                <span className="text-xs text-gym-textMuted block">At rest</span>
               </div>
             </div>
           </div>
@@ -468,15 +468,15 @@ export function MealPlannerWizard({
 
       {/* STEP 2: NIGERIAN FOOD INVENTORY & PANTRY */}
       {step === 2 && (
-        <div className="bg-white dark:bg-gym-card rounded-2xl p-6 sm:p-10 space-y-6 transition-colors">
+        <div className="glass rounded-[32px] p-5 sm:p-10 space-y-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/30 uppercase tracking-wider">
               <Scale className="w-3.5 h-3.5" />
-              <span>Pantry & Market Availability</span>
+              <span>Your kitchen</span>
             </div>
             <div className="flex items-center gap-2">
               <h2 className="text-2xl sm:text-3xl font-bold text-gym-text">
-                Your Nigerian Food Inventory
+                What’s in your kitchen?
               </h2>
               <InfoTooltip
                 title="Pantry Inventory Categories"
@@ -484,20 +484,20 @@ export function MealPlannerWizard({
               />
             </div>
             <p className="text-sm text-gym-textMuted">
-              Mark items currently in your kitchen (In Stock), items you can buy at the market (To Buy), or foods you are allergic to / dislike (Exclude).
+              Mark what you have, what you’ll buy, and anything you don’t eat.
             </p>
           </div>
 
           {/* Search & Category Tabs */}
           <div className="space-y-3">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gym-textMuted" />
               <input
                 type="text"
-                placeholder="Search food by English or Nigerian name (e.g., Titus, Oloyin, Semo, Ugwu, Akara)..."
+                placeholder="Search food, e.g. titus, semo, ugwu"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-gym-cardAlt border border-gym-borderHover text-xs sm:text-sm text-gym-text placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime"
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-gym-cardAlt border border-gym-borderHover text-xs sm:text-sm text-gym-text placeholder:text-gym-textMuted focus:outline-none focus:border-gym-lime"
               />
             </div>
 
@@ -505,9 +505,9 @@ export function MealPlannerWizard({
               <button
                 type="button"
                 onClick={() => setActiveCategory('all')}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all min-h-[36px] ${
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-2xl whitespace-nowrap transition-all min-h-[36px] ${
                   activeCategory === 'all'
-                    ? 'bg-gym-lime text-black '
+                    ? 'bg-gym-lime text-gym-ink '
                     : 'bg-gym-cardInner text-gym-textMuted'
                 }`}
               >
@@ -518,9 +518,9 @@ export function MealPlannerWizard({
                   key={cat.id}
                   type="button"
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-3.5 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all min-h-[36px] ${
+                  className={`px-3.5 py-1.5 text-xs font-bold rounded-2xl whitespace-nowrap transition-all min-h-[36px] ${
                     activeCategory === cat.id
-                      ? 'bg-gym-lime text-black '
+                      ? 'bg-gym-lime text-gym-ink '
                       : 'bg-gym-cardInner text-gym-textMuted'
                   }`}
                 >
@@ -532,7 +532,7 @@ export function MealPlannerWizard({
 
           {/* Quick Presets */}
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-bold text-zinc-500">Quick Presets:</span>
+            <span className="font-bold text-gym-textMuted">Quick fill:</span>
             <button
               type="button"
               onClick={() => {
@@ -543,9 +543,9 @@ export function MealPlannerWizard({
                   }))
                 );
               }}
-              className="px-2.5 py-1 rounded-lg bg-gym-cardInner text-gym-silver font-semibold hover:bg-zinc-200"
+              className="px-2.5 py-1 rounded-lg bg-gym-cardInner text-gym-silver font-semibold hover:bg-gym-cardInner"
             >
-              All Available in Market
+              I’ll buy everything
             </button>
             <button
               type="button"
@@ -559,7 +559,7 @@ export function MealPlannerWizard({
               }}
               className="px-2.5 py-1 rounded-lg bg-gym-lime/15 text-gym-limeDark dark:text-gym-lime border border-gym-lime/30 font-bold"
             >
-              High-Protein Staples In Stock
+              I have the protein basics
             </button>
           </div>
 
@@ -572,7 +572,7 @@ export function MealPlannerWizard({
               return (
                 <div
                   key={item.id}
-                  className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between gap-2.5 ${
+                  className={`p-3.5 rounded-3xl border transition-all flex flex-col justify-between gap-2.5 ${
                     status === 'in_stock'
                       ? 'bg-gym-lime/10 dark:bg-gym-lime/15 border-gym-lime '
                       : status === 'excluded'
@@ -593,13 +593,13 @@ export function MealPlannerWizard({
                         </h4>
                       </div>
                       {item.isHighProtein && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-gym-lime text-black shrink-0">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-gym-lime text-gym-ink shrink-0">
                           High Protein
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <div className="flex items-center gap-2 text-xs text-gym-textMuted">
                       <span>{item.servingSize}</span>
                       <span>•</span>
                       <span className="font-bold text-gym-silver">{item.proteinGrams}g prot</span>
@@ -609,14 +609,14 @@ export function MealPlannerWizard({
                   </div>
 
                   {/* 3-State Buttons: In Stock / To Buy / Exclude */}
-                  <div className="grid grid-cols-3 gap-1 pt-1 border-t border-zinc-200/60 dark:border-zinc-800/60">
+                  <div className="grid grid-cols-3 gap-1 pt-1 border-t border-gym-border">
                     <button
                       type="button"
                       onClick={() => handleSetItemStatus(item.id, 'in_stock')}
                       className={`py-1.5 rounded-lg text-xs font-semibold transition-all ${
                         status === 'in_stock'
-                          ? 'bg-gym-lime text-black '
-                          : 'bg-gym-cardInner text-gym-textMuted hover:bg-zinc-200'
+                          ? 'bg-gym-lime text-gym-ink '
+                          : 'bg-gym-cardInner text-gym-textMuted hover:bg-gym-cardInner'
                       }`}
                     >
                       In Pantry
@@ -626,8 +626,8 @@ export function MealPlannerWizard({
                       onClick={() => handleSetItemStatus(item.id, 'to_buy')}
                       className={`py-1.5 rounded-lg text-xs font-semibold transition-all ${
                         status === 'to_buy'
-                          ? 'bg-zinc-900 text-white dark:bg-zinc-200 dark:text-black '
-                          : 'bg-gym-cardInner text-gym-textMuted hover:bg-zinc-200'
+                          ? 'bg-gym-text text-gym-bg '
+                          : 'bg-gym-cardInner text-gym-textMuted hover:bg-gym-cardInner'
                       }`}
                     >
                       To Buy
@@ -657,17 +657,17 @@ export function MealPlannerWizard({
           <button
             type="button"
             onClick={() => handleStepChange(1)}
-            className="px-5 py-3 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-300 font-bold text-sm flex items-center gap-2 min-h-[48px]"
+            className="px-6 py-3 rounded-full bg-gym-cardInner hover:bg-gym-cardInner text-gym-text font-bold text-sm flex items-center gap-2 min-h-[48px]"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Targets</span>
+            <span>Back</span>
           </button>
         ) : (
           onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="px-5 py-3 rounded-2xl bg-gym-cardInner text-zinc-600 font-bold text-sm min-h-[48px]"
+              className="px-6 py-3 rounded-full bg-gym-cardInner text-gym-textMuted font-bold text-sm min-h-[48px]"
             >
               Cancel
             </button>
@@ -678,9 +678,9 @@ export function MealPlannerWizard({
           <button
             type="button"
             onClick={() => handleStepChange(2)}
-            className="ml-auto px-7 py-3.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-black font-bold text-sm transition-all flex items-center gap-2 min-h-[48px]"
+            className="ml-auto px-7 py-3.5 rounded-full bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-bold text-sm transition-all flex items-center gap-2 min-h-[48px]"
           >
-            <span>Next: Food Inventory</span>
+            <span>Next</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         ) : (
@@ -688,10 +688,10 @@ export function MealPlannerWizard({
             type="button"
             disabled={isGenerating}
             onClick={handleGenerate}
-            className="ml-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-gym-lime to-gym-limeLight text-black font-bold text-sm sm:text-base transition-all flex items-center gap-2.5 disabled:opacity-50 min-h-[50px]"
+            className="ml-auto px-8 py-4 rounded-3xl bg-gradient-to-r from-gym-lime to-gym-limeLight text-gym-ink font-bold text-sm sm:text-base transition-all flex items-center gap-2.5 disabled:opacity-50 min-h-[50px]"
           >
-            <Sparkles className="w-5 h-5 fill-black" />
-            <span>{isGenerating ? 'Building 7-Day Plan...' : 'Generate 7-Day Meal Plan'}</span>
+            <Sparkles className="w-5 h-5 fill-gym-ink" />
+            <span>{isGenerating ? 'Building…' : 'Build my meal plan'}</span>
           </button>
         )}
       </div>

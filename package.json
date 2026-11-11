@@ -8,10 +8,13 @@
     "start": "next start",
     "lint": "next lint",
     "test:engine": "node scripts/test-engine.mjs",
+    "test:qa": "npx tsx scripts/test-comprehensive-qa.mjs",
+    "test:e2e": "node scripts/test-redesign-e2e.mjs",
     "demo:record": "node scripts/record-demo.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "framer-motion": "^14.12.0",
     "jspdf": "^2.5.2",
     "lucide-react": "^0.475.0",
     "next": "^15.2.0",

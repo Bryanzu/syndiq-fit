@@ -19,15 +19,15 @@ export function getInjurySubstitutionReason(
   exercise: Exercise,
   userInjuries: InjuryArea[]
 ): string {
-  if (!exercise || !exercise.contraindications) return 'General form adaptation';
+  if (!exercise || !exercise.contraindications) return 'Swapped for a better fit';
   const matching = exercise.contraindications.filter((c) => userInjuries.includes(c));
-  if (matching.length === 0) return 'General form adaptation';
+  if (matching.length === 0) return 'Swapped for a better fit';
 
   const readableInjuries = matching
     .map((m) => m.replace('_', ' '))
     .join(' & ');
 
-  return `Adapted for ${readableInjuries} joint comfort`;
+  return `Swapped to protect your ${readableInjuries}`;
 }
 
 export function findSafeAlternative(

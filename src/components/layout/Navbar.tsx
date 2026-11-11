@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -8,30 +8,96 @@ import { Settings, MessageSquare } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { NAV_ITEMS } from './navItems';
 
-function Brand() {
+function LogoMark({ size = 36 }: { size?: number }) {
   return (
-    <Link href="/" className="flex items-center gap-2.5 min-w-0 shrink-0" aria-label="Syndiq Fit home">
-      <span className="relative block w-9 h-9 rounded-xl overflow-hidden bg-black shrink-0">
-        <Image src="/syndiq-logo.png" alt="Syndiq Fit logo" fill sizes="36px" className="object-contain p-0.5" priority />
-      </span>
-      <span className="text-[17px] font-semibold tracking-[0.08em] text-gym-text truncate">
-        SYNDIQ <span className="text-gym-limeDark dark:text-gym-lime">FIT</span>
-      </span>
-    </Link>
+    <span
+      className="animate-logoIn relative block shrink-0 overflow-hidden rounded-xl bg-black"
+      style={{ width: size, height: size }}
+    >
+      <Image src="/syndiq-logo.png" alt="" fill sizes={`${size}px`} className="object-contain p-0.5" priority />
+    </span>
   );
 }
 
-export function Navbar() {
-  const pathname = usePathname();
+function titleFor(pathname: string): string {
+  if (pathname.startsWith('/settings')) return 'Settings';
+  if (pathname.startsWith('/about')) return 'About';
+  return NAV_ITEMS.find((i) => i.match(pathname))?.label ?? 'Syndiq Fit';
+}
+
+/**
+ * PHONE header. Transparent over the page (so hero photos run to the top edge); once the page
+ * scrolls it frosts over and the screen's title fades in, like an iOS large-title bar collapsing.
+ */
+function MobileTopBar({ pathname }: { pathname: string }) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [pathname]);
+
+  const onSettings = pathname.startsWith('/settings');
+  const onFeedback = pathname.startsWith('/feedback');
+
+  return (
+    <header
+      data-header="mobile"
+      className={`${!scrolled && pathname === '/' ? 'on-photo' : ''} lg:hidden sticky top-0 z-40 w-full pt-[env(safe-area-inset-top)] transition-[background-color,backdrop-filter,border-color] duration-300 border-b ${
+        scrolled ? 'bg-[var(--nav-bg)] backdrop-blur-xl hairline' : 'border-transparent'
+      }`}
+    >
+      <div className="flex h-14 items-center justify-between gap-3 px-4">
+        <Link href="/" className="flex min-w-0 items-center gap-2.5" aria-label="Syndiq Fit home">
+          <LogoMark />
+          <span
+            className={`truncate text-[17px] font-semibold tracking-tight text-gym-text transition-opacity duration-300 ${
+              scrolled ? 'opacity-100' : 'opacity-0'
+            }`}
+            aria-hidden={!scrolled}
+          >
+            {titleFor(pathname)}
+          </span>
+        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/feedback"
+            aria-label="Feedback"
+            aria-current={onFeedback ? 'page' : undefined}
+            className={`glass-btn ${onFeedback ? '!text-gym-limeDark dark:!text-gym-lime' : ''}`}
+          >
+            <MessageSquare className="h-5 w-5" strokeWidth={1.9} />
+          </Link>
+          <ThemeToggle className="glass-btn" />
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            aria-current={onSettings ? 'page' : undefined}
+            className={`glass-btn ${onSettings ? '!text-gym-limeDark dark:!text-gym-lime' : ''}`}
+          >
+            <Settings className="h-5 w-5" strokeWidth={1.9} />
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/** DESKTOP header: brand, section tabs and utilities in one frosted bar. */
+function DesktopTopBar({ pathname }: { pathname: string }) {
   const onSettings = pathname.startsWith('/settings');
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[var(--nav-bg)] backdrop-blur-xl">
-      <div className="page flex items-center justify-between gap-4 h-16">
-        <Brand />
+    <header className="hidden lg:block sticky top-0 z-40 w-full bg-[var(--nav-bg)] backdrop-blur-xl">
+      <div className="page flex h-16 items-center justify-between gap-4">
+        <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2.5" aria-label="Syndiq Fit home">
+          <LogoMark />
+          <span className="truncate text-[17px] font-semibold tracking-tight text-gym-text">Syndiq Fit</span>
+        </Link>
 
-        {/* DESKTOP navigation — conventional top tabs: icon + short label. Hidden below lg. */}
-        <nav data-nav="desktop" aria-label="Primary" className="hidden lg:flex items-center gap-1">
+        <nav data-nav="desktop" aria-label="Primary" className="glass flex items-center gap-1 rounded-full p-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = item.match(pathname);
@@ -40,29 +106,18 @@ export function Navbar() {
                 key={item.id}
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
-                className={`relative inline-flex items-center gap-2 px-3.5 min-h-[44px] rounded-full text-sm font-medium transition-colors ${
-                  active
-                    ? 'text-gym-text bg-gym-cardInner'
-                    : 'text-gym-textMuted hover:text-gym-text hover:bg-gym-cardAlt'
+                className={`inline-flex min-h-[40px] items-center gap-2 rounded-full px-3.5 text-sm font-medium transition-colors ${
+                  active ? 'bg-gym-lime font-semibold text-gym-ink' : 'text-gym-textMuted hover:text-gym-text'
                 }`}
               >
-                <Icon className={`w-[18px] h-[18px] ${active ? 'text-gym-limeDark dark:text-gym-lime' : ''}`} strokeWidth={active ? 2.25 : 1.9} />
+                <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 1.9} />
                 <span>{item.label}</span>
-                {active && <span className="absolute left-1/2 -bottom-0.5 h-0.5 w-5 -translate-x-1/2 rounded-full bg-gym-lime" />}
               </Link>
             );
           })}
         </nav>
 
-        {/* Utilities (both breakpoints) */}
-        <div className="flex items-center gap-1 shrink-0">
-          <Link
-            href="/feedback"
-            aria-label="Feedback"
-            className={`btn-icon lg:hidden ${pathname.startsWith('/feedback') ? 'text-gym-limeDark dark:text-gym-lime' : ''}`}
-          >
-            <MessageSquare className="w-5 h-5" strokeWidth={1.9} />
-          </Link>
+        <div className="flex shrink-0 items-center gap-1">
           <ThemeToggle />
           <Link
             href="/settings"
@@ -70,10 +125,20 @@ export function Navbar() {
             aria-current={onSettings ? 'page' : undefined}
             className={`btn-icon ${onSettings ? 'text-gym-limeDark dark:text-gym-lime' : ''}`}
           >
-            <Settings className="w-5 h-5" strokeWidth={1.9} />
+            <Settings className="h-5 w-5" strokeWidth={1.9} />
           </Link>
         </div>
       </div>
     </header>
+  );
+}
+
+export function Navbar() {
+  const pathname = usePathname();
+  return (
+    <>
+      <MobileTopBar pathname={pathname} />
+      <DesktopTopBar pathname={pathname} />
+    </>
   );
 }

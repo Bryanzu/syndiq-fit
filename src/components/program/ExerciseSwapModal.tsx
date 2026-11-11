@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { plainReason } from '@/lib/exerciseCopy';
 import { Sheet } from '@/components/ui/Sheet';
 import { Exercise, WorkoutExerciseItem, MuscleGroup } from '@/types/workout';
 import { getExerciseById, exercises } from '@/data/exercises';
@@ -133,7 +134,7 @@ export function ExerciseSwapModal({
         {/* Header - Fixed/Sticky */}
         <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gym-border bg-gym-cardAlt shrink-0 sticky top-0 z-20 transition-colors">
           <div className="flex items-center gap-3 pr-2">
-            <div className="w-10 h-10 rounded-xl bg-gym-lime/15 border border-gym-lime/40 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-gym-lime/15 border border-gym-lime/40 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
               <ArrowRightLeft className="w-5 h-5" />
             </div>
             <div>
@@ -144,7 +145,7 @@ export function ExerciseSwapModal({
                 Replace Exercise
               </h3>
               <p className="text-xs sm:text-sm text-gym-textMuted mt-0.5">
-                Substituting{' '}
+                Replacing{' '}
                 <span className="text-gym-limeDark dark:text-gym-lime font-bold">
                   {currentExercise.name}
                 </span>
@@ -154,7 +155,7 @@ export function ExerciseSwapModal({
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="p-2 rounded-xl text-zinc-500 hover:text-gym-text dark:text-zinc-400 hover:brightness-110 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+            className="p-2 rounded-2xl text-gym-textMuted hover:text-gym-text hover:brightness-110 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -186,13 +187,13 @@ export function ExerciseSwapModal({
         {/* Search Bar - Sticky */}
         <div className="p-3.5 sm:p-5 border-b border-gym-border bg-gym-cardAlt shrink-0 transition-colors">
           <div className="relative">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-gym-textMuted absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search substitutes by name or equipment..."
-              className="w-full bg-gym-card border border-gym-borderHover focus:border-gym-lime rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-gym-text placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none transition-colors"
+              placeholder="Search by name or equipment"
+              className="w-full bg-gym-card border border-gym-borderHover focus:border-gym-lime rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-gym-text placeholder:text-gym-textMuted dark:placeholder:text-gym-textMuted focus:outline-none transition-colors"
             />
           </div>
         </div>
@@ -200,22 +201,22 @@ export function ExerciseSwapModal({
         {/* Candidate List - Independently Scrollable */}
         <div className="p-3.5 sm:p-6 overflow-y-auto overscroll-contain touch-pan-y space-y-3.5 flex-1 min-h-0 modal-content-scroll">
           {availableAlternatives.length === 0 ? (
-            <div className="p-8 text-center rounded-2xl bg-gym-cardAlt space-y-3 my-4">
-              <div className="w-12 h-12 mx-auto rounded-2xl bg-gym-cardInner flex items-center justify-center text-amber-500 dark:text-amber-400">
+            <div className="p-8 text-center rounded-3xl bg-gym-cardAlt space-y-3 my-4">
+              <div className="w-12 h-12 mx-auto rounded-3xl bg-gym-cardInner flex items-center justify-center text-amber-500 dark:text-amber-400">
                 <AlertCircle className="w-6 h-6" />
               </div>
               <h4 className="font-bold text-base text-gym-text">
-                No Compatible Alternatives Found
+                Nothing else fits
               </h4>
               <p className="text-xs sm:text-sm text-gym-textMuted max-w-md mx-auto leading-relaxed">
                 All potential substitutes for{' '}
-                <strong className="text-zinc-900 dark:text-zinc-200">
+                <strong className="text-gym-text">
                   {currentExercise.name}
                 </strong>{' '}
                 are either already scheduled in this workout, require equipment you haven't
                 selected, or conflict with your active injury restrictions.
               </p>
-              <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+              <p className="text-xs text-gym-textMuted max-w-sm mx-auto">
                 Tip: You can expand your equipment checklist or adjust joint settings in the
                 questionnaire to unlock additional exercise variations.
               </p>
@@ -228,7 +229,7 @@ export function ExerciseSwapModal({
               return (
                 <div
                   key={alt.id}
-                  className="group rounded-2xl bg-gym-cardAlt hover:brightness-110 hover:border-gym-lime/60 p-4 sm:p-5 transition-all space-y-3 shadow-sm "
+                  className="group rounded-3xl bg-gym-cardAlt hover:brightness-110 hover:border-gym-lime/60 p-4 sm:p-5 transition-all space-y-3 shadow-sm "
                 >
                   {/* Top: Name, Equipment & Primary Muscles */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -265,18 +266,18 @@ export function ExerciseSwapModal({
                         onSelectAlternative(alt);
                         onClose();
                       }}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs sm:text-sm transition-all shrink-0 self-start sm:self-auto min-h-[44px]"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-semibold text-xs sm:text-sm transition-all shrink-0 self-start sm:self-auto min-h-[44px]"
                     >
                       <Check className="w-4 h-4 stroke-[2.5]" />
-                      <span>Select Exercise</span>
+                      <span>Use this</span>
                     </button>
                   </div>
 
                   {/* Prescription Preview Grid */}
-                  <div className="grid grid-cols-3 gap-2 py-2 px-3 rounded-xl bg-gym-card text-center text-xs sm:text-sm">
+                  <div className="grid grid-cols-3 gap-2 py-2 px-3 rounded-2xl bg-gym-card text-center text-xs sm:text-sm">
                     <div>
                       <span className="text-xs font-semibold text-gym-textMuted uppercase tracking-wider block">
-                        Prescribed Sets
+                        Sets
                       </span>
                       <span className="font-bold text-gym-text text-sm sm:text-base">
                         {volume.sets} Sets
@@ -284,7 +285,7 @@ export function ExerciseSwapModal({
                     </div>
                     <div className="border-x border-gym-border">
                       <span className="text-xs font-semibold text-gym-textMuted uppercase tracking-wider block">
-                        Prescribed Reps
+                        Reps
                       </span>
                       <span className="font-bold text-gym-limeDark dark:text-gym-lime text-sm sm:text-base">
                         {volume.reps}
@@ -292,10 +293,10 @@ export function ExerciseSwapModal({
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-gym-textMuted uppercase tracking-wider block">
-                        Rest Period
+                        Rest
                       </span>
                       <span className="font-bold text-gym-text text-sm sm:text-base flex items-center justify-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                        <Clock className="w-3.5 h-3.5 text-gym-textMuted" />
                         {volume.restSeconds}s
                       </span>
                     </div>
@@ -303,10 +304,10 @@ export function ExerciseSwapModal({
 
                   {/* Why Included rationale */}
                   <p className="text-xs text-gym-textMuted line-clamp-2 leading-relaxed">
-                    <span className="font-semibold text-zinc-800 dark:text-zinc-300">
-                      Biomechanical role:
+                    <span className="font-semibold text-gym-text">
+                      Why:
                     </span>{' '}
-                    {alt.whyIncluded}
+                    {plainReason(alt)}
                   </p>
                 </div>
               );
@@ -318,8 +319,8 @@ export function ExerciseSwapModal({
         <div className="p-3.5 sm:p-4 bg-gym-cardAlt border-t border-gym-border flex items-center gap-2.5 text-xs text-gym-textMuted shrink-0 sticky bottom-0 z-10 transition-colors">
           <ShieldCheck className="w-4 h-4 text-gym-limeDark dark:text-gym-lime shrink-0" />
           <span>
-            Filtered against your selected gym equipment and personal joint safety profile.
-            Accidental duplicates in this workout are automatically excluded.
+            Only showing exercises that fit your equipment and injuries.
+            Exercises already in today’s session are left out.
           </span>
         </div>
     </Sheet>

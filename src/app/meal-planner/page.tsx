@@ -195,45 +195,28 @@ export default function MealPlannerPage() {
   if (!isHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="flex items-center gap-2 text-sm font-bold text-zinc-500">
+        <div className="flex items-center gap-2 text-sm font-bold text-gym-textMuted">
           <Sparkles className="w-4 h-4 text-gym-lime animate-spin" />
-          <span>Loading Nutrition Plan...</span>
+          <span>Loading your meals</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 animate-fadeIn">
+    <div className="page pb-8 pt-1 sm:py-10 space-y-8">
       {/* Wizard Modal / Overlay if building a new plan */}
       {isWizardOpen && (
         <div className="space-y-6">
-          <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gym-card transition-colors">
-            <div className="grid grid-cols-1 md:grid-cols-12 items-center">
-              <div className="md:col-span-7 p-6 sm:p-10 space-y-3 z-10">
-                <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-black inline-block">
-                  Intelligent Nutrition
-                </span>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gym-text tracking-tight">
-                  Nigerian Weekly Meal Planner
-                </h1>
-                <p className="text-xs sm:text-sm text-gym-textMuted leading-relaxed max-w-md">
-                  Calibrated daily calories, protein synthesis targets, and practical pantry management using wholesome Nigerian food staples.
-                </p>
-              </div>
-              <div className="md:col-span-5 relative h-48 md:h-full min-h-[180px] w-full overflow-hidden bg-zinc-900">
-                <Image
-                  src="/images/meal-prep-healthy.jpg"
-                  alt="Fresh wholesome ingredients and healthy nutrition"
-                  fill
-                  className="object-cover opacity-85 object-center"
-                  sizes="(max-width: 768px) 100vw, 40vw"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white dark:from-gym-card via-transparent to-transparent md:w-24 pointer-events-none" />
-              </div>
+          <div className="on-photo relative isolate overflow-hidden rounded-[32px]">
+            <Image src="/images/meal-prep-healthy.jpg" alt="" fill priority sizes="(max-width: 1280px) 100vw, 1280px" className="-z-20 object-cover" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
+            <div className="space-y-1.5 p-6 pt-28 sm:p-10 sm:pt-36">
+              <h1 className="t-large">Meals</h1>
+              <p className="text-[15px] text-white/85">A week of Nigerian food, portioned for your goal.</p>
             </div>
           </div>
+
 
           <MealPlannerWizard
             initialProfile={mealPlan?.profile}
@@ -257,23 +240,23 @@ export default function MealPlannerPage() {
       {!isWizardOpen && mealPlan && activeDay && (
         <div className="space-y-8">
           {/* Header Card */}
-          <div className="bg-white dark:bg-gym-card rounded-2xl p-6 sm:p-8 space-y-6 transition-colors">
+          <div className="bg-gym-card rounded-3xl p-6 sm:p-8 space-y-6 transition-colors">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gym-border">
               <div className="space-y-2 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-black ">
-                    Syndiq Fit Nutrition
+                  <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-gym-ink ">
+                    Your week
                   </span>
                   <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gym-cardInner text-gym-silver flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
-                    <span>7-Day Nigerian Cycle</span>
+                    <span>7 days</span>
                   </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gym-text tracking-tight">
-                  7-Day Nigerian Meal Planner
+                <h1 className="t-large">
+                  This week’s meals
                 </h1>
                 <p className="text-gym-textMuted text-xs sm:text-sm max-w-2xl leading-relaxed">
-                  Scientifically calculated meal combinations using authentic Nigerian staples (Jollof, Egusi, Brown Beans, Titus, Yam, Ogbono, Awara). Accurate macros with zero inflated claims.
+                  Tap a meal to see the recipe, swap it or change the portion.
                 </p>
               </div>
 
@@ -283,27 +266,27 @@ export default function MealPlannerPage() {
                   type="button"
                   onClick={handleDownloadPdf}
                   disabled={isExportingPdf}
-                  className="px-5 py-3 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs sm:text-sm transition-all flex items-center gap-2 disabled:opacity-50 min-h-[44px]"
+                  className="px-5 py-3 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-semibold text-xs sm:text-sm transition-all flex items-center gap-2 disabled:opacity-50 min-h-[44px]"
                 >
                   <FileDown className="w-4 h-4" />
-                  <span>{isExportingPdf ? 'Exporting PDF...' : 'Download PDF Plan'}</span>
+                  <span>{isExportingPdf ? 'Exporting PDF...' : 'Download PDF'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleRegenerateWeek}
-                  className="px-4 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-gym-text font-bold text-xs sm:text-sm transition-colors flex items-center gap-2 min-h-[44px]"
-                  title="Shuffle meals for a fresh 7-day variation"
+                  className="px-4 py-3 rounded-2xl bg-gym-cardInner hover:bg-gym-cardInner text-gym-text font-bold text-xs sm:text-sm transition-colors flex items-center gap-2 min-h-[44px]"
+                  title="Shuffle the week"
                 >
                   <RefreshCw className="w-4 h-4 text-gym-limeDark dark:text-gym-lime" />
-                  <span>Shuffle Week</span>
+                  <span>Shuffle week</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setIsPortionGuideOpen(true)}
-                  className="px-3.5 py-3 rounded-xl bg-slate-50 hover:bg-gym-cardInner text-zinc-700 hover:text-gym-text dark:text-zinc-300 transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
-                  title="How Portions & Serving Sizes Work"
+                  className="px-3.5 py-3 rounded-2xl bg-gym-cardInner hover:bg-gym-cardInner text-gym-text hover:text-gym-text transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
+                  title="How portions work"
                 >
                   <Scale className="w-4 h-4 text-gym-limeDark dark:text-gym-lime" />
                   <span className="hidden sm:inline">Portion Guide</span>
@@ -312,7 +295,7 @@ export default function MealPlannerPage() {
                 <button
                   type="button"
                   onClick={() => setIsWizardOpen(true)}
-                  className="px-3.5 py-3 rounded-xl bg-slate-50 hover:bg-gym-cardInner text-zinc-700 hover:text-gym-text dark:text-zinc-300 transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
+                  className="px-3.5 py-3 rounded-2xl bg-gym-cardInner hover:bg-gym-cardInner text-gym-text hover:text-gym-text transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span className="hidden sm:inline">Reconfigure</span>
@@ -324,32 +307,32 @@ export default function MealPlannerPage() {
             <NutritionSummaryBar mealPlan={mealPlan} activeDay={activeDay} />
           </div>
 
-          {/* View Mode Switcher: 7-Day Plan vs Market Shopping List */}
+          {/* View Mode Switcher: 7-Day Plan vs Shopping list */}
           <div className="flex items-center gap-2 border-b border-gym-border pb-2">
             <button
               type="button"
               onClick={() => setActiveTab('plan')}
-              className={`px-5 py-2.5 rounded-2xl font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all min-h-[42px] ${
+              className={`px-5 py-2.5 rounded-3xl font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all min-h-[42px] ${
                 activeTab === 'plan'
-                  ? 'bg-gym-lime text-black '
+                  ? 'bg-gym-lime text-gym-ink '
                   : 'text-gym-textMuted hover:text-gym-text bg-gym-cardInner'
               }`}
             >
               <Utensils className="w-4 h-4" />
-              <span>7-Day Meal Schedule</span>
+              <span>Meals</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('shopping')}
-              className={`px-5 py-2.5 rounded-2xl font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all min-h-[42px] ${
+              className={`px-5 py-2.5 rounded-3xl font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all min-h-[42px] ${
                 activeTab === 'shopping'
-                  ? 'bg-gym-lime text-black '
+                  ? 'bg-gym-lime text-gym-ink '
                   : 'text-gym-textMuted hover:text-gym-text bg-gym-cardInner'
               }`}
             >
               <ShoppingBag className="w-4 h-4" />
-              <span>Market Shopping List</span>
+              <span>Shopping list</span>
               <span className="px-1.5 py-0.5 rounded-full text-xs font-bold bg-black/10 dark:bg-white/10">
                 {shoppingList.filter((i) => i.toBuyQuantity > 0).length}
               </span>
@@ -370,10 +353,10 @@ export default function MealPlannerPage() {
                       key={day.dayNumber}
                       type="button"
                       onClick={() => setSelectedDayNumber(day.dayNumber)}
-                      className={`p-3 sm:p-4 rounded-2xl border text-left transition-all shrink-0 min-w-[130px] sm:min-w-[150px] ${
+                      className={`p-3 sm:p-4 rounded-3xl border text-left transition-all shrink-0 min-w-[130px] sm:min-w-[150px] ${
                         isSelected
-                          ? 'bg-zinc-900 text-white dark:bg-[#18181b] border-gym-lime ring-2 ring-gym-lime '
-                          : 'bg-white dark:bg-gym-card border-gym-border text-gym-silver hover:border-zinc-300'
+                          ? 'bg-gym-lime text-gym-ink border-gym-lime '
+                          : 'bg-gym-card border-gym-border text-gym-silver hover:border-gym-border'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
@@ -387,7 +370,7 @@ export default function MealPlannerPage() {
                       <span className="text-xs sm:text-sm font-semibold block truncate">
                         {day.totalCalories} kcal
                       </span>
-                      <span className="text-xs text-zinc-400 block">
+                      <span className="text-xs text-gym-textMuted block">
                         {day.totalProtein}g protein
                       </span>
                     </button>

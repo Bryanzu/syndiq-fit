@@ -1,4 +1,5 @@
 import { WorkoutProgram } from '@/types/workout';
+import { plainReason } from '@/lib/exerciseCopy';
 
 export async function generateWorkoutPdf(program: WorkoutProgram): Promise<void> {
   const { jsPDF } = await import('jspdf');
@@ -157,7 +158,7 @@ export async function generateWorkoutPdf(program: WorkoutProgram): Promise<void>
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(7.5);
       doc.setTextColor(100, 116, 139);
-      const coachText = doc.splitTextToSize(`Coach Rationale: ${ex.whyIncluded}`, contentWidth - 140);
+      const coachText = doc.splitTextToSize(`Why: ${plainReason(ex)}`, contentWidth - 140);
       doc.text(coachText[0] || '', margin + 12, y + 54);
 
       // Clickable YouTube Demonstration Link

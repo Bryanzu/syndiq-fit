@@ -1,316 +1,181 @@
+// Records the product walkthrough shown on /demo.
+// Needs the dev server running:  npm run dev   then   npm run demo:record
+// Output: public/videos/syndiq-fit-demo.webm (served by /api/video).
 import { chromium } from 'playwright';
-import path from 'path';
 import fs from 'fs';
-import { execSync } from 'child_process';
+import os from 'os';
+import path from 'path';
 
-const FFMPEG_PATH = 'C:\\Users\\izu31\\AppData\\Local\\ms-playwright\\ffmpeg-1013\\ffmpeg-win64.exe';
-const VIDEO_DIR = path.resolve('public', 'videos');
-const ARTIFACT_DIR = 'C:\\Users\\izu31\\.gemini\\antigravity\\brain\\7584e0c1-1d56-4a76-a80f-c27b24aded85';
+const BASE = process.env.BASE_URL || 'http://localhost:3000';
+const OUT = path.resolve('public', 'videos', 'syndiq-fit-demo.webm');
+const SIZE = { width: 1440, height: 900 };
 
-if (!fs.existsSync(VIDEO_DIR)) {
-  fs.mkdirSync(VIDEO_DIR, { recursive: true });
-}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const started = Date.now();
+const chapter = (name) => console.log(`${String(Math.round((Date.now() - started) / 1000)).padStart(4)}s  ${name}`);
 
-async function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function smoothScroll(page, targetY, durationMs = 1000) {
+async function smoothScroll(page, targetY, durationMs = 1200) {
   const startY = await page.evaluate(() => window.scrollY);
-  const diff = targetY - startY;
-  const steps = 20;
-  const stepTime = durationMs / steps;
+  const steps = 30;
   for (let i = 1; i <= steps; i++) {
-    const progress = i / steps;
-    const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-    await page.evaluate((y) => window.scrollTo(0, y), startY + diff * eased);
-    await sleep(stepTime);
+    const t = i / steps;
+    const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    await page.evaluate((y) => window.scrollTo(0, y), startY + (targetY - startY) * eased);
+    await sleep(durationMs / steps);
   }
 }
 
-async function runDemo() {
-  console.log('🚀 Launching Chromium browser with video recording enabled...');
-  const browser = await chromium.launch({
-    headless: true,
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'demo-recording-'));
+const browser = await chromium.launch();
+const context = await browser.newContext({ viewport: SIZE, colorScheme: 'dark', recordVideo: { dir: tmp, size: SIZE } });
+const page = await context.newPage();
+// Hide the Next.js dev badge so it is not in the recording
+await page.addInitScript(() => {
+  document.addEventListener('DOMContentLoaded', () => {
+    const s = document.createElement('style');
+    s.textContent = 'nextjs-portal{display:none!important}';
+    document.head.appendChild(s);
   });
+});
+let finished = false;
+const nav = (href) => page.locator(`nav[data-nav="desktop"] a[href="${href}"]`);
 
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
-    recordVideo: {
-      dir: VIDEO_DIR,
-      size: { width: 1440, height: 900 },
-    },
-  });
+try {
+  /* 1. First open */
+  chapter('First open');
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await page.waitForSelector('a:has-text("Build my program"):visible');
+  await sleep(2500);
+  await smoothScroll(page, 900);
+  await sleep(1200);
+  await smoothScroll(page, 0, 900);
+  await sleep(600);
 
-  const page = await context.newPage();
+  /* 2. Questionnaire */
+  chapter('Questionnaire');
+  await page.locator('a:has-text("Build my program"):visible').first().click();
+  await page.waitForSelector('text=What is your sex?');
+  await sleep(900);
+  await page.getByRole('radio', { name: /Female/ }).click();
+  await sleep(700);
+  for (let step = 0; step < 14; step++) {
+    const build = page.getByRole('button', { name: /Build my program/ });
+    if (await build.count()) {
+      await sleep(900);
+      await build.click();
+      break;
+    }
+    const preset = page.getByRole('button', { name: /Commercial Gym/ });
+    if (await preset.count()) {
+      await preset.first().click();
+      await sleep(900);
+      await smoothScroll(page, 500, 700);
+      await sleep(500);
+    }
+    const next = page.getByRole('button', { name: /^Next/ });
+    await next.scrollIntoViewIfNeeded();
+    await sleep(700);
+    await next.click();
+    await sleep(900);
+  }
 
-  // 1. HOME PAGE
-  console.log('📍 1. Loading Homepage (http://localhost:3000)...');
-  await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
-  await sleep(2000);
-
-  console.log('📜 Scrolling down to showcase tailored equipment platform branding...');
-  await smoothScroll(page, 550, 1200);
-  await sleep(1500);
-
-  await smoothScroll(page, 1100, 1200);
-  await sleep(1500);
-
-  await smoothScroll(page, 1600, 1200);
+  /* 3. Program */
+  chapter('Your program');
+  await page.waitForURL('**/program**');
+  await page.waitForSelector('article');
+  await sleep(2200);
+  await smoothScroll(page, 520);
+  const rows = page.locator('article');
+  for (let i = 0; i < Math.min(4, await rows.count()); i++) {
+    await rows.nth(i).hover();
+    await sleep(800);
+  }
+  await page.locator('article button[aria-label*="view instructions"]').first().click();
+  await page.waitForSelector('#exercise-detail-title');
+  await sleep(2400);
+  await page.keyboard.press('Escape');
+  await sleep(1200);
+  await page.locator('article button:has-text("Replace")').nth(1).click();
+  await page.waitForSelector('#exercise-swap-title');
   await sleep(1800);
-
-  await smoothScroll(page, 0, 1000);
-  await sleep(1200);
-
-  // 2. QUESTIONNAIRE WIZARD
-  console.log('📍 2. Starting Questionnaire Wizard...');
-  await page.click('a[href="/questionnaire"]');
-  await page.waitForURL('**/questionnaire');
+  await page.getByRole('button', { name: /Use this/ }).first().click();
   await sleep(1500);
 
-  // Step 1: Gender (Select Female)
-  console.log('👤 Step 1: Selecting Female...');
-  await page.locator('text=Female').first().click();
+  /* 4. Workout player */
+  chapter('Training');
+  await smoothScroll(page, 420, 600);
+  await page.getByRole('button', { name: /Start workout/ }).click();
+  const player = page.locator('[role="dialog"][aria-label^="Workout in progress"]');
+  await player.waitFor();
+  await sleep(1800);
+  for (let i = 0; i < 3; i++) {
+    const more = player.getByRole('button', { name: 'More weight' });
+    if (await more.count()) await more.click();
+    await sleep(350);
+  }
+  await player.getByRole('button', { name: 'Set done' }).click();
+  await sleep(3200);
+  await player.getByRole('button', { name: 'Skip rest' }).click();
+  await sleep(1200);
+  await player.getByRole('button', { name: 'Set done' }).click();
+  await sleep(2000);
+  await player.getByRole('button', { name: 'Skip rest' }).click();
   await sleep(1000);
-  await page.click('button:has-text("Next Step")');
-  await sleep(800);
-
-  // Step 2: Age
-  console.log('🎂 Step 2: Selecting Age 21–30...');
-  await page.locator('text=/21.*30/').first().click();
-  await sleep(800);
-  await page.click('button:has-text("Next Step")');
-  await sleep(800);
-
-  // Step 3: Experience
-  console.log('🏋️ Step 3: Selecting Beginner...');
-  await page.locator('text=/Beginner/').first().click();
-  await sleep(800);
-  await page.click('button:has-text("Next Step")');
-  await sleep(800);
-
-  // Step 4: Fitness Goal
-  console.log('🎯 Step 4: Selecting Muscle Building / Tone Focus...');
-  await page.locator('text=/Muscle Building/').first().click();
-  await sleep(800);
-  await page.click('button:has-text("Next Step")');
-  await sleep(800);
-
-  // Step 5: Training Frequency
-  console.log('📅 Step 5: Selecting 4 Days / Week...');
-  await page.locator('text=/4 Days/').first().click();
-  await sleep(800);
-  await page.click('button:has-text("Next Step")');
-  await sleep(800);
-
-  // Step 6: Session Duration
-  console.log('⏱️ Step 6: Selecting 45 Minutes...');
-  await page.locator('text=/45 Minutes/').first().click();
-  await sleep(800);
-  await page.click('button:has-text("Next Step")');
-  await sleep(1200);
-
-  // Step 7: Central Equipment Library & Selector
-  console.log('⚙️ Step 7: Demonstrating New Flexible Equipment Selector & Presets...');
+  await player.getByRole('button', { name: 'Minimise workout' }).click();
   await sleep(1500);
 
-  // Click Presets
-  console.log('   Clicking "Home Dumbbells" preset...');
-  await page.locator('button:has-text("Home Dumbbells")').click();
-  await sleep(1400);
-
-  console.log('   Clicking "Commercial Gym" preset...');
-  await page.locator('button:has-text("Commercial Gym")').click();
-  await sleep(1400);
-
-  // Browse category tabs
-  console.log('   Switching to "Benches & Racks" category tab...');
-  await page.locator('button:has-text("Benches & Racks")').click();
-  await sleep(1200);
-
-  console.log('   Switching to "Resistance Machines" category tab...');
-  await page.locator('button:has-text("Resistance Machines")').click();
-  await sleep(1200);
-
-  console.log('   Switching to "Cable Equipment" category tab...');
-  await page.locator('button:has-text("Cable Equipment")').click();
-  await sleep(1200);
-
-  // Try search filter
-  console.log('   Searching for "cable" in equipment search box...');
-  const searchInput = page.locator('input[placeholder*="Search equipment"]');
-  await searchInput.fill('cable');
-  await sleep(1400);
-  await searchInput.fill('');
-  await sleep(800);
-
-  // Back to All Equipment
-  await page.locator('button:has-text("All Equipment")').click();
-  await sleep(1200);
-
-  await page.click('button:has-text("Next Step")');
-  await sleep(1000);
-
-  // Step 8: Injuries & Medical Disclaimer
-  console.log('🩹 Step 8: Selecting Knee Discomfort limitation...');
-  await page.locator('text=/Knee/').first().click();
+  /* 5. Body map */
+  chapter('Body map');
+  await nav('/muscle-map').click();
+  await page.waitForSelector('text=Body map');
+  await sleep(2000);
+  // Click one solid shape of the muscle: the group's own centre can fall in the gap between left and right
+  await page.locator('g[aria-label="quads"] path').nth(2).click();
   await sleep(1500);
+  await page.getByRole('button', { name: 'back', exact: true }).click();
+  await sleep(1500);
+  await page.locator('g[aria-label="glutes"] path').first().click();
+  await sleep(1500);
+  await page.getByRole('button', { name: 'male', exact: true }).click();
+  await sleep(1500);
+  await page.getByRole('button', { name: 'female', exact: true }).click();
+  await sleep(1200);
 
-  // Generate Program
-  console.log('⚡ Generating custom program with deterministic sports-science engine...');
-  await page.click('button:has-text("Generate My Workout Program")');
-  await page.waitForURL('**/program', { timeout: 15000 });
+  /* 6. Meals */
+  chapter('Meals');
+  await nav('/meal-planner').click();
+  await page.waitForSelector('text=Set your targets');
+  await sleep(1500);
+  await smoothScroll(page, 600);
+  await sleep(800);
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.waitForSelector('text=What’s in your kitchen?');
+  await sleep(1500);
+  await page.getByRole('button', { name: /Build my meal plan/ }).click();
+  await page.waitForSelector('text=This week’s meals');
+  await sleep(2000);
+  await smoothScroll(page, 900, 1600);
+  await sleep(1500);
+  await smoothScroll(page, 1700, 1600);
+  await sleep(1200);
+  await smoothScroll(page, 0, 900);
+
+  /* 7. Home */
+  chapter('Home');
+  await nav('/').click();
+  await page.waitForSelector('text=In this session');
   await sleep(3000);
-
-  // 3. GENERATED WORKOUT PROGRAM PAGE
-  console.log('📊 3. Demonstrating Generated Workout & Female Body Visualizer...');
-  // Smooth scroll to view routine and female anatomical model
-  await smoothScroll(page, 320, 1000);
-  await sleep(2500);
-
-  console.log('✨ Verified: Female silhouette automatically rendered with no toggle buttons.');
-
-  // Hover over exercise cards to highlight active muscles
-  const exerciseCards = page.locator('div[class*="rounded-2xl bg-gym-card"]');
-  const count = await exerciseCards.count();
-  if (count > 0) {
-    console.log('🖱️ Hovering over Exercise 1 to highlight target muscles on female body...');
-    await exerciseCards.nth(0).hover();
-    await sleep(2000);
-
-    if (count > 1) {
-      console.log('🖱️ Hovering over Exercise 2...');
-      await exerciseCards.nth(1).hover();
-      await sleep(2000);
-    }
-  }
-
-  // Switch training day tabs
-  console.log('🗓️ Switching to Day 2 schedule tab...');
-  await page.locator('button:has-text("Day 2")').first().click();
-  await sleep(2000);
-
-  console.log('🗓️ Switching back to Day 1...');
-  await page.locator('button:has-text("Day 1")').first().click();
-  await sleep(2000);
-
-  // Open "Replace Exercise" Modal
-  console.log('🔄 Opening Exercise Swap / Alternative Modal (Replace button)...');
-  const replaceBtn = page.locator('button:has-text("Replace")').first();
-  if (await replaceBtn.isVisible()) {
-    await replaceBtn.click();
-    await sleep(2500);
-
-    console.log('✅ Verifying alternatives list excludes exercises already in today\'s workout...');
-    await sleep(1500);
-
-    const selectExerciseBtn = page.locator('button:has-text("Select Exercise")').first();
-    if (await selectExerciseBtn.isVisible()) {
-      console.log('🎯 Selecting smart alternative exercise...');
-      await selectExerciseBtn.click();
-      await sleep(2000);
-      console.log('✅ Replaced exercise successfully with recalculated duration and updated routine!');
-    }
-  }
-
-  // Open Instructions Modal
-  console.log('📖 Opening Exercise Instructions details modal...');
-  const instructionsBtn = page.locator('button:has-text("Instructions")').first();
-  if (await instructionsBtn.isVisible()) {
-    await instructionsBtn.click();
-    await sleep(2500);
-
-    const closeBtn = page.locator('button[aria-label="Close"], button:has(svg.lucide-x)').first();
-    if (await closeBtn.isVisible()) {
-      await closeBtn.click();
-      await sleep(1000);
-    }
-  }
-
-  // 4. STANDALONE MUSCLE MAP PAGE
-  console.log('🗺️ 4. Visiting Standalone Muscle Map (/muscle-map)...');
-  await page.goto('http://localhost:3000/muscle-map', { waitUntil: 'networkidle' });
-  await sleep(2500);
-
-  console.log('🚻 Testing interactive Male / Female toggling on Standalone Map...');
-  const maleBtn = page.locator('button:has-text("Male")').first();
-  if (await maleBtn.isVisible()) {
-    await maleBtn.click();
-    await sleep(2000);
-  }
-
-  const femaleBtn = page.locator('button:has-text("Female")').first();
-  if (await femaleBtn.isVisible()) {
-    await femaleBtn.click();
-    await sleep(2000);
-  }
-
-  console.log('🔄 Testing Front / Back anatomical switching...');
-  const backBtn = page.locator('button:has-text("Back")').first();
-  if (await backBtn.isVisible()) {
-    await backBtn.click();
-    await sleep(2000);
-  }
-
-  const frontBtn = page.locator('button:has-text("Front")').first();
-  if (await frontBtn.isVisible()) {
-    await frontBtn.click();
-    await sleep(2000);
-  }
-
-  // Click on a muscle group to show stable layout and exercises
-  console.log('💪 Clicking Chest muscle group...');
-  const chestSvg = page.locator('path[id*="chest"], g[id*="chest"]').first();
-  if (await chestSvg.isVisible()) {
-    await chestSvg.click();
-    await sleep(2000);
-  }
-
-  // Smooth scroll back to top
-  await smoothScroll(page, 0, 800);
-  await sleep(2000);
-
-  console.log('🎬 Wrapping up demo and finalizing video stream...');
-  await page.close();
+  chapter('End');
+  finished = true;
+} finally {
+  const video = page.video();
   await context.close();
   await browser.close();
-
-  // Find saved WebM
-  const files = fs.readdirSync(VIDEO_DIR).filter((f) => f.endsWith('.webm'));
-  if (files.length > 0) {
-    files.sort((a, b) => fs.statSync(path.join(VIDEO_DIR, b)).mtimeMs - fs.statSync(path.join(VIDEO_DIR, a)).mtimeMs);
-    const recordedWebm = path.join(VIDEO_DIR, files[0]);
-    const demoWebm = path.join(VIDEO_DIR, 'syndiq-fit-demo.webm');
-    const demoMp4 = path.join(VIDEO_DIR, 'syndiq-fit-demo.mp4');
-
-    fs.copyFileSync(recordedWebm, demoWebm);
-    console.log(`✅ Saved WebM demo video to: ${demoWebm}`);
-
-    // Convert to MP4
-    if (fs.existsSync(FFMPEG_PATH)) {
-      console.log('🔄 Encoding MP4 version with H.264...');
-      try {
-        execSync(`"${FFMPEG_PATH}" -y -i "${demoWebm}" -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p "${demoMp4}"`, {
-          stdio: 'inherit',
-        });
-        console.log(`✅ Saved MP4 demo video to: ${demoMp4}`);
-
-        // Copy to artifact directory for easy download
-        const artifactMp4 = path.join(ARTIFACT_DIR, 'syndiq-fit-demo.mp4');
-        const artifactWebm = path.join(ARTIFACT_DIR, 'syndiq-fit-demo.webm');
-        fs.copyFileSync(demoMp4, artifactMp4);
-        fs.copyFileSync(demoWebm, artifactWebm);
-        console.log(`✅ Copied to artifacts directory: ${artifactMp4}`);
-      } catch (err) {
-        console.error('Error during MP4 conversion:', err.message);
-      }
-    }
+  // Only replace the published video when the whole walkthrough ran
+  if (video && finished) {
+    fs.mkdirSync(path.dirname(OUT), { recursive: true });
+    fs.copyFileSync(await video.path(), OUT);
+    console.log(`Saved ${OUT} (${(fs.statSync(OUT).size / 1048576).toFixed(1)} MB)`);
   }
-
-  console.log('🎉 Full product demo video recorded and saved successfully!');
+  fs.rmSync(tmp, { recursive: true, force: true });
 }
-
-runDemo().catch((err) => {
-  console.error('❌ Demo recording failed:', err);
-  process.exit(1);
-});

@@ -10,8 +10,8 @@ export function Footer() {
             SYNDIQ <span className="text-gym-limeDark dark:text-gym-lime">FIT</span>
           </p>
           <p className="t-small leading-relaxed">
-            Rule-based training programs matched to your equipment, experience and goals. Fitness guidance for healthy
-            individuals — stop and seek advice if you feel sharp pain.
+            Training programs and meal plans built around you. Fitness guidance, not medical advice. Stop if you feel
+            sharp pain.
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gym-textMuted">
@@ -19,6 +19,7 @@ export function Footer() {
           <Link href="/disclaimer" className="hover:text-gym-text transition-colors py-1">Disclaimer</Link>
           <Link href="/settings" className="hover:text-gym-text transition-colors py-1">Settings</Link>
           <Link href="/feedback" className="hover:text-gym-text transition-colors py-1">Feedback</Link>
+          <Link href="/credits" className="hover:text-gym-text transition-colors py-1">Photo credits</Link>
         </nav>
       </div>
       <p className="page mt-6 text-xs text-gym-textMuted">© {new Date().getFullYear()} Syndiq Fit</p>
