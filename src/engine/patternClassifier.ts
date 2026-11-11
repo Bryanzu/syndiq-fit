@@ -121,7 +121,7 @@ export function getExercisePattern(exercise: Exercise): MovementPattern {
 export function enhanceExercise(exercise: Exercise): Exercise {
   return {
     ...exercise,
-    tier: getExerciseTier(exercise),
-    movementPattern: getExercisePattern(exercise),
+    tier: exercise.tier || getExerciseTier(exercise),
+    movementPattern: exercise.movementPattern || getExercisePattern(exercise),
   };
 }

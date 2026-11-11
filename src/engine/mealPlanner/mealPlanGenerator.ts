@@ -8,7 +8,7 @@ import {
   NigerianRecipe,
   ProteinShortfallReport,
 } from '@/types/mealPlanner';
-import { NIGERIAN_RECIPES, getRecipesByMealType, getRecipeById } from '@/data/nigerianRecipes';
+import { NIGERIAN_RECIPES, getRecipeById } from '@/data/nigerianRecipes';
 import { getFoodById, getAffordableHighProteinFoods } from '@/data/nigerianFoods';
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -72,11 +72,9 @@ export function generateWeeklyMealPlan(
 
   // Build recipe pools by meal type
   const getPoolForType = (mealType: MealType): NigerianRecipe[] => {
+    // Never fall back to recipes containing excluded foods (they may be allergies).
+    // An empty pool means that meal is skipped and reported, not silently filled.
     const list = allowedRecipes.filter((r) => r.mealTypes.includes(mealType));
-    // Fall back to all recipes for that type if all were excluded to prevent empty schedule
-    if (list.length === 0) {
-      return getRecipesByMealType(mealType);
-    }
     return list.sort((a, b) => scoreRecipe(b) - scoreRecipe(a));
   };
 
@@ -93,14 +91,66 @@ export function generateWeeklyMealPlan(
     snack: [],
   };
 
-  const selectRecipeWithVariety = (pool: NigerianRecipe[], mealType: MealType, dayIdx: number): NigerianRecipe => {
-    const recentlyUsed = recentRecipes[mealType];
-    // Find highest scoring recipe not used in the last 2 days of this meal type
-    const candidate = pool.find((r) => !recentlyUsed.slice(-2).includes(r.id)) ||
-      pool[(dayIdx) % pool.length];
+  // Recipes already placed today (lunch and dinner share some recipes)
+  let usedToday = new Set<string>();
+
+  const selectRecipeWithVariety = (pool: NigerianRecipe[], mealType: MealType, dayIdx: number): NigerianRecipe | undefined => {
+    if (pool.length === 0) return undefined;
+    const used = recentRecipes[mealType];
+    const lastTwo = used.slice(-2);
+    const timesUsed = (id: string) => used.filter((u) => u === id).length;
+
+    // Rotate through the whole pool: least-used first, best score breaking ties (pool is score-sorted),
+    // never repeating the last 2 days of this meal type or a recipe already eaten today.
+    const fresh = pool.filter((r) => !lastTwo.includes(r.id) && !usedToday.has(r.id));
+    const eligible = fresh.length > 0 ? fresh : pool.filter((r) => !usedToday.has(r.id));
+    const ranked = (eligible.length > 0 ? eligible : pool)
+      .map((r, idx) => ({ r, idx }))
+      .sort((a, b) => timesUsed(a.r.id) - timesUsed(b.r.id) || a.idx - b.idx);
+    const candidate = ranked[0]?.r ?? pool[dayIdx % pool.length];
 
     recentRecipes[mealType].push(candidate.id);
+    usedToday.add(candidate.id);
     return candidate;
+  };
+
+  // Portion sizes the UI can display and step through
+  const PORTION_STEPS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+
+  /**
+   * Picks one portion multiplier per meal so the day lands as close as possible to the calorie target.
+   * Starts from a uniform multiplier, then nudges individual meals one step to close the remaining gap.
+   */
+  const fitPortionsToTarget = (recipes: NigerianRecipe[], targetCalories: number): number[] => {
+    const baseTotal = recipes.reduce((sum, r) => sum + r.calories, 0);
+    if (baseTotal <= 0 || !targetCalories) return recipes.map(() => 1.0);
+
+    const ideal = targetCalories / baseTotal;
+    const nearestStep = PORTION_STEPS.reduce((best, s) => (Math.abs(s - ideal) < Math.abs(best - ideal) ? s : best), 1.0);
+    const stepIdx = recipes.map(() => PORTION_STEPS.indexOf(nearestStep));
+    const total = () => recipes.reduce((sum, r, i) => sum + r.calories * PORTION_STEPS[stepIdx[i]], 0);
+
+    for (let guard = 0; guard < recipes.length * PORTION_STEPS.length; guard++) {
+      const gap = targetCalories - total();
+      const dir = gap > 0 ? 1 : -1;
+      // Best single-step move: the one that leaves the smallest remaining gap
+      let bestMeal = -1;
+      let bestGap = Math.abs(gap);
+      recipes.forEach((r, i) => {
+        const next = stepIdx[i] + dir;
+        if (next < 0 || next >= PORTION_STEPS.length) return;
+        const delta = r.calories * (PORTION_STEPS[next] - PORTION_STEPS[stepIdx[i]]);
+        const newGap = Math.abs(gap - delta);
+        if (newGap < bestGap) {
+          bestGap = newGap;
+          bestMeal = i;
+        }
+      });
+      if (bestMeal === -1) break;
+      stepIdx[bestMeal] += dir;
+    }
+
+    return stepIdx.map((i) => PORTION_STEPS[i]);
   };
 
   // Convert recipe into a PlannedMeal with portion scaling
@@ -129,30 +179,38 @@ export function generateWeeklyMealPlan(
     };
   };
 
+  // Meal types left empty because every recipe for them contains an excluded food
+  const skippedMealTypes = new Set<MealType>();
+
   // Generate 7 days
   const days: DayMealPlan[] = [];
 
   for (let i = 0; i < 7; i++) {
     const dayName = DAYS_OF_WEEK[i];
-    const meals: PlannedMeal[] = [];
+    usedToday = new Set<string>();
 
-    // Breakfast
-    const bRecipe = selectRecipeWithVariety(breakfastPool, 'breakfast', i);
-    meals.push(buildPlannedMeal(bRecipe, 'breakfast'));
-
-    // Lunch
-    const lRecipe = selectRecipeWithVariety(lunchPool, 'lunch', i);
-    meals.push(buildPlannedMeal(lRecipe, 'lunch'));
-
-    // Dinner
-    const dRecipe = selectRecipeWithVariety(dinnerPool, 'dinner', i);
-    meals.push(buildPlannedMeal(dRecipe, 'dinner'));
-
-    // Snack (if 4 meals per day)
+    const slots: Array<{ mealType: MealType; pool: NigerianRecipe[] }> = [
+      { mealType: 'breakfast', pool: breakfastPool },
+      { mealType: 'lunch', pool: lunchPool },
+      { mealType: 'dinner', pool: dinnerPool },
+    ];
     if (profile.mealsPerDay === 4) {
-      const sRecipe = selectRecipeWithVariety(snackPool, 'snack', i);
-      meals.push(buildPlannedMeal(sRecipe, 'snack'));
+      slots.push({ mealType: 'snack', pool: snackPool });
     }
+
+    // Choose the day's recipes first, then size the portions to the calorie target
+    const chosen: Array<{ mealType: MealType; recipe: NigerianRecipe }> = [];
+    for (const slot of slots) {
+      const recipe = selectRecipeWithVariety(slot.pool, slot.mealType, i);
+      if (recipe) {
+        chosen.push({ mealType: slot.mealType, recipe });
+      } else {
+        skippedMealTypes.add(slot.mealType);
+      }
+    }
+
+    const multipliers = fitPortionsToTarget(chosen.map((c) => c.recipe), profile.targetCalories);
+    const meals: PlannedMeal[] = chosen.map((c, idx) => buildPlannedMeal(c.recipe, c.mealType, multipliers[idx]));
 
     const dayCalories = meals.reduce((sum, m) => sum + m.calories, 0);
     const dayProtein = Math.round(meals.reduce((sum, m) => sum + m.protein, 0) * 10) / 10;
@@ -178,21 +236,34 @@ export function generateWeeklyMealPlan(
   let shortfallReport: ProteinShortfallReport | undefined = undefined;
   const shortfall = Math.round((profile.targetProteinGrams - avgProtein) * 10) / 10;
 
-  if (shortfall > 8) {
-    const suggestions: string[] = [
-      'Add 2 boiled chicken eggs to breakfast (+13g pure protein at ~₦300–₦400).',
-      'Stir 2 rounded tablespoons of ground crayfish into your soups and stew (+11g animal protein + calcium).',
-      'Swap one snack for pan-seared Awara (soy curd) or 1 cup of plain Greek yogurt (+17g protein).',
-      'Incorporate 1 extra piece of affordable Panla or Titus mackerel fish with dinner (+21g protein).',
-      'Add 1 extra cup of cooked brown honey beans or 1 wrap of Moi Moi (+14g protein).',
+  if (shortfall > 8 || skippedMealTypes.size > 0) {
+    // Each suggestion lists the foods it relies on; drop any that use a food the user excluded.
+    const allSuggestions: Array<{ foodIds: string[]; text: string }> = [
+      { foodIds: ['chicken_egg'], text: 'Add 2 boiled chicken eggs to breakfast (+13g pure protein at ~₦300–₦400).' },
+      { foodIds: ['ground_crayfish'], text: 'Stir 2 rounded tablespoons of ground crayfish into your soups and stew (+11g animal protein + calcium).' },
+      { foodIds: ['awara_tofu'], text: 'Swap one snack for pan-seared Awara (soy curd) (+17g protein).' },
+      { foodIds: ['plain_yogurt'], text: 'Swap one snack for 1 cup of plain Greek yogurt (+17g protein).' },
+      { foodIds: ['panla_hake'], text: 'Incorporate 1 extra piece of affordable Panla fish with dinner (+21g protein).' },
+      { foodIds: ['titus_mackerel'], text: 'Incorporate 1 extra piece of Titus mackerel fish with dinner (+21g protein).' },
+      { foodIds: ['brown_beans'], text: 'Add 1 extra cup of cooked brown honey beans (+14g protein).' },
+      { foodIds: ['moi_moi'], text: 'Add 1 wrap of Moi Moi (+14g protein).' },
     ];
+    const suggestions: string[] = allSuggestions
+      .filter((s) => !s.foodIds.some((id) => excludedFoodIds.has(id)))
+      .map((s) => s.text)
+      .slice(0, 5);
+    if (skippedMealTypes.size > 0) {
+      suggestions.unshift(
+        `No ${[...skippedMealTypes].join(' or ')} could be planned because every recipe for it contains a food you excluded. Re-allow some foods to fill it.`
+      );
+    }
 
     shortfallReport = {
       hasShortfall: true,
       targetProtein: profile.targetProteinGrams,
       actualAverageProtein: avgProtein,
-      shortfallGrams: shortfall,
-      explanation: `Based on your selected meals and food exclusions, your daily protein intake averages ${avgProtein}g against your optimal target of ${profile.targetProteinGrams}g (${shortfall}g daily deficit). Syndiq Fit reports true numbers to protect your progress.`,
+      shortfallGrams: Math.max(0, shortfall),
+      explanation: `Based on your selected meals and food exclusions, your daily protein intake averages ${avgProtein}g against your optimal target of ${profile.targetProteinGrams}g (${Math.max(0, shortfall)}g daily deficit). Syndiq Fit reports true numbers to protect your progress.`,
       suggestions,
     };
   }

@@ -17,10 +17,11 @@ export function calculateNutritionTargets(
   age: number,
   weightKg: number,
   activityLevel: 'sedentary' | 'light' | 'moderate' | 'very_active',
-  goal: 'fat_loss' | 'muscle_building' | 'maintain' | 'strength'
+  goal: 'fat_loss' | 'muscle_building' | 'maintain' | 'strength',
+  heightCmInput?: number
 ): CalculatedNutritionTargets {
-  // Estimated height standard: 175cm for males, 163cm for females if not specified
-  const heightCm = gender === 'male' ? 175 : 163;
+  // Use the user's height when given; otherwise fall back to 175cm for males, 163cm for females
+  const heightCm = heightCmInput && heightCmInput > 0 ? heightCmInput : gender === 'male' ? 175 : 163;
 
   // Mifflin-St Jeor BMR
   let bmr = 10 * weightKg + 6.25 * heightCm - 5 * age;

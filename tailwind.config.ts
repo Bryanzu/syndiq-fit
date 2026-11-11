@@ -1,5 +1,10 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Syndiq Fit design tokens.
+ * Surfaces and text use CSS variables (see globals.css) so light/dark switch without per-component dark: variants.
+ * Accent: lime (brand, matches logo) used sparingly; turquoise as secondary data accent.
+ */
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,6 +14,20 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          "Inter",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+      },
       colors: {
         gym: {
           bg: "var(--gym-bg)",
@@ -22,16 +41,28 @@ const config: Config = {
           silverMuted: "var(--gym-silver-muted)",
           text: "var(--gym-text-primary)",
           textMuted: "var(--gym-text-muted)",
-          lime: "#84cc16",
-          limeLight: "#a3e635",
-          limeDark: "#65a30d",
-          limeGlow: "rgba(132, 204, 22, 0.4)",
+          ink: "#0b1004",
+          lime: "#a3e635",
+          limeLight: "#bef264",
+          limeDark: "#4d7c0f",
+          limeGlow: "rgba(163, 230, 53, 0.35)",
+          turquoise: "#22d3ee",
+          turquoiseLight: "#67e8f9",
+          turquoiseDark: "#0e7490",
         },
       },
       boxShadow: {
-        "lime-sm": "0 0 10px rgba(132, 204, 22, 0.25)",
-        "lime-md": "0 0 20px rgba(132, 204, 22, 0.35)",
-        "lime-lg": "0 0 35px rgba(132, 204, 22, 0.45)",
+        "lime-sm": "none",
+        "lime-md": "none",
+        "lime-lg": "none",
+        "cyan-sm": "none",
+        float: "0 10px 30px -8px rgba(0,0,0,0.45)",
+      },
+      maxWidth: {
+        page: "72rem",
+      },
+      transitionTimingFunction: {
+        smooth: "cubic-bezier(0.22, 1, 0.36, 1)",
       },
     },
   },

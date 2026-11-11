@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
+import { ExpandableNavDock } from '@/components/layout/ExpandableNavDock';
 import { ThemeProvider } from '@/context/ThemeContext';
 
 export const metadata: Metadata = {
@@ -12,6 +12,17 @@ export const metadata: Metadata = {
   icons: {
     icon: '/syndiq-logo.png',
   },
+};
+
+// Explicit viewport: responsive width, and `cover` so env(safe-area-inset-*) works on notched phones.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#090a0c' },
+    { media: '(prefers-color-scheme: light)', color: '#f4f5f1' },
+  ],
 };
 
 export default function RootLayout({
@@ -44,12 +55,12 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-gym-bg text-gym-silver min-h-screen flex flex-col antialiased selection:bg-gym-lime selection:text-black transition-colors duration-200">
+      <body className="bg-gym-bg text-gym-silver min-h-[100dvh] flex flex-col antialiased selection:bg-gym-lime selection:text-black">
         <ThemeProvider>
           <Navbar />
-          <main className="flex-1 w-full pb-20 md:pb-0">{children}</main>
+          <main className="flex-1 w-full">{children}</main>
           <Footer />
-          <BottomNav />
+          <ExpandableNavDock />
         </ThemeProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { generateWorkoutProgram } from '@/engine/programAssembler';
 import { validateWorkoutProgram } from '@/engine/workoutValidator';
-import { ALL_SYNDIQ_EQUIPMENT_IDS } from '@/data/equipment';
+import { ALL_SYNDIQ_EQUIPMENT_IDS, HOME_GYM_DUMBBELLS_IDS, BODYWEIGHT_ONLY_IDS } from '@/data/equipment';
 import { UserProfile } from '@/types/questionnaire';
 
 export async function GET() {
@@ -69,6 +69,32 @@ export async function GET() {
         duration: 60,
         availableEquipment: ALL_SYNDIQ_EQUIPMENT_IDS,
         injuries: ['lower_back'],
+      },
+    },
+    {
+      name: 'Strict Bodyweight Only Hypertrophy & Fat Loss (45 min)',
+      profile: {
+        gender: 'male',
+        age: '21-30',
+        experience: 'beginner',
+        goal: 'muscle_building',
+        frequency: 3,
+        duration: 45,
+        availableEquipment: BODYWEIGHT_ONLY_IDS,
+        injuries: ['none'],
+      },
+    },
+    {
+      name: 'Home Dumbbells Only Upper / Lower Split (60 min)',
+      profile: {
+        gender: 'female',
+        age: '31-40',
+        experience: 'intermediate',
+        goal: 'general_fitness',
+        frequency: 4,
+        duration: 60,
+        availableEquipment: HOME_GYM_DUMBBELLS_IDS,
+        injuries: ['none'],
       },
     },
   ];

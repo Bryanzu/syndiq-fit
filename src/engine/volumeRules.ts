@@ -7,15 +7,15 @@ import { UserProfile, WorkoutDuration, ExperienceLevel, FitnessGoal, TrainingFre
 export function getTargetExerciseCount(duration: WorkoutDuration): number {
   switch (duration) {
     case 30:
-      return 3;
-    case 45:
       return 4;
+    case 45:
+      return 5;
     case 60:
       return 6;
     case 90:
       return 8;
     case 120:
-      return 9;
+      return 10;
     default:
       return 6;
   }
@@ -58,7 +58,12 @@ export function resolveTrainingFrequency(
  * Accurately estimates exercise time in minutes based on sets, rep cadence (tempo),
  * rest intervals, and equipment changeover.
  */
-export function estimateExerciseDuration(sets: number, reps: string, restSeconds: number): number {
+export function estimateExerciseDuration(
+  sets: number,
+  reps: string,
+  restSeconds: number,
+  setupSeconds: number = 90
+): number {
   // Parse average reps: e.g. "8-12" -> 10, "10-15" -> 12.5, "4-6" -> 5, "30s" -> 30
   let repCount = 10;
   if (reps.includes('-')) {
@@ -75,8 +80,8 @@ export function estimateExerciseDuration(sets: number, reps: string, restSeconds
   const secondsUnderTension = reps.includes('s') ? repCount : repCount * 3;
   // Total work seconds = sets * (tension + rest)
   const totalWorkSeconds = sets * (secondsUnderTension + restSeconds);
-  // Equipment adjustment & loading buffer (approx 45 seconds per movement)
-  const totalSeconds = totalWorkSeconds + 45;
+  // Per-movement overhead: walking to the station, loading, and ramp-up sets
+  const totalSeconds = totalWorkSeconds + setupSeconds;
 
   return Math.max(2, Math.round(totalSeconds / 60));
 }
@@ -85,11 +90,12 @@ export function estimateExerciseDuration(sets: number, reps: string, restSeconds
  * Calculates total session duration in minutes, factoring 5-minute dynamic mobility warm-up.
  */
 export function calculateWorkoutDuration(
-  exercises: Array<{ sets: number; reps: string; restSeconds: number }>
+  exercises: Array<{ sets: number; reps: string; restSeconds: number; exercise?: { tier?: number } }>
 ): number {
   const warmupMinutes = 5;
   const exercisesDuration = exercises.reduce(
-    (acc, ex) => acc + estimateExerciseDuration(ex.sets, ex.reps, ex.restSeconds),
+    // Main compounds (tier 1) need ramp-up sets and plate loading, so they carry more setup time
+    (acc, ex) => acc + estimateExerciseDuration(ex.sets, ex.reps, ex.restSeconds, ex.exercise?.tier === 1 ? 150 : 90),
     0
   );
   return warmupMinutes + exercisesDuration;
@@ -150,12 +156,20 @@ export function adaptExerciseVolume(
       restSeconds = Math.max(120, restSeconds + 30);
       intensityNote = 'Heavy compound work. Rest fully between working sets (RPE 8-9).';
     }
+  } else if (profile.experience === 'intermediate') {
+    if (exercise.tier === 1 && (profile.goal === 'build_strength' || profile.goal === 'overall_strength')) {
+      reps = '5-8';
+      restSeconds = Math.max(120, restSeconds);
+      intensityNote = 'Strength focus: add load when you hit the top of the rep range on every set (RPE 8).';
+    }
   }
 
   // 4. Goal Scaling
   if (profile.goal === 'fat_loss' || profile.goal === 'endurance') {
     restSeconds = Math.max(45, restSeconds - 15);
-    if (!reps.includes('s') && !reps.includes('m')) {
+    // Fat loss keeps main compounds in their normal rep range: heavy work preserves muscle in a deficit.
+    const keepHeavy = profile.goal === 'fat_loss' && exercise.tier === 1;
+    if (!keepHeavy && !reps.includes('s') && !reps.includes('m')) {
       reps = '12-15';
     }
     if (!intensityNote) {
@@ -201,7 +215,7 @@ export function adaptExerciseVolume(
   if (profile.age === '51-60' || profile.age === '61+') {
     restSeconds += 30;
     // Avoid heavy low-rep axial grinds for master lifters
-    if (reps === '4-6' || reps === '5') {
+    if (reps === '4-6' || reps === '5' || reps === '5-8') {
       reps = '8-10';
     }
     if (exercise.tier === 1) {

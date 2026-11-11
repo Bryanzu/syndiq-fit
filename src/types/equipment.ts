@@ -31,6 +31,8 @@ export type SyndiqEquipmentId =
   | 'cable_crossover_machine'
   | 'adjustable_cable_column'
   // Bodyweight and functional
+  | 'bodyweight'
+  | 'bodyweight_only'
   | 'pull_up_bar'
   | 'dip_station'
   | 'resistance_bands'

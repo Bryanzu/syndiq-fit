@@ -1,5 +1,5 @@
 import { WorkoutProgram, WorkoutDay, WorkoutExerciseItem, MuscleGroup } from '@/types/workout';
-import { isExerciseAvailable } from './equipmentFilter';
+import { isExerciseAvailable, isBodyweightOnlyEquipment } from './equipmentFilter';
 import { isContraindicated } from './injuryRules';
 
 export interface WorkoutValidationResult {
@@ -97,7 +97,13 @@ export function validateWorkoutProgram(program: WorkoutProgram): WorkoutValidati
 
       // 2. Equipment availability check
       const isEquipSafe = isExerciseAvailable(ex, profile.availableEquipment);
-      if (isEquipSafe) {
+      const isBodyweightMode = isBodyweightOnlyEquipment(profile.availableEquipment);
+
+      if (isBodyweightMode && !ex.isStrictBodyweight) {
+        errors.push(
+          `Day ${day.dayNumber}: Exercise "${ex.name}" requires external equipment (${ex.equipment}) in Strict Bodyweight Only mode.`
+        );
+      } else if (isEquipSafe) {
         equipmentCompliantCount++;
       } else {
         errors.push(

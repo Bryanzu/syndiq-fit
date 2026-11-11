@@ -432,12 +432,11 @@ export const HOME_GYM_DUMBBELLS_IDS: SyndiqEquipmentId[] = [
   'jump_rope',
 ];
 
-export const BODYWEIGHT_ONLY_IDS: SyndiqEquipmentId[] = [
-  'pull_up_bar',
-  'yoga_mat',
-  'resistance_bands',
-  'jump_rope',
-];
+export const BODYWEIGHT_ONLY_IDS: SyndiqEquipmentId[] = ['bodyweight_only'];
+
+export const DUMBBELL_ONLY_IDS: SyndiqEquipmentId[] = ['dumbbells'];
+
+export const RESISTANCE_BANDS_ONLY_IDS: SyndiqEquipmentId[] = ['resistance_bands'];
 
 export const ALL_SYNDIQ_EQUIPMENT_IDS: SyndiqEquipmentId[] = EQUIPMENT_LIBRARY.map((e) => e.id);
 

@@ -108,6 +108,8 @@ export interface MealPlanProfile {
   gender: 'male' | 'female';
   age: number;
   weightKg: number;
+  /** Optional for plans saved before height was collected */
+  heightCm?: number;
   activityLevel: 'sedentary' | 'light' | 'moderate' | 'very_active';
   goal: 'fat_loss' | 'muscle_building' | 'maintain' | 'strength';
   mealsPerDay: 3 | 4;

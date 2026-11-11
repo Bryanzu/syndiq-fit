@@ -63,24 +63,24 @@ export default function MuscleMapPage() {
           <Sparkles className="w-3.5 h-3.5" />
           <span>INTERACTIVE ANATOMICAL EXPLORER</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-zinc-900 dark:text-white tracking-tight">
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gym-text tracking-tight">
           Muscle Map & Exercise Library
         </h1>
-        <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed">
+        <p className="text-xs sm:text-sm text-gym-textMuted max-w-xl mx-auto leading-relaxed">
           Tap any muscle group on the anatomical figure below to explore exercises, form cues, and video demonstrations. Supports both male and female anatomy.
         </p>
       </div>
 
       {/* Mobile-only View Switcher Tabs */}
       <div className="flex lg:hidden items-center justify-center">
-        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-[#18181b] p-1.5 rounded-2xl border border-zinc-200 dark:border-gym-border w-full max-w-sm">
+        <div className="flex items-center gap-1 bg-gym-cardInner p-1.5 rounded-2xl w-full max-w-sm">
           <button
             type="button"
             onClick={() => setMobileTab('map')}
             className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 min-h-[44px] ${
               mobileTab === 'map'
-                ? 'bg-gym-lime text-black shadow-lime-sm'
-                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                ? 'bg-gym-lime text-black '
+                : 'text-zinc-600 hover:text-gym-text dark:text-zinc-400 '
             }`}
           >
             <Activity className="w-4 h-4" />
@@ -91,8 +91,8 @@ export default function MuscleMapPage() {
             onClick={() => setMobileTab('exercises')}
             className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 min-h-[44px] ${
               mobileTab === 'exercises'
-                ? 'bg-gym-lime text-black shadow-lime-sm'
-                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                ? 'bg-gym-lime text-black '
+                : 'text-zinc-600 hover:text-gym-text dark:text-zinc-400 '
             }`}
           >
             <Dumbbell className="w-4 h-4" />
@@ -110,7 +110,7 @@ export default function MuscleMapPage() {
           }`}
         >
           {/* Anatomical Visualizer Container */}
-          <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl overflow-hidden shadow-xl">
+          <div className="bg-white dark:bg-gym-card rounded-2xl overflow-hidden ">
             <BodyVisualizer
               primaryMuscles={[selectedMuscle]}
               selectedMuscle={selectedMuscle}
@@ -126,7 +126,7 @@ export default function MuscleMapPage() {
             <button
               type="button"
               onClick={() => setMobileTab('exercises')}
-              className="w-full py-3.5 px-5 rounded-2xl bg-gym-lime text-black font-black text-sm shadow-lime-md flex items-center justify-center gap-2 hover:bg-gym-limeLight transition-all min-h-[48px]"
+              className="w-full py-3.5 px-5 rounded-2xl bg-gym-lime text-black font-bold text-sm flex items-center justify-center gap-2 hover:bg-gym-limeLight transition-all min-h-[48px]"
             >
               <span>View {formatMuscle(selectedMuscle)} Exercises ({filteredExercises.length})</span>
               <ArrowRight className="w-4 h-4 stroke-[3]" />
@@ -134,9 +134,9 @@ export default function MuscleMapPage() {
           </div>
 
           {/* Quick Muscle Selector Pills */}
-          <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-[#121212] border border-zinc-200 dark:border-gym-border space-y-2.5 shadow-md transition-colors">
+          <div className="p-4 sm:p-5 rounded-2xl bg-gym-card space-y-2.5 transition-colors">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gym-textMuted">
                 Quick Muscle Selector
               </span>
               <span className="text-xs text-gym-limeDark dark:text-gym-lime font-bold">
@@ -153,8 +153,8 @@ export default function MuscleMapPage() {
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all min-h-[36px] ${
                     selectedMuscle === m
-                      ? 'bg-gym-lime text-black font-extrabold shadow-lime-sm scale-105'
-                      : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white border border-zinc-200 dark:border-transparent'
+                      ? 'bg-gym-lime text-black font-semibold scale-105'
+                      : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 text-zinc-700 hover:text-gym-text dark:text-zinc-300 border border-zinc-200 dark:border-transparent'
                   }`}
                 >
                   {formatMuscle(m)}
@@ -172,7 +172,7 @@ export default function MuscleMapPage() {
           }`}
         >
           {/* Mobile Back to Map Bar */}
-          <div className="flex lg:hidden items-center justify-between p-3.5 rounded-2xl bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-gym-border">
+          <div className="flex lg:hidden items-center justify-between p-3.5 rounded-2xl bg-gym-cardInner ">
             <button
               type="button"
               onClick={() => setMobileTab('map')}
@@ -181,21 +181,21 @@ export default function MuscleMapPage() {
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Anatomical Body</span>
             </button>
-            <span className="text-xs sm:text-sm font-bold text-zinc-700 dark:text-zinc-300">
+            <span className="text-xs sm:text-sm font-bold text-gym-silver">
               {formatMuscle(selectedMuscle)}
             </span>
           </div>
 
           {/* Header Bar */}
-          <div className="flex items-center justify-between p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-gym-border transition-colors">
+          <div className="flex items-center justify-between p-4 sm:p-5 rounded-2xl bg-gym-cardAlt transition-colors">
             <div className="space-y-0.5">
-              <span className="text-xs font-black uppercase text-gym-limeDark dark:text-gym-lime tracking-wider block">
+              <span className="text-xs font-bold uppercase text-gym-limeDark dark:text-gym-lime tracking-wider block">
                 Targeted Muscle Area
               </span>
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white">{formatMuscle(selectedMuscle)}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gym-text">{formatMuscle(selectedMuscle)}</h2>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-bold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 px-3.5 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700">
+              <span className="text-xs sm:text-sm font-bold text-gym-silver bg-gym-cardInner px-3.5 py-1.5 rounded-xl ">
                 {filteredExercises.length} Exercises Available
               </span>
             </div>
@@ -204,28 +204,28 @@ export default function MuscleMapPage() {
           {/* Exercise Cards with internal scroll on desktop to prevent parent container collapse */}
           <div className="space-y-3 lg:max-h-[650px] lg:overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-thumb-zinc-400 dark:scrollbar-thumb-zinc-700">
             {filteredExercises.length === 0 ? (
-              <div className="p-8 text-center rounded-2xl bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border text-zinc-500 dark:text-zinc-400 text-sm">
+              <div className="p-8 text-center rounded-2xl bg-white dark:bg-gym-card text-gym-textMuted text-sm">
                 No exercises found for this muscle group.
               </div>
             ) : (
               filteredExercises.map((ex) => (
                 <div
                   key={ex.id}
-                  className="group p-4 sm:p-5 rounded-2xl bg-white dark:bg-gym-card hover:bg-slate-50 dark:hover:bg-gym-cardHover border border-zinc-200 dark:border-gym-border hover:border-gym-lime/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+                  className="group p-4 sm:p-5 rounded-2xl bg-white dark:bg-gym-card hover:brightness-110 hover:border-gym-lime/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 "
                 >
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white group-hover:text-gym-limeDark dark:group-hover:text-gym-lime transition-colors">
+                      <h3 className="text-base sm:text-lg font-bold text-gym-text group-hover:text-gym-limeDark dark:group-hover:text-gym-lime transition-colors">
                         {ex.name}
                       </h3>
-                      <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 shrink-0">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase bg-gym-cardInner text-gym-silver shrink-0">
                         {ex.equipment.replace('_', ' ')}
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 max-w-xl">
+                    <p className="text-xs sm:text-sm text-gym-textMuted line-clamp-2 max-w-xl">
                       {ex.whyIncluded}
                     </p>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 pt-1">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-gym-textMuted pt-1">
                       <span className="text-zinc-500 font-semibold">Standard Protocol:</span>
                       <span className="font-bold text-zinc-800 dark:text-zinc-300">
                         {ex.defaultSets} sets × {ex.defaultReps} reps
@@ -238,7 +238,7 @@ export default function MuscleMapPage() {
                     <button
                       type="button"
                       onClick={() => setSelectedVideoExercise(ex)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-xs sm:text-sm shadow-lime-sm transition-all hover:scale-105 min-h-[44px]"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs sm:text-sm transition-all min-h-[44px]"
                     >
                       <Play className="w-3.5 h-3.5 fill-black" />
                       <span>Watch Demo</span>

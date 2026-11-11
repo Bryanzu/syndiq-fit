@@ -65,6 +65,11 @@ export interface Exercise {
   intensityNote?: string;
   movementPattern?: MovementPattern;
   tier?: 1 | 2 | 3; // 1 = Main Compound, 2 = Secondary Compound, 3 = Isolation / Accessory
+  category?: string;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  exerciseType?: 'compound' | 'isolation' | 'bodyweight' | 'cardio' | 'mobility';
+  isStrictBodyweight?: boolean; // True ONLY for exercises requiring zero external apparatus/equipment
+  suitableGoals?: string[];
 }
 
 export interface WorkoutExerciseItem {
