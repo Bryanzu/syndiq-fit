@@ -13,9 +13,8 @@ import { MiniPlayer } from '@/components/workout/MiniPlayer';
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Syndiq fit — Intelligent Workout Program Generator',
-  description:
-    'Evidence-based, personalized workout programs tailored to your gym equipment, lifting experience, fitness goals, and injury restrictions with Syndiq fit.',
+  title: 'Syndiq Fit',
+  description: 'Workout programs built around your gym, schedule and injuries, with Nigerian meal plans.',
   icons: {
     icon: '/syndiq-logo.png',
   },

@@ -9,10 +9,10 @@ interface DayTabsProps {
   onSelectDay: (index: number) => void;
 }
 
-/** Segmented pill tabs, horizontally scrollable on narrow screens. */
+/** One glass pill per training day, horizontally scrollable on narrow screens. */
 export function DayTabs({ days, activeDayIndex, onSelectDay }: DayTabsProps) {
   return (
-    <div role="tablist" aria-label="Training days" className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+    <div role="tablist" aria-label="Training days" className="no-scrollbar -mx-4 flex items-stretch gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
       {days.map((day, idx) => {
         const isActive = activeDayIndex === idx;
         const label = day.title.replace(/^Day \d+\s*[—–-]\s*/, '');
@@ -23,14 +23,14 @@ export function DayTabs({ days, activeDayIndex, onSelectDay }: DayTabsProps) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onSelectDay(idx)}
-            className={`shrink-0 rounded-full px-4 py-2 text-left transition-colors min-h-[44px] ${
-              isActive ? 'bg-gym-lime text-gym-ink' : 'bg-gym-card text-gym-textMuted hover:text-gym-text'
+            className={`tap shrink-0 rounded-[22px] px-4 py-2.5 text-left ${
+              isActive ? 'bg-gym-lime text-gym-ink' : 'glass text-gym-text'
             }`}
           >
-            <span className={`block text-xs font-semibold uppercase tracking-wider ${isActive ? 'text-gym-ink/70' : ''}`}>
-              Day {day.dayNumber} · {day.estimatedDuration}m
+            <span className={`block text-xs font-semibold ${isActive ? 'text-gym-ink/75' : 'text-gym-textMuted'}`}>
+              Day {day.dayNumber} · {day.estimatedDuration} min
             </span>
-            <span className="block text-sm font-semibold max-w-[11rem] truncate">{label}</span>
+            <span className="block max-w-[11rem] truncate text-[15px] font-bold">{label}</span>
           </button>
         );
       })}

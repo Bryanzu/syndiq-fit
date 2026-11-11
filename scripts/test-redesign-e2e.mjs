@@ -1,0 +1,191 @@
+// End-to-end check of the redesigned app in a real browser (Playwright).
+// Needs the dev server running:  npm run dev   then   npm run test:e2e
+import { chromium } from 'playwright';
+
+const BASE = process.env.BASE_URL || 'http://localhost:3000';
+// A share link: base64 of a UserProfile (male, intermediate, build muscle, 4 days, 60 min, barbell gym, knee injury)
+const PROFILE =
+  'eyJnZW5kZXIiOiJtYWxlIiwiYWdlIjoiMjEtMzAiLCJleHBlcmllbmNlIjoiaW50ZXJtZWRpYXRlIiwiZ29hbCI6Im11c2NsZV9idWlsZGluZyIsImZyZXF1ZW5jeSI6NCwiZHVyYXRpb24iOjYwLCJhdmFpbGFibGVFcXVpcG1lbnQiOlsiZHVtYmJlbGxzIiwiYWRqdXN0YWJsZV9iZW5jaCIsImJhcmJlbGwiLCJzcXVhdF9yYWNrIiwicHVsbF91cF9iYXIiLCJhZGp1c3RhYmxlX2NhYmxlX2NvbHVtbiJdLCJpbmp1cmllcyI6WyJrbmVlIl19';
+
+let passed = 0;
+let failed = 0;
+const pageErrors = [];
+function check(label, ok, detail = '') {
+  if (ok) passed++;
+  else failed++;
+  console.log(`  [${ok ? 'PASS' : 'FAIL'}] ${label}${detail ? ` (${detail})` : ''}`);
+}
+
+const browser = await chromium.launch();
+
+async function open(viewport, scheme = 'dark') {
+  const ctx = await browser.newContext({ viewport, colorScheme: scheme, hasTouch: viewport.width < 600 });
+  const page = await ctx.newPage();
+  page.on('pageerror', (e) => pageErrors.push(e.message));
+  // The Next.js dev overlay badge sits over the bottom-left of the page and intercepts taps
+  await page.addInitScript(() => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const s = document.createElement('style');
+      s.textContent = 'nextjs-portal{display:none!important}';
+      document.head.appendChild(s);
+    });
+  });
+  return { ctx, page };
+}
+
+/* ------------------------------------------------------------------ */
+console.log('\n--- Phone: first open, home, workout player ---');
+{
+  const { ctx, page } = await open({ width: 390, height: 844 });
+  const nav = page.locator('nav[data-nav="mobile"]');
+  const player = page.locator('[role="dialog"][aria-label^="Workout in progress"]');
+  const mini = page.locator('[data-mini-player]');
+
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await page.waitForSelector('a:has-text("Build my program"):visible');
+  check('First-open screen shows the call to action', true);
+  check('Pill navigation is hidden on the first-open screen', (await nav.count()) === 0);
+
+  await page.goto(`${BASE}/program?p=${PROFILE}`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('article');
+  check('Share link builds a program', (await page.locator('article').count()) >= 4);
+  check('Program header shows the plain program name', (await page.locator('h1').first().innerText()).includes('Build muscle'));
+  const rowPhoto = page.locator('article img').first();
+  await rowPhoto.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(800);
+  check('Exercise rows show a photo', await rowPhoto.evaluate((img) => img.complete && img.naturalWidth > 0));
+
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await page.waitForSelector('text=In this session');
+  check('Pill navigation shows five tabs on Home', (await nav.locator('a').count()) === 5);
+  check('Active tab is Home', (await nav.locator('a[aria-current="page"]').getAttribute('href')) === '/');
+
+  // Slide to start: a short drag must not start, a long drag must
+  const thumb = page.locator('button[aria-label^="Slide to"]');
+  let b = await thumb.boundingBox();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + 70, b.y + b.height / 2, { steps: 5 });
+  await page.mouse.up();
+  await page.waitForTimeout(500);
+  check('Short slide does not start the workout', (await player.count()) === 0);
+  b = await thumb.boundingBox();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + 310, b.y + b.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await player.waitFor();
+  check('Full slide opens the workout player', true);
+
+  // Log a set with weight and reps
+  await player.getByRole('button', { name: 'More weight' }).click();
+  await player.getByRole('button', { name: 'More weight' }).click();
+  await player.getByRole('button', { name: 'Set done' }).click();
+  await player.locator('[role="timer"]').waitFor();
+  check('Completing a set starts the rest timer', true);
+  const history = await page.evaluate(() => JSON.parse(localStorage.getItem('syndiq_lift_history') || '{}'));
+  const firstEntry = Object.values(history)[0]?.[0];
+  check('Set is logged with its weight', firstEntry?.weight === 5, JSON.stringify(firstEntry));
+  await player.getByRole('button', { name: 'Skip rest' }).click();
+  check('Last-time tile shows the logged weight', (await player.innerText()).includes('5 kg'));
+
+  await player.getByRole('button', { name: 'Minimise workout' }).click();
+  await mini.waitFor();
+  check('Minimising shows the mini player', (await mini.innerText()).includes('Set 2'));
+  check('Page scroll is restored while minimised', await page.evaluate(() => !document.body.classList.contains('modal-open')));
+
+  await page.reload({ waitUntil: 'networkidle' });
+  await mini.waitFor();
+  check('Workout survives a reload', true);
+
+  // Finish everything
+  await mini.locator('button[aria-label^="Open workout"]').click();
+  await player.waitFor();
+  for (let guard = 0; guard < 90; guard++) {
+    if (await page.locator('#workout-summary-title').count()) break;
+    const skip = player.getByRole('button', { name: 'Skip rest' });
+    if (await skip.count()) await skip.click();
+    else await player.getByRole('button', { name: 'Set done' }).click();
+    await page.waitForTimeout(40);
+  }
+  await page.locator('#workout-summary-title').waitFor();
+  const summary = (await page.locator('[role="dialog"]').innerText()).replace(/\n/g, ' ');
+  check('Summary shows every set done', /(\d+)\/\1\s*sets/.test(summary), summary.slice(0, 90));
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.waitForSelector('text=Recent');
+  await page.waitForTimeout(800);
+  check('Home counts the session this week', /1\s*of 4 this week/.test((await page.locator('main').innerText()).replace(/\n/g, ' ')));
+
+  /* Body map */
+  console.log('\n--- Phone: body map ---');
+  await nav.locator('a[href="/muscle-map"]').click();
+  await page.waitForURL('**/muscle-map');
+  await page.waitForSelector('text=Body map');
+  check('Body map shows sets logged this week', /\d+ sets? this week/.test(await page.locator('main').innerText()));
+  await page.getByRole('button', { name: 'back', exact: true }).click();
+  await page.locator('g[aria-label="glutes"] path').first().click();
+  check('Tapping a muscle on the figure selects it', (await page.locator('main h2').first().innerText()) === 'Glutes');
+  await page.getByRole('button', { name: /^Chest/ }).click();
+  await page.waitForTimeout(300);
+  check('Choosing a front muscle turns the figure around', (await page.getByRole('button', { name: 'front', exact: true }).getAttribute('aria-pressed')) === 'true');
+  check('No sideways scrolling on the body map', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+
+  /* Sheets */
+  console.log('\n--- Phone: sheets ---');
+  await nav.locator('a[href="/program"]').click();
+  await page.waitForURL('**/program');
+  await page.waitForSelector('article');
+  await page.locator('article button[aria-label*="view instructions"]').first().click();
+  await page.waitForSelector('.sheet-panel');
+  await page.waitForTimeout(600);
+  const box = await page.locator('.sheet-panel').boundingBox();
+  check('Sheet is anchored to the bottom of the screen', Math.round(box.y + box.height) === 844 && box.x === 0, JSON.stringify(box));
+  const grab = await page.locator('.sheet-panel > div').first().boundingBox();
+  await page.mouse.move(grab.x + grab.width / 2, grab.y + 8);
+  await page.mouse.down();
+  await page.mouse.move(grab.x + grab.width / 2, grab.y + 230, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(500);
+  check('Dragging the sheet down dismisses it', (await page.locator('.sheet-panel').count()) === 0);
+
+  /* Meals */
+  console.log('\n--- Phone: meal planner ---');
+  await nav.locator('a[href="/meal-planner"]').click();
+  await page.waitForURL('**/meal-planner');
+  await page.waitForSelector('text=Set your targets');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('button', { name: /Build my meal plan/ }).click();
+  await page.waitForSelector('text=This week’s meals');
+  const plan = await page.evaluate(() => JSON.parse(localStorage.getItem('syndiq_meal_plan')));
+  const gap = Math.abs(plan.averageDailyCalories - plan.profile.targetCalories);
+  check('Meal plan lands within 150 kcal of the target', gap <= 150, `${plan.averageDailyCalories} vs ${plan.profile.targetCalories}`);
+  check('Meal plan stores the height it was built with', typeof plan.profile.heightCm === 'number');
+  await nav.locator('a[href="/muscle-map"]').click();
+  await page.waitForSelector('text=Body map');
+  await page.getByRole('button', { name: 'female', exact: true }).click();
+  check('Body map switches to the female figure', (await page.locator('svg[aria-label*="female body"]').count()) === 1);
+  await ctx.close();
+}
+
+/* ------------------------------------------------------------------ */
+console.log('\n--- Desktop and light theme ---');
+{
+  const { ctx, page } = await open({ width: 1280, height: 800 }, 'light');
+  await page.addInitScript(() => localStorage.setItem('syndiq_theme', 'light'));
+  await page.goto(`${BASE}/program?p=${PROFILE}`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('article');
+  check('Pill navigation is hidden on desktop', !(await page.locator('nav[data-nav="mobile"]').isVisible()));
+  check('Desktop navigation is visible', await page.locator('nav[data-nav="desktop"]').isVisible());
+  check('Light theme is applied', await page.evaluate(() => document.documentElement.classList.contains('light')));
+  await page.locator('article button:has-text("Replace")').first().click();
+  await page.waitForSelector('.sheet-panel');
+  await page.waitForTimeout(500);
+  const box = await page.locator('.sheet-panel').boundingBox();
+  check('On desktop the sheet is a centred dialog', box.x > 100 && box.y > 20, JSON.stringify(box));
+  await ctx.close();
+}
+
+await browser.close();
+check('No page errors', pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '));
+console.log(`\nTOTAL: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}\n`);
+process.exit(failed > 0 ? 1 : 0);

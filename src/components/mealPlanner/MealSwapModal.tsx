@@ -44,7 +44,7 @@ export function MealSwapModal({
   return (
     <Sheet isOpen={Boolean(meal)} onClose={onClose} labelledBy="meal-swap-title" zClass="z-[100]" maxWidth="max-w-2xl">
         {/* Sticky Header with Accessible Close Button */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-5 border-b border-gym-border bg-white dark:bg-gym-card">
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-5 border-b border-gym-border bg-gym-card">
           <div className="space-y-0.5 min-w-0 pr-3">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gym-limeDark dark:text-gym-lime">
               <Sparkles className="w-3.5 h-3.5" />
@@ -59,7 +59,7 @@ export function MealSwapModal({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-2 sm:p-2.5 rounded-xl text-zinc-500 hover:text-gym-text dark:text-zinc-400 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-2 sm:p-2.5 rounded-2xl text-gym-textMuted hover:text-gym-text bg-gym-cardInner hover:bg-gym-cardInner transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
@@ -68,7 +68,7 @@ export function MealSwapModal({
         {/* Scrollable Alternatives List */}
         <div className="p-4 sm:p-5 space-y-3 overflow-y-auto modal-content-scroll flex-1">
           <p className="text-xs text-gym-textMuted leading-relaxed">
-            Select any authentic Nigerian recipe below. Macros and portions will instantly recalculate for this meal without changing the rest of your week.
+            Pick a replacement. The rest of your week stays the same.
           </p>
 
           <div className="space-y-2.5">
@@ -86,7 +86,7 @@ export function MealSwapModal({
                       onClose();
                     }
                   }}
-                  className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                  className={`p-4 rounded-3xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                     isCurrent
                       ? 'border-gym-lime bg-gym-lime/10 dark:bg-gym-lime/15 cursor-default'
                       : 'border-gym-border bg-gym-cardAlt hover:border-gym-borderHover hover:brightness-110 cursor-pointer'
@@ -100,7 +100,7 @@ export function MealSwapModal({
                         </span>
                       )}
                       {isCurrent && (
-                        <span className="px-2 py-0.5 rounded text-xs font-bold uppercase bg-gym-lime text-black ">
+                        <span className="px-2 py-0.5 rounded text-xs font-bold uppercase bg-gym-lime text-gym-ink ">
                           Current Choice
                         </span>
                       )}
@@ -118,14 +118,14 @@ export function MealSwapModal({
 
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1 pt-1">
-                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-zinc-200/80 dark:bg-zinc-800 text-gym-textMuted flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-gym-cardInner/80 text-gym-textMuted flex items-center gap-1">
                         <Clock className="w-2.5 h-2.5" />
                         <span>{recipe.prepTimeMinutes + recipe.cookTimeMinutes} mins</span>
                       </span>
                       {recipe.tags.slice(0, 2).map((tag) => (
                         <span
                           key={tag}
-                          className="px-2 py-0.5 rounded text-xs font-bold bg-zinc-200/80 dark:bg-zinc-800 text-gym-textMuted capitalize"
+                          className="px-2 py-0.5 rounded text-xs font-bold bg-gym-cardInner/80 text-gym-textMuted capitalize"
                         >
                           {tag.replace('_', ' ')}
                         </span>
@@ -134,14 +134,14 @@ export function MealSwapModal({
                   </div>
 
                   {/* Macros & Swap Button */}
-                  <div className="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-200/60 dark:border-zinc-800/60">
+                  <div className="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gym-border">
                     <div className="flex items-center gap-3 text-right">
                       <div>
                         <div className="flex items-center gap-1 text-xs font-bold text-gym-text justify-end">
                           <Flame className="w-3 h-3 text-amber-500" />
                           <span>{recipe.calories} kcal</span>
                         </div>
-                        <span className="text-xs text-zinc-400 block">
+                        <span className="text-xs text-gym-textMuted block">
                           {calDelta > 0 ? `+${calDelta}` : calDelta} kcal
                         </span>
                       </div>
@@ -151,7 +151,7 @@ export function MealSwapModal({
                           <Beef className="w-3 h-3" />
                           <span>{recipe.protein}g</span>
                         </div>
-                        <span className={`text-xs font-bold block ${protDelta >= 0 ? 'text-gym-limeDark dark:text-gym-lime' : 'text-zinc-400'}`}>
+                        <span className={`text-xs font-bold block ${protDelta >= 0 ? 'text-gym-limeDark dark:text-gym-lime' : 'text-gym-textMuted'}`}>
                           {protDelta >= 0 ? `+${protDelta}g` : `${protDelta}g`}
                         </span>
                       </div>
@@ -165,7 +165,7 @@ export function MealSwapModal({
                           onSelectRecipe(meal.id, recipe.id);
                           onClose();
                         }}
-                        className="px-3.5 py-2 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs transition-all "
+                        className="px-3.5 py-2 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-semibold text-xs transition-all "
                       >
                         Choose Meal
                       </button>

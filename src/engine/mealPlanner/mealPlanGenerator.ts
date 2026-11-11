@@ -263,7 +263,10 @@ export function generateWeeklyMealPlan(
       targetProtein: profile.targetProteinGrams,
       actualAverageProtein: avgProtein,
       shortfallGrams: Math.max(0, shortfall),
-      explanation: `Based on your selected meals and food exclusions, your daily protein intake averages ${avgProtein}g against your optimal target of ${profile.targetProteinGrams}g (${Math.max(0, shortfall)}g daily deficit). Syndiq Fit reports true numbers to protect your progress.`,
+      explanation:
+        shortfall > 0
+          ? `You’re averaging ${avgProtein}g of protein a day against a ${profile.targetProteinGrams}g target, about ${Math.max(0, shortfall)}g short.`
+          : `Protein is on target at ${avgProtein}g a day.`,
       suggestions,
     };
   }

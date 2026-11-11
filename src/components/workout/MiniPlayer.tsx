@@ -4,6 +4,8 @@ import React from 'react';
 import { Check, SkipForward } from 'lucide-react';
 import { useNow, useWorkoutSession } from '@/context/WorkoutSessionContext';
 import { completedSets, formatClock, totalSets } from '@/lib/workoutSession';
+import { lastLift, logLift } from '@/lib/liftHistory';
+import { toLocalISODate } from '@/lib/progress';
 
 /**
  * Collapsed workout: a bar docked above the tab bar on phones (a card in the corner on desktop).
@@ -33,9 +35,9 @@ export function MiniPlayer() {
   return (
     <div
       data-mini-player
-      className="animate-riseIn fixed z-40 print:hidden inset-x-2 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+0.5rem)] lg:inset-x-auto lg:right-6 lg:bottom-6 lg:w-96"
+      className="animate-riseIn fixed z-40 print:hidden inset-x-2 bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4.25rem)] lg:inset-x-auto lg:right-6 lg:bottom-6 lg:w-96"
     >
-      <div className="relative flex items-center gap-1 overflow-hidden rounded-2xl bg-gym-card shadow-float ring-1 ring-black/5 dark:ring-white/10">
+      <div className="relative flex items-center gap-1 overflow-hidden rounded-[26px] glass-nav shadow-float">
         <button
           type="button"
           onClick={() => setExpanded(true)}
@@ -58,7 +60,16 @@ export function MiniPlayer() {
         ) : setsDoneHere < item.sets ? (
           <button
             type="button"
-            onClick={completeSet}
+            onClick={() => {
+              const last = lastLift(item.exercise.id);
+              const timed = /\d\s*(s|m)$/.test(item.reps);
+              logLift(item.exercise.id, {
+                date: toLocalISODate(),
+                weight: last?.weight ?? 0,
+                reps: timed ? 0 : last?.reps || parseInt(item.reps, 10) || 0,
+              });
+              completeSet();
+            }}
             className="tap mr-2 flex size-10 shrink-0 items-center justify-center rounded-full bg-gym-lime text-gym-ink"
             aria-label={`Complete set ${setsDoneHere + 1}`}
           >

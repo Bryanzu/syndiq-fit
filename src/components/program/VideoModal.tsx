@@ -33,14 +33,14 @@ export function VideoModal({ exercise, isOpen, onClose }: VideoModalProps) {
                 {exercise.name}
               </h3>
               <p className="text-xs text-gym-textMuted">
-                Exercise Form & Execution Demonstration
+                Demo
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="p-2 rounded-xl text-zinc-500 hover:text-gym-text dark:text-zinc-400 hover:brightness-110 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
+            className="p-2 rounded-2xl text-gym-textMuted hover:text-gym-text hover:brightness-110 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -73,7 +73,7 @@ export function VideoModal({ exercise, isOpen, onClose }: VideoModalProps) {
                   href={exercise.youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs sm:text-sm transition-all min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-semibold text-xs sm:text-sm transition-all min-h-[44px]"
                 >
                   <span>Watch on YouTube</span>
                   <ExternalLink className="w-4 h-4" />
@@ -93,7 +93,7 @@ export function VideoModal({ exercise, isOpen, onClose }: VideoModalProps) {
             href={exercise.youtubeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-gym-limeDark dark:text-zinc-400 dark:hover:text-gym-lime transition-colors shrink-0 font-medium"
+            className="inline-flex items-center gap-1.5 text-xs text-gym-textMuted hover:text-gym-limeDark dark:hover:text-gym-lime transition-colors shrink-0 font-medium"
           >
             <span>Open in YouTube app</span>
             <ExternalLink className="w-3.5 h-3.5" />

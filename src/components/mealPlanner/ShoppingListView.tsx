@@ -37,28 +37,28 @@ export function ShoppingListView({ items, onToggleItem }: ShoppingListViewProps)
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Top Banner & Quick Controls */}
-      <div className="bg-white dark:bg-gym-card rounded-2xl p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-gym-card rounded-3xl p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-black ">
-              Nigerian Market Guide
+            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-gym-ink ">
+              Shopping
             </span>
             <span className="text-xs text-gym-textMuted">
               {purchasedCount} of {toBuyCount} items bought
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-gym-text">
-            7-Day Consolidated Shopping List
+            Shopping list
           </h2>
           <p className="text-xs sm:text-sm text-gym-textMuted max-w-xl">
-            Calculated across your entire 7-day program with in-stock pantry items automatically subtracted. Formatted in standard local market units (crates, derica, mudus, bunches, tubers).
+            Everything for the week, minus what you already have, in market units.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleCopy}
-          className="self-start sm:self-auto px-4 py-3 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold text-xs sm:text-sm flex items-center gap-2 hover:opacity-90 transition-all shrink-0 min-h-[44px]"
+          className="self-start sm:self-auto px-4 py-3 rounded-2xl bg-gym-text text-gym-bg font-semibold text-xs sm:text-sm flex items-center gap-2 hover:opacity-90 transition-all shrink-0 min-h-[44px]"
         >
           {copied ? <CheckCheck className="w-4 h-4 text-gym-lime" /> : <Copy className="w-4 h-4" />}
           <span>{copied ? 'Copied to Clipboard!' : 'Copy Market List'}</span>
@@ -74,14 +74,14 @@ export function ShoppingListView({ items, onToggleItem }: ShoppingListViewProps)
           return (
             <div
               key={cat.id}
-              className="bg-white dark:bg-gym-card rounded-2xl p-5 sm:p-6 space-y-3 "
+              className="bg-gym-card rounded-3xl p-5 sm:p-6 space-y-3 "
             >
-              <div className="flex items-center gap-2 pb-2 border-b border-zinc-200/80 dark:border-zinc-800/80">
+              <div className="flex items-center gap-2 pb-2 border-b border-gym-border">
                 <Store className="w-4 h-4 text-gym-limeDark dark:text-gym-lime" />
                 <h3 className="text-sm sm:text-base font-bold text-gym-text">
                   {cat.label}
                 </h3>
-                <span className="text-xs text-zinc-400 ml-auto font-bold">
+                <span className="text-xs text-gym-textMuted ml-auto font-bold">
                   {catItems.length} items
                 </span>
               </div>
@@ -97,7 +97,7 @@ export function ShoppingListView({ items, onToggleItem }: ShoppingListViewProps)
                       className={`py-3.5 flex items-start justify-between gap-3 transition-colors ${
                         isFullyStocked
                           ? 'opacity-50 cursor-default'
-                          : 'cursor-pointer hover:brightness-110 -mx-2 px-2 rounded-xl'
+                          : 'cursor-pointer hover:brightness-110 -mx-2 px-2 rounded-2xl'
                       }`}
                     >
                       <div className="space-y-1 flex-1 min-w-0">
@@ -105,7 +105,7 @@ export function ShoppingListView({ items, onToggleItem }: ShoppingListViewProps)
                           <span
                             className={`text-sm font-semibold leading-snug ${
                               item.isPurchased
-                                ? 'line-through text-zinc-400 dark:text-zinc-500'
+                                ? 'line-through text-gym-textMuted'
                                 : 'text-gym-text'
                             }`}
                           >
@@ -123,7 +123,7 @@ export function ShoppingListView({ items, onToggleItem }: ShoppingListViewProps)
                             {item.marketFormatRecommendation}
                           </span>
                           {item.inStockQuantity > 0 && !isFullyStocked && (
-                            <span className="text-xs text-zinc-400">
+                            <span className="text-xs text-gym-textMuted">
                               (Needs {item.totalQuantityNeeded} {item.unit}s • {item.inStockQuantity} in pantry)
                             </span>
                           )}
@@ -140,7 +140,7 @@ export function ShoppingListView({ items, onToggleItem }: ShoppingListViewProps)
                           <div
                             className={`w-5 h-5 rounded-lg flex items-center justify-center border transition-all ${
                               item.isPurchased
-                                ? 'bg-gym-lime text-black border-gym-lime '
+                                ? 'bg-gym-lime text-gym-ink border-gym-lime '
                                 : 'border-gym-border bg-gym-card'
                             }`}
                           >

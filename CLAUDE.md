@@ -34,7 +34,7 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 | Browser storage | `src/lib/storage.ts` (program, profile, meal plan, inventory), `src/lib/progress.ts` (workout log) |
 | Design tokens | `src/app/globals.css` and `tailwind.config.ts` |
 
-`localStorage` keys: `syndiq_active_program`, `syndiq_active_profile`, `syndiq_meal_plan`, `syndiq_meal_inventory`, `syndiq_workout_log`, `syndiq_workout_session`, `syndiq_theme`, `syndiq_admin_key`.
+`localStorage` keys: `syndiq_lift_history`, `syndiq_active_program`, `syndiq_active_profile`, `syndiq_meal_plan`, `syndiq_meal_inventory`, `syndiq_workout_log`, `syndiq_workout_session`, `syndiq_theme`, `syndiq_admin_key`.
 
 ### How the engines work
 
@@ -59,18 +59,31 @@ Mockups (first open, home, workout player, muscle map): https://claude.ai/artifa
 
 ### Redesign status
 
-Done and merged to `main`: token-based design system, bottom tab bar, `Sheet` dialogs, toasts, skeleton loading, Inter font, workout player and mini player, engine fixes.
+Done and merged to `main`: token-based design system, `Sheet` dialogs, toasts, skeleton loading, Inter font, workout player and mini player, engine fixes.
 
-Not started, in the planned order:
+Built on branch `redesign/glass` (check whether it has been merged):
 
-1. Foundation: glass tokens, pill navigation, new phone header, motion library, page transitions
-2. First-open screen and Home
-3. Workout player restyle, with per-set weight and reps logging
-4. Muscle map
-5. Program, meal planner and questionnaire screens, plus the copy rewrite
-6. Light theme
+- Glass tokens and helpers in `globals.css` (`.glass`, `.glass-nav`, `.glass-inset`, `.glass-btn`, `.on-photo`, `.t-large`, `.stagger`)
+- Floating pill navigation (`TabBar.tsx`), phone header that frosts on scroll (`Navbar.tsx`), page transitions (`src/app/template.tsx`)
+- First-open screen and Home (`src/app/page.tsx`), with `SlideToStart`
+- Workout player over a photo, logging weight and reps per set (`src/lib/liftHistory.ts`)
+- Body map with a new figure (`BodyFigure.tsx`) shaded by sets logged this week (`src/lib/muscleLoad.ts`)
+- Program page: photo header (`PlanHeader.tsx`), glass day tabs, and the new figure in place of `BodyVisualizer`
+- Meal planner and questionnaire: photo hero, large titles, legacy `zinc`/`white` classes swept to tokens
+- Copy rewrite across the app. Exercise reasons shown in the UI and PDF come from `plainReason()` in `src/lib/exerciseCopy.ts`, not the `whyIncluded` text in the data
 
-Open decisions for the owner: where exercise and meal photos come from (the project has only four images), and the artwork for the muscle figure.
+- Photos: 14 exercise photos and 24 meal photos from Wikimedia Commons in `public/images/exercises` and `public/images/meals`, chosen by `src/lib/photos.ts`, credited in `src/data/photoCredits.ts` and on `/credits`. Most are CC BY or CC BY-SA, so keep the credits page and add an entry for any new photo
+- Female body figure: `BodyFigure` takes `build="male" | "female"`; the female build is the same drawing reshaped by height in `BodyFigure.tsx`
+- Exercise rows grow into their detail sheet (View Transitions API via `morphName` on `Sheet` and `ExerciseCard`; browsers without it just open the sheet)
+- Meal cards with a photo banner, glass wizard and questionnaire panels, questionnaire options as real radio controls
+- `/demo` page and `scripts/record-demo.mjs` rewritten for the redesign; the video was re-recorded
+
+Ideas not started:
+
+1. A photo per exercise (currently one per movement type) and embedded demo videos (`youtubeId` is empty)
+2. Expand animation for meal cards and body-map rows (only program exercise rows have it)
+3. `public/videos/page@*.webm` are leftover recordings that nothing uses
+
 
 ## Development Rules
 
@@ -109,16 +122,21 @@ npx tsc --noEmit -p .
 ```
 
 ```bash
-npx tsx scripts/test-comprehensive-qa.mjs
+npm run test:qa
+```
+
+```bash
+npm run test:e2e
 ```
 
 ```bash
 npm run dev
 ```
 
-- The QA suite runs both engines and checks file structure; 22 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
+- The QA suite runs both engines and checks file structure and photos; 24 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
 - `npm run test:engine` needs the dev server running on port 3000.
-- For UI checks use Playwright (a dev dependency) against `http://localhost:3000`. The older Playwright scripts in `scripts/` predate the new navigation and may need updating. `test-new-features.mjs` looks for the text "Clear Active Workout Program?" and "Yes, Clear Program".
+- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 31 checks should pass. It needs the dev server running.
+- `npm run demo:record` re-records the `/demo` walkthrough video (also needs the dev server).
 - A program can be loaded without the questionnaire through a share link: `/program?p=<base64 of the profile JSON>`.
 - The dev server prints an SWC "not a valid Win32 application" warning; the app still compiles.
 
@@ -145,5 +163,5 @@ Rough ownership by feature: workout generation (`src/engine/*.ts`, `src/data/exe
 - There is no week-to-week progression in workout programs.
 - The skipped-meal notice appears inside the protein shortfall report.
 - The mini player overlaps the bottom of page content on phones.
-- Exercises have no photos or embedded videos (`youtubeId` is empty; demos open a YouTube search).
+- Exercises have no embedded videos (`youtubeId` is empty; demos open a YouTube search).
 - `QuestionnaireWizard.tsx` and `MealPlannerWizard.tsx` are very large and should be split before restyling.

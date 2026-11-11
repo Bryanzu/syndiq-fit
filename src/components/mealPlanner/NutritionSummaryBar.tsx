@@ -22,7 +22,7 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
       {/* Target vs Actual Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Calories Card */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-gym-card flex items-center justify-between">
+        <div className="p-4 rounded-3xl bg-gym-card flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gym-textMuted">
               <Flame className="w-3.5 h-3.5 text-amber-500" />
@@ -36,7 +36,7 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
               <span className="text-xl sm:text-2xl font-bold text-gym-text">
                 {activeDay.totalCalories}
               </span>
-              <span className="text-xs text-zinc-500">/ {profile.targetCalories} kcal</span>
+              <span className="text-xs text-gym-textMuted">/ {profile.targetCalories} kcal</span>
             </div>
             <span className={`text-xs font-bold block ${Math.abs(calDiff) <= 150 ? 'text-gym-limeDark dark:text-gym-lime' : calDiff > 0 ? 'text-amber-600' : 'text-blue-500'}`}>
               {calDiff >= 0 ? `+${calDiff}` : `${calDiff}`} kcal of target
@@ -45,7 +45,7 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
         </div>
 
         {/* Protein Card */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-gym-card flex items-center justify-between">
+        <div className="p-4 rounded-3xl bg-gym-card flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gym-textMuted">
               <Beef className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
@@ -59,7 +59,7 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
               <span className="text-xl sm:text-2xl font-bold text-gym-text">
                 {activeDay.totalProtein}g
               </span>
-              <span className="text-xs text-zinc-500">/ {profile.targetProteinGrams}g</span>
+              <span className="text-xs text-gym-textMuted">/ {profile.targetProteinGrams}g</span>
             </div>
             <span className={`text-xs font-bold block ${protDiff >= 0 ? 'text-gym-limeDark dark:text-gym-lime' : 'text-amber-500'}`}>
               {protDiff >= 0 ? `Target Met (+${protDiff}g)` : `${protDiff}g below target`}
@@ -68,7 +68,7 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
         </div>
 
         {/* Carbs Card */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-gym-card flex items-center justify-between">
+        <div className="p-4 rounded-3xl bg-gym-card flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-gym-textMuted">
               <span>Carbohydrates</span>
@@ -82,19 +82,19 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
                 {activeDay.totalCarbs}g
               </span>
             </div>
-            <span className="text-xs text-zinc-500 block">
+            <span className="text-xs text-gym-textMuted block">
               {Math.round((activeDay.totalCarbs * 4 / Math.max(activeDay.totalCalories, 1)) * 100)}% of daily energy
             </span>
           </div>
         </div>
 
-        {/* Healthy Fats Card */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-gym-card flex items-center justify-between">
+        {/* Fats Card */}
+        <div className="p-4 rounded-3xl bg-gym-card flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-gym-textMuted">
-              <span>Healthy Fats</span>
+              <span>Fats</span>
               <InfoTooltip
-                title="Healthy Fats"
+                title="Fats"
                 content="Dietary fats support vital hormone synthesis (testosterone), cellular health, and fat-soluble vitamin uptake."
               />
             </div>
@@ -103,7 +103,7 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
                 {activeDay.totalFat}g
               </span>
             </div>
-            <span className="text-xs text-zinc-500 block">
+            <span className="text-xs text-gym-textMuted block">
               {Math.round((activeDay.totalFat * 9 / Math.max(activeDay.totalCalories, 1)) * 100)}% of daily energy
             </span>
           </div>
@@ -112,15 +112,15 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
 
       {/* Honest Protein Shortfall Alert Banner: NEVER falsify numbers */}
       {shortfall && shortfall.hasShortfall && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+        <div className="p-4 sm:p-5 rounded-3xl bg-amber-500/10 border border-amber-500/30 space-y-3">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
+            <div className="p-2 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-900 dark:text-amber-200">
-                  Honest Gap Analysis
+                  Protein gap
                 </span>
                 <span className="text-xs font-bold text-amber-900 dark:text-amber-300">
                   Daily Deficit: {shortfall.shortfallGrams}g Protein
@@ -135,7 +135,7 @@ export function NutritionSummaryBar({ mealPlan, activeDay }: NutritionSummaryBar
           {/* Actionable Nigerian Solutions */}
           <div className="pl-0 sm:pl-11 space-y-1.5 pt-1 border-t border-amber-500/20">
             <span className="text-xs font-semibold text-amber-900 dark:text-amber-200 block uppercase tracking-wider">
-              Affordable Nigerian High-Protein Additions to Bridge the Gap:
+              Easy ways to close it:
             </span>
             <ul className="space-y-1">
               {shortfall.suggestions.map((suggestion, idx) => (

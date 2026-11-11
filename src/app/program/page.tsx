@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, Suspense } from 'react';
+import { flushSync } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -15,7 +16,7 @@ import { ExerciseDetailModal } from '@/components/program/ExerciseDetailModal';
 import { ExerciseSwapModal } from '@/components/program/ExerciseSwapModal';
 import { VideoModal } from '@/components/program/VideoModal';
 import { ShareQrModal } from '@/components/program/ShareQrModal';
-import { BodyVisualizer } from '@/components/body/BodyVisualizer';
+import { BodyFigure } from '@/components/body/BodyFigure';
 import { adaptExerciseVolume, calculateWorkoutDuration } from '@/engine/volumeRules';
 import { Sheet } from '@/components/ui/Sheet';
 import { toast } from '@/components/ui/Toaster';
@@ -30,6 +31,54 @@ function ProgramContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const workout = useWorkoutSession();
+
+  // Row-to-sheet morph: which row carries the shared name, and whether the open sheet does
+  const [morphIndex, setMorphIndex] = useState<number | null>(null);
+  const [detailIndex, setDetailIndex] = useState<number | null>(null);
+  const [sheetMorph, setSheetMorph] = useState(false);
+
+  const canMorph = () =>
+    typeof document !== 'undefined' &&
+    'startViewTransition' in document &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /** Opens the instructions; where the browser supports it, the row grows into the sheet. */
+  const openDetails = (item: WorkoutExerciseItem, idx: number) => {
+    if (!canMorph()) {
+      setSheetMorph(false);
+      setSelectedItemForDetails(item);
+      return;
+    }
+    flushSync(() => setMorphIndex(idx));
+    (document as any).startViewTransition(() => {
+      flushSync(() => {
+        setMorphIndex(null);
+        setSheetMorph(true);
+        setDetailIndex(idx);
+        setSelectedItemForDetails(item);
+      });
+    });
+  };
+
+  /** Closes the instructions, shrinking the sheet back into its row. */
+  const closeDetails = () => {
+    if (!canMorph() || !sheetMorph || detailIndex === null) {
+      setSelectedItemForDetails(null);
+      return;
+    }
+    const idx = detailIndex;
+    const transition = (document as any).startViewTransition(() => {
+      flushSync(() => {
+        setSelectedItemForDetails(null);
+        setMorphIndex(idx);
+      });
+    });
+    transition.finished.finally(() => {
+      setMorphIndex(null);
+      setDetailIndex(null);
+      setSheetMorph(false);
+    });
+  };
 
   // Active muscle highlight state for Body Visualizer
   const [hoveredPrimary, setHoveredPrimary] = useState<MuscleGroup[]>([]);
@@ -106,7 +155,7 @@ function ProgramContent() {
           restSeconds: volume.restSeconds,
           intensityNote: volume.intensityNote || item.intensityNote,
           isSubstituted: true,
-          substitutionReason: 'Customized by user',
+          substitutionReason: 'Your swap',
         };
       }
       return item;
@@ -182,15 +231,14 @@ function ProgramContent() {
               No active <strong className="font-semibold">workout program</strong>
             </h1>
             <p className="text-sm sm:text-base text-white/75 max-w-lg leading-relaxed">
-              You haven&apos;t generated a program yet, or your previous schedule was cleared. Your questionnaire answers are
-              kept, so a new split takes seconds.
+              Answer eight questions and your week is ready. Your last answers are saved.
             </p>
             <div className="flex flex-wrap items-center gap-2.5 pt-1">
               <Link href="/questionnaire" className="btn-primary px-7">
                 <Sparkles className="w-4 h-4" /> Create new program
               </Link>
-              <Link href="/meal-planner" className="btn bg-white/15 text-white backdrop-blur hover:bg-white/25">
-                View meal planner
+              <Link href="/meal-planner" className="btn bg-white/15 text-white backdrop-blur hover:bg-gym-card/25">
+                Plan my meals
               </Link>
             </div>
           </div>
@@ -204,6 +252,9 @@ function ProgramContent() {
   // Derive muscle highlights for body map
   const activeDayPrimary = hoveredPrimary.length > 0 ? hoveredPrimary : currentDay.focusMuscles;
   const activeDaySecondary = hoveredSecondary;
+  const muscleIntensity: Partial<Record<MuscleGroup, number>> = {};
+  activeDaySecondary.forEach((m) => (muscleIntensity[m] = 0.35));
+  activeDayPrimary.forEach((m) => (muscleIntensity[m] = 1));
 
   const shareUrl =
     typeof window !== 'undefined'
@@ -212,7 +263,7 @@ function ProgramContent() {
 
   return (
     <>
-      <div className="page py-6 sm:py-10 space-y-8 animate-fadeIn">
+      <div className="page pb-8 pt-1 sm:py-10 space-y-8">
         <PlanHeader
           program={program}
           onDownloadPdf={handleDownloadPdf}
@@ -222,7 +273,7 @@ function ProgramContent() {
         />
 
         <div className="space-y-3">
-          <h2 className="t-section">Training schedule</h2>
+          <h2 className="text-xl font-bold tracking-tight text-gym-text">Your week</h2>
           <DayTabs
             days={program.days}
             activeDayIndex={activeDayIndex}
@@ -260,7 +311,8 @@ function ProgramContent() {
                   key={`${item.exercise.id}-${idx}`}
                   item={item}
                   index={idx}
-                  onOpenDetails={() => setSelectedItemForDetails(item)}
+                  onOpenDetails={() => openDetails(item, idx)}
+                  morphName={morphIndex === idx ? 'exercise-surface' : undefined}
                   onOpenVideo={() => setSelectedExerciseForVideo(item.exercise)}
                   onOpenSwap={() => setSelectedItemForSwap(item)}
                   onHoverMuscles={(pri, sec) => {
@@ -282,20 +334,17 @@ function ProgramContent() {
               <span className="t-small hidden lg:inline">Hover an exercise to highlight</span>
             </div>
 
-            <BodyVisualizer
-              primaryMuscles={activeDayPrimary}
-              secondaryMuscles={activeDaySecondary}
-              interactive={true}
-              gender={program.userProfile.gender}
-              allowGenderToggle={false}
-            />
+            <div className="surface grid grid-cols-2 gap-2 !rounded-[32px] p-4">
+              <BodyFigure view="front" build={program.userProfile.gender} selected={null} intensity={muscleIntensity} interactive={false} className="mx-auto w-full max-w-[11rem]" />
+              <BodyFigure view="back" build={program.userProfile.gender} selected={null} intensity={muscleIntensity} interactive={false} className="mx-auto w-full max-w-[11rem]" />
+            </div>
 
             <p className="t-small leading-relaxed">
-              Day {currentDay.dayNumber} targets{' '}
+              Day {currentDay.dayNumber} trains{' '}
               <strong className="text-gym-limeDark dark:text-gym-lime font-semibold">
                 {currentDay.focusMuscles.map((m) => m.replace('_', ' ')).join(', ')}
               </strong>{' '}
-              with compound volume and targeted assistance to prevent muscular asymmetries.
+              today.
             </p>
           </div>
         </div>
@@ -305,7 +354,8 @@ function ProgramContent() {
       <ExerciseDetailModal
         item={selectedItemForDetails}
         isOpen={Boolean(selectedItemForDetails)}
-        onClose={() => setSelectedItemForDetails(null)}
+        onClose={closeDetails}
+        morph={sheetMorph}
         onOpenVideo={() => {
           if (selectedItemForDetails) {
             setSelectedExerciseForVideo(selectedItemForDetails.exercise);
@@ -314,6 +364,7 @@ function ProgramContent() {
         onOpenSwap={() => {
           if (selectedItemForDetails) {
             const item = selectedItemForDetails;
+            setSheetMorph(false);
             setSelectedItemForDetails(null);
             setSelectedItemForSwap(item);
           }
@@ -350,7 +401,7 @@ function ProgramContent() {
       >
         <div className="p-6 sm:p-8 space-y-6">
           <div className="flex items-start justify-between">
-            <span className="flex size-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+            <span className="flex size-12 items-center justify-center rounded-3xl bg-red-500/10 text-red-500">
               <Trash2 className="w-6 h-6" />
             </span>
             <button type="button" onClick={() => setIsClearModalOpen(false)} className="btn-icon" aria-label="Close dialog">

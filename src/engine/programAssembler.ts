@@ -198,7 +198,7 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
             if (safeAlt && !selectedExerciseIds.has(safeAlt.id)) {
               chosenExercise = safeAlt;
               isSubstituted = true;
-              substitutionReason = 'Substituted for spinal decompression & joint longevity (50+)';
+              substitutionReason = 'Swapped to go easier on your spine';
             }
           } else {
             const safeAlt = findSafeAlternative(
@@ -230,7 +230,7 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
         if (fallback) {
           chosenExercise = fallback;
           isSubstituted = true;
-          substitutionReason = 'Adapted for available gym equipment';
+          substitutionReason = 'Swapped to fit your equipment';
         }
       }
 
@@ -247,7 +247,7 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
         if (fallbackAny) {
           chosenExercise = fallbackAny;
           isSubstituted = true;
-          substitutionReason = 'Adapted for available gym equipment';
+          substitutionReason = 'Swapped to fit your equipment';
         }
       }
 
@@ -316,13 +316,13 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
 
   const secondaryDesc =
     profile.secondaryGoals && profile.secondaryGoals.length > 0
-      ? ` Complementary priorities: ${profile.secondaryGoals.map(getGoalLabel).join(', ')}.`
+      ? ` Also working on: ${profile.secondaryGoals.map(getGoalLabel).join(', ').toLowerCase()}.`
       : '';
 
   const program: WorkoutProgram = {
     id: `syndiq-${Date.now()}`,
-    name: `${getGoalLabel(profile.goal)} — ${frequency}-Day Program`,
-    description: `Customized for a ${profile.gender === 'male' ? 'male' : 'female'} lifter (${profile.age} yrs), focusing on ${getGoalLabel(profile.goal)} with ~${profile.duration}-minute sessions.${secondaryDesc}`,
+    name: `${getGoalLabel(profile.goal)} · ${frequency} days a week`,
+    description: `${profile.duration}-minute sessions.${secondaryDesc}`,
     userProfile: profile,
     days,
     createdAt: new Date().toISOString(),
@@ -383,23 +383,23 @@ function matchesGoal(exercise: Exercise, goal: string): boolean {
 
 function getGoalLabel(goal: string): string {
   const map: Record<string, string> = {
-    fat_loss: 'Fat Loss & Conditioning',
-    muscle_building: 'Hypertrophy & Muscle Building',
-    lean_toned: 'Lean & Toned Physique',
-    general_fitness: 'Total Body Fitness',
-    build_strength: 'Maximal Strength',
-    overall_strength: 'Functional Strength',
-    beginner_strength: 'Foundational Strength',
-    chest_emphasis: 'Chest Development',
-    back_emphasis: 'Back & V-Taper Development',
-    shoulder_emphasis: 'Shoulder & Deltoid Development',
-    arm_emphasis: 'Arm Hypertrophy',
-    leg_emphasis: 'Quad & Leg Builder',
-    glute_emphasis: 'Glute & Posterior Development',
-    core_emphasis: 'Core Stability & Midsection',
-    endurance: 'Muscular Endurance',
-    maintain_fitness: 'Fitness Maintenance',
-    athletic_performance: 'Athletic Conditioning',
+    fat_loss: 'Lose fat',
+    muscle_building: 'Build muscle',
+    lean_toned: 'Lean and toned',
+    general_fitness: 'General fitness',
+    build_strength: 'Max strength',
+    overall_strength: 'All-round strength',
+    beginner_strength: 'Starter strength',
+    chest_emphasis: 'Bigger chest',
+    back_emphasis: 'Wider back',
+    shoulder_emphasis: 'Broader shoulders',
+    arm_emphasis: 'Bigger arms',
+    leg_emphasis: 'Stronger legs',
+    glute_emphasis: 'Glutes',
+    core_emphasis: 'Core',
+    endurance: 'Endurance',
+    maintain_fitness: 'Stay in shape',
+    athletic_performance: 'Athletic',
   };
-  return map[goal] || 'Custom Training Program';
+  return map[goal] || 'Your program';
 }

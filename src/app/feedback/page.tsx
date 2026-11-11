@@ -109,10 +109,10 @@ export default function FeedbackPage() {
   return (
     <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-8 animate-fadeIn">
       {/* Top Banner Card with Fitness Photography */}
-      <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gym-card transition-colors">
+      <div className="relative rounded-3xl overflow-hidden bg-gym-card transition-colors">
         <div className="grid grid-cols-1 md:grid-cols-12 items-center">
           <div className="md:col-span-7 p-6 sm:p-10 space-y-3 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-black ">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-gym-ink ">
               <MessageSquare className="w-3.5 h-3.5" />
               <span>Tester Community</span>
             </div>
@@ -138,10 +138,10 @@ export default function FeedbackPage() {
       </div>
 
       {/* Main Feedback Form Card */}
-      <div className="bg-white dark:bg-gym-card rounded-2xl p-6 sm:p-10 transition-colors">
+      <div className="bg-gym-card rounded-3xl p-6 sm:p-10 transition-colors">
         {isSuccess ? (
           <div className="text-center py-10 space-y-6 animate-fadeIn">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-gym-lime/20 border border-gym-lime flex items-center justify-center text-gym-limeDark dark:text-gym-lime ">
+            <div className="w-16 h-16 mx-auto rounded-3xl bg-gym-lime/20 border border-gym-lime flex items-center justify-center text-gym-limeDark dark:text-gym-lime ">
               <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
             </div>
             <div className="space-y-2">
@@ -156,13 +156,13 @@ export default function FeedbackPage() {
               <button
                 type="button"
                 onClick={() => setIsSuccess(false)}
-                className="px-6 py-3 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-sm transition-all "
+                className="px-6 py-3 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-semibold text-sm transition-all "
               >
                 Submit Another Comment
               </button>
               <Link
                 href="/program"
-                className="px-5 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-gym-text font-bold text-sm transition-colors"
+                className="px-5 py-3 rounded-2xl bg-gym-cardInner hover:bg-gym-cardInner text-gym-text font-bold text-sm transition-colors"
               >
                 Back to Workout Plan
               </Link>
@@ -171,7 +171,7 @@ export default function FeedbackPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             {errorMsg && (
-              <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 flex items-start gap-3 text-red-700 dark:text-red-400 text-xs sm:text-sm animate-fadeIn">
+              <div className="p-4 rounded-3xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 flex items-start gap-3 text-red-700 dark:text-red-400 text-xs sm:text-sm animate-fadeIn">
                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                 <span className="font-semibold">{errorMsg}</span>
               </div>
@@ -187,7 +187,7 @@ export default function FeedbackPage() {
                   <User className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
                   <span>Your Name or Tester Nickname *</span>
                 </label>
-                <span className="text-xs text-zinc-400">No account required</span>
+                <span className="text-xs text-gym-textMuted">No account required</span>
               </div>
               <input
                 id="fb-username"
@@ -197,7 +197,7 @@ export default function FeedbackPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-gym-cardAlt text-sm text-gym-text placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime ring-1 ring-transparent focus:ring-gym-lime transition-all"
+                className="w-full px-4 py-3 rounded-2xl bg-gym-cardAlt text-sm text-gym-text placeholder:text-gym-textMuted focus:outline-none focus:border-gym-lime ring-1 ring-transparent focus:ring-gym-lime transition-all"
               />
             </div>
 
@@ -212,10 +212,10 @@ export default function FeedbackPage() {
                     key={cat.id}
                     type="button"
                     onClick={() => setCategory(cat.id)}
-                    className={`p-3.5 rounded-2xl border text-left flex items-start gap-3 transition-all min-h-[52px] ${
+                    className={`p-3.5 rounded-3xl border text-left flex items-start gap-3 transition-all min-h-[52px] ${
                       category === cat.id
                         ? 'bg-gym-lime/15 border-gym-lime text-gym-text ring-1 ring-gym-lime font-bold'
-                        : 'bg-gym-cardAlt border-gym-border text-gym-silver hover:border-zinc-300'
+                        : 'bg-gym-cardAlt border-gym-border text-gym-silver hover:border-gym-border'
                     }`}
                   >
                     <div className="p-1 rounded-lg bg-gym-card shrink-0 mt-0.5">
@@ -223,7 +223,7 @@ export default function FeedbackPage() {
                     </div>
                     <div className="min-w-0">
                       <span className="text-xs font-bold block">{cat.label}</span>
-                      <span className="text-xs text-zinc-500 block leading-tight">{cat.desc}</span>
+                      <span className="text-xs text-gym-textMuted block leading-tight">{cat.desc}</span>
                     </div>
                   </button>
                 ))}
@@ -242,7 +242,7 @@ export default function FeedbackPage() {
                 </label>
                 <span
                   className={`text-xs font-mono ${
-                    message.length > 1100 ? 'text-amber-500 font-bold' : 'text-zinc-400'
+                    message.length > 1100 ? 'text-amber-500 font-bold' : 'text-gym-textMuted'
                   }`}
                 >
                   {message.length} / 1200
@@ -256,13 +256,13 @@ export default function FeedbackPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-gym-cardAlt text-sm text-gym-text placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime ring-1 ring-transparent focus:ring-gym-lime transition-all resize-y"
+                className="w-full px-4 py-3 rounded-2xl bg-gym-cardAlt text-sm text-gym-text placeholder:text-gym-textMuted focus:outline-none focus:border-gym-lime ring-1 ring-transparent focus:ring-gym-lime transition-all resize-y"
               />
             </div>
 
             {/* Submit Action */}
             <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <span className="text-xs text-zinc-400 flex items-center gap-1">
+              <span className="text-xs text-gym-textMuted flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
                 <span>Your submission is securely delivered directly to our app administrator.</span>
               </span>
@@ -270,7 +270,7 @@ export default function FeedbackPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-8 py-3.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 min-h-[48px]"
+                className="px-8 py-3.5 rounded-3xl bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 min-h-[48px]"
               >
                 {isSubmitting ? (
                   <span>Submitting...</span>
@@ -290,7 +290,7 @@ export default function FeedbackPage() {
       <div className="text-center pt-4">
         <Link
           href="/admin/feedback"
-          className="text-xs text-zinc-400 hover:text-gym-limeDark dark:hover:text-gym-lime transition-colors inline-flex items-center gap-1"
+          className="text-xs text-gym-textMuted hover:text-gym-limeDark dark:hover:text-gym-lime transition-colors inline-flex items-center gap-1"
         >
           <span>Administrator Review Portal</span>
           <ArrowRight className="w-3 h-3" />

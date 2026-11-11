@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
+import { mealPhoto } from '@/lib/photos';
 import { PlannedMeal } from '@/types/mealPlanner';
 import {
   Sun,
@@ -85,14 +87,18 @@ export function MealCard({
 
   return (
     <div
-      className={`rounded-2xl sm:rounded-2xl border transition-all p-5 sm:p-6 space-y-4 ${
+      className={`overflow-hidden rounded-[32px] border transition-all p-5 sm:p-6 space-y-4 ${
         isCompleted
-          ? 'bg-zinc-100/70 dark:bg-[#121212]/60 border-gym-border opacity-80'
-          : 'bg-white dark:bg-gym-card border-gym-border hover:border-gym-borderHover'
+          ? 'bg-gym-cardInner/60 border-gym-border opacity-80'
+          : 'bg-gym-card border-gym-border hover:border-gym-borderHover'
       }`}
     >
+      <div className="relative -mx-5 -mt-5 h-40 overflow-hidden sm:-mx-6 sm:-mt-6 sm:h-48">
+        <Image src={mealPhoto(meal.recipeId)} alt="" fill sizes="(max-width: 768px) 100vw, 640px" className="object-cover" />
+      </div>
+
       {/* Top Header: Meal Type, Checkbox & Quick Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-200/80 dark:border-zinc-800/80">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gym-border">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-gym-cardInner flex items-center justify-center">
             {getMealTypeIcon()}
@@ -114,9 +120,9 @@ export function MealCard({
         <button
           type="button"
           onClick={() => onToggleComplete(meal.id)}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-2xl text-xs font-bold transition-all ${
             isCompleted
-              ? 'bg-gym-lime text-black '
+              ? 'bg-gym-lime text-gym-ink '
               : 'bg-gym-cardInner text-gym-textMuted hover:text-gym-text '
           }`}
         >
@@ -127,7 +133,7 @@ export function MealCard({
           >
             {isCompleted && <Check className="w-2.5 h-2.5 stroke-[3]" />}
           </div>
-          <span>{isCompleted ? 'Eaten' : 'Mark Eaten'}</span>
+          <span>{isCompleted ? 'Eaten' : 'Mark eaten'}</span>
         </button>
       </div>
 
@@ -144,9 +150,9 @@ export function MealCard({
       </div>
 
       {/* Practical Ingredients Summary */}
-      <div className="space-y-1 bg-gym-cardAlt p-3 rounded-xl /60 dark:border-zinc-800/60">
-        <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 block">
-          Measured Portions:
+      <div className="space-y-1 bg-gym-cardAlt p-3 rounded-2xl /60">
+        <span className="text-xs font-bold uppercase tracking-wider text-gym-textMuted block">
+          On your plate
         </span>
         <div className="flex flex-wrap gap-1.5 pt-0.5">
           {meal.ingredients.map((ing, idx) => (
@@ -159,7 +165,7 @@ export function MealCard({
           ))}
         </div>
         {practicalMeasure && (
-          <div className="pt-2 border-t border-zinc-200/50 dark:border-zinc-800/50 flex items-start gap-1.5 text-xs text-gym-textMuted">
+          <div className="pt-2 border-t border-gym-border flex items-start gap-1.5 text-xs text-gym-textMuted">
             <Utensils className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime shrink-0 mt-0.5" />
             <span>
               Home estimate: <strong>{practicalMeasure}</strong>
@@ -170,7 +176,7 @@ export function MealCard({
 
       {/* Macro Breakdown Pills */}
       <div className="grid grid-cols-4 gap-2 pt-1 text-center">
-        <div className="p-2 rounded-xl bg-zinc-100/80 dark:bg-zinc-900 /80 dark:border-zinc-800">
+        <div className="p-2 rounded-2xl bg-gym-cardInner/80 /80">
           <div className="flex items-center justify-center gap-1 text-xs text-gym-textMuted font-bold uppercase">
             <Flame className="w-3 h-3 text-amber-500" />
             <span>Energy</span>
@@ -180,7 +186,7 @@ export function MealCard({
           </span>
         </div>
 
-        <div className="p-2 rounded-xl bg-gym-lime/10 dark:bg-gym-lime/15 border border-gym-lime/30">
+        <div className="p-2 rounded-2xl bg-gym-lime/10 dark:bg-gym-lime/15 border border-gym-lime/30">
           <div className="flex items-center justify-center gap-1 text-xs text-gym-limeDark dark:text-gym-lime font-bold uppercase">
             <Beef className="w-3 h-3" />
             <span>Protein</span>
@@ -190,7 +196,7 @@ export function MealCard({
           </span>
         </div>
 
-        <div className="p-2 rounded-xl bg-zinc-100/80 dark:bg-zinc-900 /80 dark:border-zinc-800">
+        <div className="p-2 rounded-2xl bg-gym-cardInner/80 /80">
           <span className="text-xs text-gym-textMuted font-bold uppercase block">
             Carbs
           </span>
@@ -199,7 +205,7 @@ export function MealCard({
           </span>
         </div>
 
-        <div className="p-2 rounded-xl bg-zinc-100/80 dark:bg-zinc-900 /80 dark:border-zinc-800">
+        <div className="p-2 rounded-2xl bg-gym-cardInner/80 /80">
           <span className="text-xs text-gym-textMuted font-bold uppercase block">
             Fats
           </span>
@@ -210,7 +216,7 @@ export function MealCard({
       </div>
 
       {/* Footer Controls: Portion Scaler & Action Buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-zinc-200/80 dark:border-zinc-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-gym-border">
         {/* Portion Multiplier Selector with Stepper & Fractions */}
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
           <div className="flex items-center gap-1">
@@ -225,13 +231,13 @@ export function MealCard({
           </div>
 
           {/* Stepper Buttons (- and +) */}
-          <div className="flex items-center bg-gym-cardInner rounded-xl p-0.5 ">
+          <div className="flex items-center bg-gym-cardInner rounded-2xl p-0.5 ">
             <button
               type="button"
               aria-label="Decrease portion"
               disabled={meal.portionMultiplier <= availableMultipliers[0]}
               onClick={() => handleStepPortion(-1)}
-              className="p-1.5 rounded-lg text-gym-textMuted hover:bg-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="p-1.5 rounded-lg text-gym-textMuted hover:bg-gym-card disabled:opacity-30 disabled:pointer-events-none transition-colors"
             >
               <Minus className="w-3 h-3" />
             </button>
@@ -243,7 +249,7 @@ export function MealCard({
               aria-label="Increase portion"
               disabled={meal.portionMultiplier >= availableMultipliers[availableMultipliers.length - 1]}
               onClick={() => handleStepPortion(1)}
-              className="p-1.5 rounded-lg text-gym-textMuted hover:bg-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="p-1.5 rounded-lg text-gym-textMuted hover:bg-gym-card disabled:opacity-30 disabled:pointer-events-none transition-colors"
             >
               <Plus className="w-3 h-3" />
             </button>
@@ -265,7 +271,7 @@ export function MealCard({
                 onClick={() => onPortionChange(meal.id, val)}
                 className={`px-2 py-1 rounded-lg font-bold text-xs transition-all ${
                   meal.portionMultiplier === val
-                    ? 'bg-zinc-900 text-white dark:bg-gym-lime dark:text-black font-semibold'
+                    ? 'bg-gym-lime text-gym-ink font-semibold'
                     : 'bg-gym-cardInner text-gym-textMuted hover:brightness-110'
                 }`}
               >
@@ -280,19 +286,19 @@ export function MealCard({
           <button
             type="button"
             onClick={() => onRecipeClick(meal)}
-            className="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-gym-text font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 sm:flex-none px-3 py-2 rounded-2xl bg-gym-cardInner hover:bg-gym-cardInner text-gym-text font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
           >
             <ChefHat className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
-            <span>Prep Guide</span>
+            <span>Recipe</span>
           </button>
 
           <button
             type="button"
             onClick={() => onSwapClick(meal)}
-            className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-gym-lime/10 hover:bg-gym-lime/20 text-gym-limeDark dark:text-gym-lime border border-gym-lime/40 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 sm:flex-none px-3.5 py-2 rounded-2xl bg-gym-lime/10 hover:bg-gym-lime/20 text-gym-limeDark dark:text-gym-lime border border-gym-lime/40 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
           >
             <RotateCw className="w-3.5 h-3.5" />
-            <span>Swap Meal</span>
+            <span>Swap</span>
           </button>
         </div>
       </div>

@@ -1,262 +1,218 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+import { exercisePhoto } from '@/lib/photos';
+import { Play } from 'lucide-react';
 import { MuscleGroup, Exercise } from '@/types/workout';
-import { exercises, getExercisesByMuscle } from '@/data/exercises';
-import { BodyVisualizer } from '@/components/body/BodyVisualizer';
-import { VideoModal } from '@/components/program/VideoModal';
+import { getExercisesByMuscle } from '@/data/exercises';
+import { BodyBuild, BodyFigure, BodyView, FRONT_MUSCLES, BACK_MUSCLES } from '@/components/body/BodyFigure';
 import { loadSavedProfile } from '@/lib/storage';
-import { Play, Sparkles, Activity, Layers, Dumbbell, ArrowRight, ArrowLeft } from 'lucide-react';
+import { VideoModal } from '@/components/program/VideoModal';
+import { MuscleLoad, daysAgoLabel, loadMuscleLoad } from '@/lib/muscleLoad';
+import { WORKOUT_LOGGED_EVENT } from '@/lib/workoutSession';
+
+const GROUPS: { name: string; muscles: MuscleGroup[] }[] = [
+  { name: 'Chest', muscles: ['chest'] },
+  { name: 'Shoulders', muscles: ['front_delts', 'side_delts', 'rear_delts'] },
+  { name: 'Arms', muscles: ['biceps', 'triceps', 'forearms'] },
+  { name: 'Core', muscles: ['abs', 'obliques', 'lower_back'] },
+  { name: 'Back', muscles: ['lats', 'upper_back', 'traps'] },
+  { name: 'Legs', muscles: ['quads', 'hamstrings', 'glutes', 'calves'] },
+];
+
+/** Sets in a week at which a muscle shows at full brightness */
+const FULL_BRIGHTNESS_SETS = 10;
+
+const formatMuscle = (m: MuscleGroup) =>
+  m.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
 export default function MuscleMapPage() {
-  const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup>('chest');
-  const [selectedVideoExercise, setSelectedVideoExercise] = useState<Exercise | null>(null);
-  const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [mobileTab, setMobileTab] = useState<'map' | 'exercises'>('map');
+  const [selected, setSelected] = useState<MuscleGroup>('chest');
+  const [view, setView] = useState<BodyView>('front');
+  const [build, setBuild] = useState<BodyBuild>('male');
 
-  const exerciseListRef = useRef<HTMLDivElement>(null);
-
-  // Sync default gender with saved user profile if available
+  // Start with the build from the user's questionnaire answers, if they have any
   useEffect(() => {
-    const profile = loadSavedProfile();
-    if (profile && profile.gender) {
-      setGender(profile.gender);
-    }
+    const gender = loadSavedProfile()?.gender;
+    if (gender) setBuild(gender);
+  }, []);
+  const [videoExercise, setVideoExercise] = useState<Exercise | null>(null);
+  const [load, setLoad] = useState<Partial<Record<MuscleGroup, MuscleLoad>>>({});
+
+  useEffect(() => {
+    const refresh = () => setLoad(loadMuscleLoad());
+    refresh();
+    window.addEventListener(WORKOUT_LOGGED_EVENT, refresh);
+    return () => window.removeEventListener(WORKOUT_LOGGED_EVENT, refresh);
   }, []);
 
-  const muscleList: MuscleGroup[] = [
-    'chest',
-    'lats',
-    'upper_back',
-    'front_delts',
-    'side_delts',
-    'rear_delts',
-    'biceps',
-    'triceps',
-    'forearms',
-    'abs',
-    'obliques',
-    'lower_back',
-    'quads',
-    'hamstrings',
-    'glutes',
-    'calves',
-  ];
+  const intensity = useMemo(() => {
+    const out: Partial<Record<MuscleGroup, number>> = {};
+    for (const [muscle, value] of Object.entries(load)) {
+      out[muscle as MuscleGroup] = (value?.setsThisWeek ?? 0) / FULL_BRIGHTNESS_SETS;
+    }
+    return out;
+  }, [load]);
 
-  const filteredExercises = getExercisesByMuscle(selectedMuscle);
+  const hasHistory = Object.values(load).some((l) => (l?.setsThisWeek ?? 0) > 0);
+  const exercises = getExercisesByMuscle(selected);
+  const selectedLoad = load[selected];
+  const group = GROUPS.find((g) => g.muscles.includes(selected)) ?? GROUPS[0];
 
-  const formatMuscle = (m: MuscleGroup) =>
-    m
-      .split('_')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-
-  const handleSelectMuscle = (m: MuscleGroup) => {
-    setSelectedMuscle(m);
+  // Choosing a muscle that is only on the other side turns the figure around
+  const select = (muscle: MuscleGroup) => {
+    setSelected(muscle);
+    const visible = view === 'front' ? FRONT_MUSCLES : BACK_MUSCLES;
+    if (!visible.includes(muscle)) setView(view === 'front' ? 'back' : 'front');
   };
 
+  const status = selectedLoad?.setsThisWeek
+    ? `${selectedLoad.setsThisWeek} ${selectedLoad.setsThisWeek === 1 ? 'set' : 'sets'} this week · last trained ${daysAgoLabel(selectedLoad.lastTrained!)}`
+    : selectedLoad?.lastTrained
+    ? `Last trained ${daysAgoLabel(selectedLoad.lastTrained)}`
+    : 'Not trained yet';
+
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8 animate-fadeIn">
-      {/* Page Title */}
-      <div className="text-center space-y-2 max-w-2xl mx-auto">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gym-lime/10 border border-gym-lime/30 text-xs font-bold text-gym-limeDark dark:text-gym-lime">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>INTERACTIVE ANATOMICAL EXPLORER</span>
-        </div>
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gym-text tracking-tight">
-          Muscle Map & Exercise Library
-        </h1>
-        <p className="text-xs sm:text-sm text-gym-textMuted max-w-xl mx-auto leading-relaxed">
-          Tap any muscle group on the anatomical figure below to explore exercises, form cues, and video demonstrations. Supports both male and female anatomy.
-        </p>
-      </div>
-
-      {/* Mobile-only View Switcher Tabs */}
-      <div className="flex lg:hidden items-center justify-center">
-        <div className="flex items-center gap-1 bg-gym-cardInner p-1.5 rounded-2xl w-full max-w-sm">
-          <button
-            type="button"
-            onClick={() => setMobileTab('map')}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 min-h-[44px] ${
-              mobileTab === 'map'
-                ? 'bg-gym-lime text-black '
-                : 'text-zinc-600 hover:text-gym-text dark:text-zinc-400 '
-            }`}
-          >
-            <Activity className="w-4 h-4" />
-            <span>Anatomical Map</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMobileTab('exercises')}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 min-h-[44px] ${
-              mobileTab === 'exercises'
-                ? 'bg-gym-lime text-black '
-                : 'text-zinc-600 hover:text-gym-text dark:text-zinc-400 '
-            }`}
-          >
-            <Dumbbell className="w-4 h-4" />
-            <span>Exercises ({filteredExercises.length})</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Container: Fixed Stable Layout to Prevent Layout Shifts */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start min-h-[750px]">
-        {/* Left Column: Interactive Body Map & Quick Filter Buttons */}
-        <div
-          className={`lg:col-span-5 lg:sticky lg:top-24 space-y-4 transition-all ${
-            mobileTab === 'exercises' ? 'hidden lg:block' : 'block'
-          }`}
-        >
-          {/* Anatomical Visualizer Container */}
-          <div className="bg-white dark:bg-gym-card rounded-2xl overflow-hidden ">
-            <BodyVisualizer
-              primaryMuscles={[selectedMuscle]}
-              selectedMuscle={selectedMuscle}
-              onMuscleClick={handleSelectMuscle}
-              gender={gender}
-              onGenderChange={(g) => setGender(g)}
-              allowGenderToggle={true}
-            />
-          </div>
-
-          {/* Mobile Direct Action Button to view selected exercises */}
-          <div className="block lg:hidden">
+    <div className="page pb-8 pt-1 lg:py-10">
+      <header className="flex items-center justify-between gap-3">
+        <h1 className="t-large">Body map</h1>
+        <div className="glass flex rounded-full p-1" role="group" aria-label="Side of the body">
+          {(['front', 'back'] as BodyView[]).map((v) => (
             <button
+              key={v}
               type="button"
-              onClick={() => setMobileTab('exercises')}
-              className="w-full py-3.5 px-5 rounded-2xl bg-gym-lime text-black font-bold text-sm flex items-center justify-center gap-2 hover:bg-gym-limeLight transition-all min-h-[48px]"
+              aria-pressed={view === v}
+              onClick={() => setView(v)}
+              className={`tap h-10 rounded-full px-[18px] text-sm capitalize ${
+                view === v ? 'bg-gym-text font-bold text-gym-bg' : 'font-semibold text-gym-text'
+              }`}
             >
-              <span>View {formatMuscle(selectedMuscle)} Exercises ({filteredExercises.length})</span>
-              <ArrowRight className="w-4 h-4 stroke-[3]" />
+              {v}
             </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="mt-3 flex justify-end">
+        <div className="glass flex rounded-full p-1" role="group" aria-label="Body type">
+          {(['male', 'female'] as BodyBuild[]).map((b) => (
+            <button
+              key={b}
+              type="button"
+              aria-pressed={build === b}
+              onClick={() => setBuild(b)}
+              className={`tap h-9 rounded-full px-4 text-[13px] capitalize ${
+                build === b ? 'bg-gym-lime font-bold text-gym-ink' : 'font-semibold text-gym-text'
+              }`}
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-2 grid gap-6 lg:mt-6 lg:grid-cols-12 lg:gap-12">
+        {/* Figure + muscle groups */}
+        <div className="relative isolate flex min-w-0 items-start gap-3 lg:col-span-6 lg:gap-8">
+          <div className="absolute left-0 top-16 -z-10 size-64 rounded-full bg-gym-lime/15 blur-[70px]" aria-hidden />
+          <div className="min-w-0 flex-1" style={{ perspective: 900 }}>
+            <BodyFigure view={view} build={build} selected={selected} intensity={intensity} onSelect={select} className="mx-auto w-full max-w-[17rem]" />
           </div>
 
-          {/* Quick Muscle Selector Pills */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-gym-card space-y-2.5 transition-colors">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gym-textMuted">
-                Quick Muscle Selector
-              </span>
-              <span className="text-xs text-gym-limeDark dark:text-gym-lime font-bold">
-                {formatMuscle(selectedMuscle)}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto pr-1 scrollbar-none">
-              {muscleList.map((m) => (
+          <div className="w-[8.25rem] shrink-0 space-y-2 pt-10 lg:w-44">
+            {GROUPS.map((g) => {
+              const active = g === group;
+              const sets = g.muscles.reduce((sum, m) => sum + (load[m]?.setsThisWeek ?? 0), 0);
+              const strength = Math.min(1, sets / FULL_BRIGHTNESS_SETS);
+              return (
                 <button
-                  key={m}
+                  key={g.name}
                   type="button"
-                  onClick={() => {
-                    handleSelectMuscle(m);
-                  }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all min-h-[36px] ${
-                    selectedMuscle === m
-                      ? 'bg-gym-lime text-black font-semibold scale-105'
-                      : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 text-zinc-700 hover:text-gym-text dark:text-zinc-300 border border-zinc-200 dark:border-transparent'
+                  aria-pressed={active}
+                  onClick={() => select(g.muscles.find((m) => (view === 'front' ? FRONT_MUSCLES : BACK_MUSCLES).includes(m)) ?? g.muscles[0])}
+                  className={`tap flex h-11 w-full items-center gap-2 rounded-full px-3.5 text-[13px] ${
+                    active ? 'bg-gym-lime font-bold text-gym-ink' : 'glass font-semibold text-gym-text'
                   }`}
                 >
-                  {formatMuscle(m)}
+                  <span
+                    className="size-2.5 shrink-0 rounded-full"
+                    style={{ background: active ? '#0B1004' : sets > 0 ? `rgb(var(--muscle-rgb) / ${(0.3 + 0.7 * strength).toFixed(2)})` : 'var(--muscle-line)' }}
+                    aria-hidden
+                  />
+                  <span className="flex-1 text-left">{g.name}</span>
+                  <span className="tabular-nums" aria-label={`${sets} sets this week`}>
+                    {sets}
+                  </span>
                 </button>
-              ))}
-            </div>
+              );
+            })}
+            <p className="t-small px-1 pt-1 !text-xs leading-snug">
+              {hasHistory ? 'Sets this week. Brighter means more work.' : 'Log sets in a workout and the body lights up.'}
+            </p>
           </div>
         </div>
 
-        {/* Right Column: Filtered Exercise List (Fixed min-height & internal scroll prevents page jumping) */}
-        <div
-          ref={exerciseListRef}
-          className={`lg:col-span-7 space-y-4 min-h-[600px] sm:min-h-[750px] transition-all ${
-            mobileTab === 'map' ? 'hidden lg:block' : 'block'
-          }`}
-        >
-          {/* Mobile Back to Map Bar */}
-          <div className="flex lg:hidden items-center justify-between p-3.5 rounded-2xl bg-gym-cardInner ">
-            <button
-              type="button"
-              onClick={() => setMobileTab('map')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-gym-limeDark dark:text-gym-lime hover:underline min-h-[44px]"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Anatomical Body</span>
-            </button>
-            <span className="text-xs sm:text-sm font-bold text-gym-silver">
-              {formatMuscle(selectedMuscle)}
-            </span>
-          </div>
-
-          {/* Header Bar */}
-          <div className="flex items-center justify-between p-4 sm:p-5 rounded-2xl bg-gym-cardAlt transition-colors">
-            <div className="space-y-0.5">
-              <span className="text-xs font-bold uppercase text-gym-limeDark dark:text-gym-lime tracking-wider block">
-                Targeted Muscle Area
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-gym-text">{formatMuscle(selectedMuscle)}</h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-bold text-gym-silver bg-gym-cardInner px-3.5 py-1.5 rounded-xl ">
-                {filteredExercises.length} Exercises Available
-              </span>
-            </div>
-          </div>
-
-          {/* Exercise Cards with internal scroll on desktop to prevent parent container collapse */}
-          <div className="space-y-3 lg:max-h-[650px] lg:overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-thumb-zinc-400 dark:scrollbar-thumb-zinc-700">
-            {filteredExercises.length === 0 ? (
-              <div className="p-8 text-center rounded-2xl bg-white dark:bg-gym-card text-gym-textMuted text-sm">
-                No exercises found for this muscle group.
+        {/* Selected muscle */}
+        <section className="min-w-0 lg:col-span-6" aria-live="polite">
+          <div key={selected} className="glass animate-riseIn rounded-[32px] p-5">
+            <div className="flex items-end justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-2xl font-bold tracking-[-0.03em] text-gym-text">{formatMuscle(selected)}</h2>
+                <p className="t-small !text-[13px]">{status}</p>
               </div>
-            ) : (
-              filteredExercises.map((ex) => (
-                <div
-                  key={ex.id}
-                  className="group p-4 sm:p-5 rounded-2xl bg-white dark:bg-gym-card hover:brightness-110 hover:border-gym-lime/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 "
-                >
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <h3 className="text-base sm:text-lg font-bold text-gym-text group-hover:text-gym-limeDark dark:group-hover:text-gym-lime transition-colors">
-                        {ex.name}
-                      </h3>
-                      <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase bg-gym-cardInner text-gym-silver shrink-0">
-                        {ex.equipment.replace('_', ' ')}
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-gym-textMuted line-clamp-2 max-w-xl">
-                      {ex.whyIncluded}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-gym-textMuted pt-1">
-                      <span className="text-zinc-500 font-semibold">Standard Protocol:</span>
-                      <span className="font-bold text-zinc-800 dark:text-zinc-300">
-                        {ex.defaultSets} sets × {ex.defaultReps} reps
-                      </span>
-                      <span>({ex.defaultRestSeconds}s rest)</span>
-                    </div>
-                  </div>
+              <span className="shrink-0 text-sm font-semibold text-gym-limeDark dark:text-gym-lime">
+                {exercises.length} {exercises.length === 1 ? 'exercise' : 'exercises'}
+              </span>
+            </div>
 
-                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedVideoExercise(ex)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs sm:text-sm transition-all min-h-[44px]"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-black" />
-                      <span>Watch Demo</span>
-                    </button>
-                  </div>
-                </div>
-              ))
+            {group.muscles.length > 1 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {group.muscles.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    aria-pressed={m === selected}
+                    onClick={() => select(m)}
+                    className={`tap min-h-[40px] rounded-full px-3.5 text-[13px] font-semibold ${
+                      m === selected ? 'bg-gym-text text-gym-bg' : 'glass-inset text-gym-text'
+                    }`}
+                  >
+                    {formatMuscle(m)}
+                  </button>
+                ))}
+              </div>
             )}
+
+            <ul className="stagger divide-line mt-2">
+              {exercises.map((ex, i) => (
+                <li key={ex.id} className="flex items-center gap-3 py-3" style={{ '--i': Math.min(i, 8) } as React.CSSProperties}>
+                  <span className="relative size-12 shrink-0 overflow-hidden rounded-2xl" aria-hidden>
+                    <Image src={exercisePhoto(ex)} alt="" fill sizes="48px" className="object-cover" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[15px] font-semibold text-gym-text">{ex.name}</p>
+                    <p className="t-small !text-xs capitalize">
+                      {ex.equipment} · {ex.defaultSets} × {ex.defaultReps}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setVideoExercise(ex)}
+                    aria-label={`Watch ${ex.name} demo`}
+                    className="tap flex size-11 shrink-0 items-center justify-center rounded-full bg-gym-lime text-gym-ink"
+                  >
+                    <Play className="h-4 w-4 fill-current" />
+                  </button>
+                </li>
+              ))}
+              {exercises.length === 0 && <li className="t-small py-4">Nothing in the library for this muscle yet.</li>}
+            </ul>
           </div>
-        </div>
+        </section>
       </div>
 
-      {/* Video Modal */}
-      <VideoModal
-        exercise={selectedVideoExercise}
-        isOpen={Boolean(selectedVideoExercise)}
-        onClose={() => setSelectedVideoExercise(null)}
-      />
+      <VideoModal exercise={videoExercise} isOpen={Boolean(videoExercise)} onClose={() => setVideoExercise(null)} />
     </div>
   );
 }

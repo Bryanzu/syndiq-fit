@@ -1,114 +1,52 @@
 import React from 'react';
 import Link from 'next/link';
-import { Play, Download, Sparkles, ArrowRight, ShieldCheck, CheckCircle2, Dumbbell, ArrowLeft } from 'lucide-react';
+import { Download, ArrowRight } from 'lucide-react';
+
+const CHAPTERS: [string, string][] = [
+  ['Build a program', 'Eight questions: your goal, schedule, equipment and any injuries.'],
+  ['Your week', 'Every training day laid out. Open an exercise, or swap one you don’t like.'],
+  ['Train', 'Follow the session set by set, log the weight, and rest on a timer.'],
+  ['Body map and meals', 'See which muscles you’ve worked, then plan a week of Nigerian food.'],
+];
 
 export default function DemoPage() {
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-10 animate-fadeIn">
-      {/* Header */}
-      <div className="space-y-3 text-center sm:text-left">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gym-textMuted hover:text-gym-limeDark dark:hover:text-gym-lime transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
-        </Link>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gym-lime/10 border border-gym-lime/30 text-xs font-bold text-gym-limeDark dark:text-gym-lime mb-2">
-              <Sparkles className="w-3.5 h-3.5 fill-gym-limeDark dark:fill-gym-lime" />
-              <span>OFFICIAL PRODUCT WALKTHROUGH</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gym-text tracking-tight">
-              Syndiq Fit Video Demo
-            </h1>
-          </div>
-          <a
-            href="/api/video"
-            download="syndiq-fit-demo.webm"
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs sm:text-sm transition-all shrink-0 min-h-[44px]"
-          >
-            <Download className="w-4 h-4 stroke-[2.5]" />
-            <span>Download Video (.webm)</span>
-          </a>
+    <div className="page max-w-5xl space-y-8 pb-10 pt-1 sm:py-10">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1.5">
+          <h1 className="t-large">See it in action</h1>
+          <p className="t-small max-w-xl">A 90-second walkthrough, from the first question to a finished set.</p>
         </div>
-        <p className="text-sm text-gym-textMuted max-w-2xl leading-relaxed">
-          Watch the end-to-end walkthrough demonstrating female body visualization, flexible equipment configuration, deterministic workout assembly, and intelligent exercise replacement.
-        </p>
-      </div>
+        <a href="/api/video" download="syndiq-fit-demo.webm" className="btn-secondary shrink-0 self-start sm:self-auto">
+          <Download className="h-4 w-4" /> Download video
+        </a>
+      </header>
 
-      {/* Video Player Card */}
-      <div className="relative rounded-2xl overflow-hidden bg-black ">
-        <video
-          controls
-          autoPlay
-          muted
-          playsInline
-          className="w-full aspect-[16/10] bg-black object-contain"
-          src="/api/video"
-        >
-          Your browser does not support the video tag. You can download the video using the link above.
+      <div className="overflow-hidden rounded-[32px] bg-black">
+        <video controls autoPlay muted playsInline className="aspect-[16/10] w-full bg-black object-contain" src="/api/video">
+          Your browser can’t play this video. Use the download link above.
         </video>
       </div>
 
-      {/* Walkthrough Chapters / Highlights */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-6 rounded-2xl bg-gym-card space-y-3">
-          <div className="flex items-center gap-2 text-gym-limeDark dark:text-gym-lime font-bold text-sm">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>1. Tailored Equipment Rebranding</span>
-          </div>
-          <p className="text-xs text-gym-textMuted leading-relaxed">
-            Demonstrates the new branding across the landing page, showing that Syndiq Fit adapts to whatever equipment you have available across 6 core categories.
-          </p>
-        </div>
+      <ol className="stagger grid gap-4 md:grid-cols-2">
+        {CHAPTERS.map(([title, body], i) => (
+          <li key={title} className="surface flex gap-4 !rounded-3xl p-5" style={{ '--i': i } as React.CSSProperties}>
+            <span className="text-3xl font-bold tabular-nums tracking-tight text-gym-limeDark dark:text-gym-lime">{i + 1}</span>
+            <div className="space-y-1">
+              <h2 className="t-section">{title}</h2>
+              <p className="t-small leading-relaxed">{body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
 
-        <div className="p-6 rounded-2xl bg-gym-card space-y-3">
-          <div className="flex items-center gap-2 text-gym-limeDark dark:text-gym-lime font-bold text-sm">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>2. Female Profile & Flexible Equipment Selector</span>
-          </div>
-          <p className="text-xs text-gym-textMuted leading-relaxed">
-            Walks through the questionnaire with female selection, testing quick presets (&quot;Home Dumbbells&quot; and &quot;Commercial Gym&quot;), category tabs, and real-time alias search.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-gym-card space-y-3">
-          <div className="flex items-center gap-2 text-gym-limeDark dark:text-gym-lime font-bold text-sm">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>3. Generated Program & Female Muscle Map</span>
-          </div>
-          <p className="text-xs text-gym-textMuted leading-relaxed">
-            Verifies that the generated program automatically renders the female anatomical silhouette without showing any male/female toggle switcher. Exercise hovers highlight active muscles dynamically.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-gym-card space-y-3">
-          <div className="flex items-center gap-2 text-gym-limeDark dark:text-gym-lime font-bold text-sm">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>4. Exercise Replacement & Standalone Map</span>
-          </div>
-          <p className="text-xs text-gym-textMuted leading-relaxed">
-            Demonstrates swapping an exercise with duplicate prevention, and tests the standalone muscle map where interactive Male/Female switching remains available.
-          </p>
-        </div>
-      </div>
-
-      {/* Try It CTA */}
-      <div className="p-8 rounded-2xl bg-gradient-to-r from-zinc-100 to-zinc-200/80 dark:from-zinc-900 dark:to-[#141414] border border-gym-lime/40 flex flex-col sm:flex-row items-center justify-between gap-6 ">
+      <div className="glass flex flex-col items-center justify-between gap-5 rounded-[32px] p-6 sm:flex-row sm:p-8">
         <div className="space-y-1 text-center sm:text-left">
-          <h3 className="text-xl sm:text-2xl font-bold text-gym-text">Experience It Live</h3>
-          <p className="text-xs sm:text-sm text-gym-textMuted">
-            Generate your own custom workout plan matched to your gym and goals.
-          </p>
+          <h2 className="text-xl font-bold tracking-tight text-gym-text sm:text-2xl">Try it yourself</h2>
+          <p className="t-small">Two minutes. No account needed.</p>
         </div>
-        <Link
-          href="/questionnaire"
-          className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-sm transition-all shrink-0 min-h-[48px]"
-        >
-          <span>Start Questionnaire</span>
-          <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+        <Link href="/questionnaire" className="btn-primary !min-h-[52px] shrink-0 px-7">
+          Build my program <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

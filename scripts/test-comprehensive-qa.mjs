@@ -5,6 +5,9 @@ import { BODYWEIGHT_ONLY_IDS, HOME_GYM_DUMBBELLS_IDS, ALL_SYNDIQ_EQUIPMENT_IDS }
 import { isContraindicated } from '../src/engine/injuryRules';
 import { generateWeeklyMealPlan } from '../src/engine/mealPlanner/mealPlanGenerator';
 import fs from 'fs';
+import { NIGERIAN_RECIPES } from '../src/data/nigerianRecipes';
+import { exercisePhoto, mealPhoto } from '../src/lib/photos';
+import { PHOTO_CREDITS } from '../src/data/photoCredits';
 import path from 'path';
 
 console.log('=================================================================');
@@ -220,6 +223,19 @@ const programPageContent = fs.readFileSync(path.resolve('./src/app/program/page.
 const detailIdx = programPageContent.indexOf('<ExerciseDetailModal');
 const videoIdx = programPageContent.indexOf('<VideoModal');
 assert(detailIdx !== -1 && videoIdx !== -1 && detailIdx < videoIdx, 'DOM hierarchy: ExerciseDetailModal is rendered before VideoModal for proper stacking');
+
+// -----------------------------------------------------------------------------
+// TEST 7: Photos
+// -----------------------------------------------------------------------------
+console.log('\n--- TEST 7: Photos ---');
+
+const usedPhotos = new Set([...exercises.map((e) => exercisePhoto(e)), ...NIGERIAN_RECIPES.map((r) => mealPhoto(r.id))]);
+const missingPhotos = [...usedPhotos].filter((p) => !fs.existsSync(path.resolve('./public' + p)));
+assert(missingPhotos.length === 0, `Every exercise and recipe photo exists on disk (missing: ${missingPhotos.join(', ') || 'none'})`);
+
+const credited = new Set(PHOTO_CREDITS.map((c) => c.file));
+const uncredited = [...usedPhotos].filter((p) => !credited.has(p));
+assert(uncredited.length === 0, `Every photo in use has a credit entry (uncredited: ${uncredited.join(', ') || 'none'})`);
 
 // -----------------------------------------------------------------------------
 // SUMMARY
