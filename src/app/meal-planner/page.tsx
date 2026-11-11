@@ -208,16 +208,16 @@ export default function MealPlannerPage() {
       {/* Wizard Modal / Overlay if building a new plan */}
       {isWizardOpen && (
         <div className="space-y-6">
-          <div className="relative rounded-3xl overflow-hidden border border-zinc-200 dark:border-gym-border bg-white dark:bg-gym-card shadow-lg transition-colors">
+          <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gym-card transition-colors">
             <div className="grid grid-cols-1 md:grid-cols-12 items-center">
               <div className="md:col-span-7 p-6 sm:p-10 space-y-3 z-10">
-                <span className="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-gym-lime text-black shadow-lime-sm inline-block">
+                <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-black inline-block">
                   Intelligent Nutrition
                 </span>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gym-text tracking-tight">
                   Nigerian Weekly Meal Planner
                 </h1>
-                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md">
+                <p className="text-xs sm:text-sm text-gym-textMuted leading-relaxed max-w-md">
                   Calibrated daily calories, protein synthesis targets, and practical pantry management using wholesome Nigerian food staples.
                 </p>
               </div>
@@ -257,22 +257,22 @@ export default function MealPlannerPage() {
       {!isWizardOpen && mealPlan && activeDay && (
         <div className="space-y-8">
           {/* Header Card */}
-          <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl transition-colors">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-gym-border">
+          <div className="bg-white dark:bg-gym-card rounded-2xl p-6 sm:p-8 space-y-6 transition-colors">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gym-border">
               <div className="space-y-2 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-gym-lime text-black shadow-lime-sm">
+                  <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-black ">
                     Syndiq Fit Nutrition
                   </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 flex items-center gap-1.5">
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gym-cardInner text-gym-silver flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
                     <span>7-Day Nigerian Cycle</span>
                   </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gym-text tracking-tight">
                   7-Day Nigerian Meal Planner
                 </h1>
-                <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                <p className="text-gym-textMuted text-xs sm:text-sm max-w-2xl leading-relaxed">
                   Scientifically calculated meal combinations using authentic Nigerian staples (Jollof, Egusi, Brown Beans, Titus, Yam, Ogbono, Awara). Accurate macros with zero inflated claims.
                 </p>
               </div>
@@ -283,7 +283,7 @@ export default function MealPlannerPage() {
                   type="button"
                   onClick={handleDownloadPdf}
                   disabled={isExportingPdf}
-                  className="px-5 py-3 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-xs sm:text-sm shadow-lime-md transition-all hover:scale-105 flex items-center gap-2 disabled:opacity-50 min-h-[44px]"
+                  className="px-5 py-3 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-xs sm:text-sm transition-all flex items-center gap-2 disabled:opacity-50 min-h-[44px]"
                 >
                   <FileDown className="w-4 h-4" />
                   <span>{isExportingPdf ? 'Exporting PDF...' : 'Download PDF Plan'}</span>
@@ -292,7 +292,7 @@ export default function MealPlannerPage() {
                 <button
                   type="button"
                   onClick={handleRegenerateWeek}
-                  className="px-4 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs sm:text-sm border border-zinc-300 dark:border-zinc-700 transition-colors flex items-center gap-2 min-h-[44px]"
+                  className="px-4 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-gym-text font-bold text-xs sm:text-sm transition-colors flex items-center gap-2 min-h-[44px]"
                   title="Shuffle meals for a fresh 7-day variation"
                 >
                   <RefreshCw className="w-4 h-4 text-gym-limeDark dark:text-gym-lime" />
@@ -302,7 +302,7 @@ export default function MealPlannerPage() {
                 <button
                   type="button"
                   onClick={() => setIsPortionGuideOpen(true)}
-                  className="px-3.5 py-3 rounded-xl bg-slate-50 hover:bg-zinc-100 dark:bg-[#141414] dark:hover:bg-zinc-800 text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white border border-zinc-200 dark:border-gym-border transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
+                  className="px-3.5 py-3 rounded-xl bg-slate-50 hover:bg-gym-cardInner text-zinc-700 hover:text-gym-text dark:text-zinc-300 transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
                   title="How Portions & Serving Sizes Work"
                 >
                   <Scale className="w-4 h-4 text-gym-limeDark dark:text-gym-lime" />
@@ -312,7 +312,7 @@ export default function MealPlannerPage() {
                 <button
                   type="button"
                   onClick={() => setIsWizardOpen(true)}
-                  className="px-3.5 py-3 rounded-xl bg-slate-50 hover:bg-zinc-100 dark:bg-[#141414] dark:hover:bg-zinc-800 text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white border border-zinc-200 dark:border-gym-border transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
+                  className="px-3.5 py-3 rounded-xl bg-slate-50 hover:bg-gym-cardInner text-zinc-700 hover:text-gym-text dark:text-zinc-300 transition-colors flex items-center gap-1.5 text-xs sm:text-sm font-semibold min-h-[44px]"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span className="hidden sm:inline">Reconfigure</span>
@@ -325,14 +325,14 @@ export default function MealPlannerPage() {
           </div>
 
           {/* View Mode Switcher: 7-Day Plan vs Market Shopping List */}
-          <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2">
+          <div className="flex items-center gap-2 border-b border-gym-border pb-2">
             <button
               type="button"
               onClick={() => setActiveTab('plan')}
-              className={`px-5 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm flex items-center gap-2 transition-all min-h-[42px] ${
+              className={`px-5 py-2.5 rounded-2xl font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all min-h-[42px] ${
                 activeTab === 'plan'
-                  ? 'bg-gym-lime text-black shadow-lime-sm'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-900'
+                  ? 'bg-gym-lime text-black '
+                  : 'text-gym-textMuted hover:text-gym-text bg-gym-cardInner'
               }`}
             >
               <Utensils className="w-4 h-4" />
@@ -342,15 +342,15 @@ export default function MealPlannerPage() {
             <button
               type="button"
               onClick={() => setActiveTab('shopping')}
-              className={`px-5 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm flex items-center gap-2 transition-all min-h-[42px] ${
+              className={`px-5 py-2.5 rounded-2xl font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all min-h-[42px] ${
                 activeTab === 'shopping'
-                  ? 'bg-gym-lime text-black shadow-lime-sm'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-900'
+                  ? 'bg-gym-lime text-black '
+                  : 'text-gym-textMuted hover:text-gym-text bg-gym-cardInner'
               }`}
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Market Shopping List</span>
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-black/10 dark:bg-white/10">
+              <span className="px-1.5 py-0.5 rounded-full text-xs font-bold bg-black/10 dark:bg-white/10">
                 {shoppingList.filter((i) => i.toBuyQuantity > 0).length}
               </span>
             </button>
@@ -372,22 +372,22 @@ export default function MealPlannerPage() {
                       onClick={() => setSelectedDayNumber(day.dayNumber)}
                       className={`p-3 sm:p-4 rounded-2xl border text-left transition-all shrink-0 min-w-[130px] sm:min-w-[150px] ${
                         isSelected
-                          ? 'bg-zinc-900 text-white dark:bg-[#18181b] border-gym-lime ring-2 ring-gym-lime shadow-lime-sm'
-                          : 'bg-white dark:bg-gym-card border-zinc-200 dark:border-gym-border text-zinc-700 dark:text-zinc-300 hover:border-zinc-300'
+                          ? 'bg-zinc-900 text-white dark:bg-[#18181b] border-gym-lime ring-2 ring-gym-lime '
+                          : 'bg-white dark:bg-gym-card border-gym-border text-gym-silver hover:border-zinc-300'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-black uppercase tracking-wider block">
+                        <span className="text-xs font-bold uppercase tracking-wider block">
                           {day.dayName.slice(0, 3)}
                         </span>
                         {completedMeals === day.meals.length && (
                           <span className="w-2 h-2 rounded-full bg-gym-lime" />
                         )}
                       </div>
-                      <span className="text-xs sm:text-sm font-extrabold block truncate">
+                      <span className="text-xs sm:text-sm font-semibold block truncate">
                         {day.totalCalories} kcal
                       </span>
-                      <span className="text-[10px] text-zinc-400 block">
+                      <span className="text-xs text-zinc-400 block">
                         {day.totalProtein}g protein
                       </span>
                     </button>
@@ -398,10 +398,10 @@ export default function MealPlannerPage() {
               {/* Day Title & Completed Indicator */}
               <div className="flex items-center justify-between gap-3">
                 <div className="space-y-0.5">
-                  <h2 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gym-text">
                     {activeDay.dayName}&apos;s Nutrition Schedule
                   </h2>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-gym-textMuted">
                     {activeDay.meals.length} planned meals • {activeDay.totalCalories} total calories • {activeDay.totalProtein}g protein
                   </p>
                 </div>

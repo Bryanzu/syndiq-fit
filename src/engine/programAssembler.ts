@@ -3,7 +3,7 @@ import { UserProfile } from '@/types/questionnaire';
 import { exercises } from '@/data/exercises';
 import { TEMPLATES_BY_FREQUENCY, TemplateSlot } from '@/data/templates';
 import { enhanceExercise } from './patternClassifier';
-import { isExerciseAvailable } from './equipmentFilter';
+import { isExerciseAvailable, isBodyweightOnlyEquipment, normalizeEquipmentSet } from './equipmentFilter';
 import { isContraindicated, getInjurySubstitutionReason, findSafeAlternative } from './injuryRules';
 import {
   getTargetExerciseCount,
@@ -23,10 +23,12 @@ function getEnhancedExercise(id: string): Exercise | undefined {
 // Exercises with high axial compressive loading on the spine to avoid for lifters aged 51+
 const AXIAL_SPINAL_LOAD_IDS = new Set([
   'barbell-back-squat',
-  'barbell-deadlift',
+  'conventional-deadlift',
   'barbell-overhead-press',
   'good-morning',
 ]);
+
+const LOWER_BODY_MUSCLES: MuscleGroup[] = ['quads', 'hamstrings', 'glutes', 'calves'];
 
 /**
  * Generates an individualized, rule-driven workout program tailored to Syndiq Fit's verified
@@ -41,6 +43,22 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
   const isFemale = profile.gender === 'female';
   const isSenior = profile.age === '51-60' || profile.age === '61+';
 
+  const prefersLoaded = !isBodyweightOnlyEquipment(profile.availableEquipment);
+  // Normalised so legacy/composite IDs (e.g. 'leg_press_hack_squat') count as the machines they provide
+  const ownedEquipment = [...normalizeEquipmentSet(profile.availableEquipment)];
+  const ownsMachines = ownedEquipment.some((id) => id.includes('machine') && id !== 'rowing_machine');
+  const ownsKettlebells = ownedEquipment.some((id) => id.startsWith('kettlebell'));
+  // 0 = loaded movement on gear the user actually has, 1 = floor-only bodyweight, 2 = improvised substitute
+  const equipmentFitRank = (ex: Exercise): number => {
+    if (ex.equipment === 'machine' && !ownsMachines) return 2;
+    if (ex.equipment === 'kettlebell' && !ownsKettlebells) return 2;
+    return ex.isStrictBodyweight ? 1 : 0;
+  };
+
+  // How many times each exercise has been used on earlier days. Used as a ranking tie-breaker
+  // so repeated slots across the week (e.g. Push A / Push B) rotate through different movements.
+  const weeklyUsage = new Map<string, number>();
+
   // 2. Assemble each workout day
   const days: WorkoutDay[] = template.days.map((dayTemplate, dayIndex) => {
     const selectedExerciseIds = new Set<string>();
@@ -51,7 +69,9 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
 
     // For female users: adjust high-frequency push isolations towards posterior chain / glutes
     // unless user explicitly selected upper-body focus goals
-    if (isFemale && profile.goal !== 'chest_emphasis' && profile.goal !== 'arm_emphasis') {
+    // Only on days that already train the lower body, so a hinge never lands on a push/upper day.
+    const dayTrainsLowerBody = dayTemplate.focusMuscles.some((m) => LOWER_BODY_MUSCLES.includes(m));
+    if (isFemale && dayTrainsLowerBody && profile.goal !== 'chest_emphasis' && profile.goal !== 'arm_emphasis') {
       let replacedOne = false;
       activeSlots = activeSlots.map((slot) => {
         if (!replacedOne && (slot.pattern === 'isolation_triceps' || slot.pattern === 'isolation_delts')) {
@@ -72,6 +92,16 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
       const essential = activeSlots.filter((s) => s.isEssential);
       const optional = activeSlots.filter((s) => !s.isEssential);
       activeSlots = [...essential, ...optional].slice(0, targetExerciseCount);
+    } else if (activeSlots.length < targetExerciseCount) {
+      // Long sessions (90–120 min) ask for more exercises than the template has slots.
+      // Fill the gap with extra accessory work drawn from the day's own slots (accessories first).
+      const optional = activeSlots.filter((s) => !s.isEssential);
+      const essential = activeSlots.filter((s) => s.isEssential);
+      const extraSource = [...optional, ...essential];
+      for (let i = 0; activeSlots.length < targetExerciseCount && extraSource.length > 0; i++) {
+        const base = extraSource[i % extraSource.length];
+        activeSlots.push({ ...base, isEssential: false, tierPreference: base.tierPreference === 1 ? 2 : base.tierPreference });
+      }
     }
 
     // 3. Select exercises for each slot
@@ -110,6 +140,21 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
             const bDiff = Math.abs((b.tier || 2) - slot.tierPreference);
             if (aDiff !== bDiff) return aDiff - bDiff;
           }
+
+          // With equipment available, prefer loaded movements over floor-only bodyweight ones
+          // for strength slots (core and conditioning are fine either way).
+          // Machine / kettlebell movements that are only possible by improvising with other gear
+          // (e.g. a "machine" calf raise done with dumbbells) rank last.
+          if (prefersLoaded && slot.pattern !== 'core' && slot.pattern !== 'conditioning') {
+            const aRank = equipmentFitRank(a);
+            const bRank = equipmentFitRank(b);
+            if (aRank !== bRank) return aRank - bRank;
+          }
+
+          // Weekly variety: prefer movements not yet used on earlier days
+          const aUsed = weeklyUsage.get(a.id) || 0;
+          const bUsed = weeklyUsage.get(b.id) || 0;
+          if (aUsed !== bUsed) return aUsed - bUsed;
 
           // Beginner safety: prefer machine or dumbbell over heavy barbell
           if (profile.experience === 'complete_beginner') {
@@ -189,9 +234,27 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
         }
       }
 
+      // 3d. Broader safety net: any safe exercise matching day's focus muscles or core
+      if (!chosenExercise) {
+        const fallbackAny = enhancedExercises.find(
+          (ex) =>
+            !selectedExerciseIds.has(ex.id) &&
+            (ex.primaryMuscles.some((m) => dayTemplate.focusMuscles.includes(m)) || ex.movementPattern === 'core' || ex.movementPattern === 'conditioning') &&
+            !isContraindicated(ex, profile.injuries) &&
+            isExerciseAvailable(ex, profile.availableEquipment) &&
+            (!isSenior || !AXIAL_SPINAL_LOAD_IDS.has(ex.id))
+        );
+        if (fallbackAny) {
+          chosenExercise = fallbackAny;
+          isSubstituted = true;
+          substitutionReason = 'Adapted for available gym equipment';
+        }
+      }
+
       // 4. Assign volume and push to day list
       if (chosenExercise) {
         selectedExerciseIds.add(chosenExercise.id);
+        weeklyUsage.set(chosenExercise.id, (weeklyUsage.get(chosenExercise.id) || 0) + 1);
         const volume = adaptExerciseVolume(chosenExercise, profile);
 
         dayExercises.push({
@@ -220,13 +283,24 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
       }
     }
 
-    // If estimated duration is under target by > 12%, add 1 set to main compounds
+    // If estimated duration is under target by > 12%, add sets one round at a time
+    // (compounds first, since they lead the day) until the session fills the requested time.
     if (estimatedDuration < profile.duration * 0.88 && dayExercises.length > 0) {
-      for (let i = 0; i < Math.min(3, dayExercises.length); i++) {
-        if (dayExercises[i].sets < 4) {
-          dayExercises[i].sets += 1;
-          estimatedDuration = calculateWorkoutDuration(dayExercises);
-          if (estimatedDuration >= profile.duration * 0.95) break;
+      const setCap = (item: WorkoutExerciseItem): number => {
+        if (profile.experience === 'complete_beginner') return 3;
+        if (isSenior) return 4;
+        return (item.exercise.tier || 3) <= 2 ? 5 : 4;
+      };
+      let added = true;
+      while (added && estimatedDuration < profile.duration * 0.95) {
+        added = false;
+        for (const item of dayExercises) {
+          if (item.sets < setCap(item)) {
+            item.sets += 1;
+            added = true;
+            estimatedDuration = calculateWorkoutDuration(dayExercises);
+            if (estimatedDuration >= profile.duration * 0.95) break;
+          }
         }
       }
     }
@@ -295,7 +369,13 @@ function matchesGoal(exercise: Exercise, goal: string): boolean {
   if (goal === 'glute_emphasis' && (exercise.primaryMuscles.includes('glutes') || exercise.primaryMuscles.includes('hamstrings'))) return true;
   if (goal === 'core_emphasis' && (exercise.primaryMuscles.includes('abs') || exercise.primaryMuscles.includes('obliques'))) return true;
   if (goal === 'lean_toned' && (exercise.primaryMuscles.includes('glutes') || exercise.primaryMuscles.includes('abs'))) return true;
-  if (goal === 'build_strength' && exercise.tier === 1) return true;
+  if ((goal === 'build_strength' || goal === 'overall_strength') && exercise.tier === 1) return true;
+  if ((goal === 'muscle_building' || goal === 'beginner_strength') && (exercise.tier === 1 || exercise.tier === 2)) return true;
+  if (
+    goal === 'athletic_performance' &&
+    (exercise.tier === 1 || exercise.movementPattern === 'conditioning' || exercise.movementPattern === 'carry')
+  )
+    return true;
   if (goal === 'fat_loss' && (exercise.movementPattern === 'conditioning' || exercise.tier === 3)) return true;
   if (goal === 'endurance' && (exercise.movementPattern === 'conditioning' || exercise.tier === 3)) return true;
   return false;

@@ -109,17 +109,17 @@ export default function FeedbackPage() {
   return (
     <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-8 animate-fadeIn">
       {/* Top Banner Card with Fitness Photography */}
-      <div className="relative rounded-3xl overflow-hidden border border-zinc-200 dark:border-gym-border bg-white dark:bg-gym-card shadow-lg transition-colors">
+      <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gym-card transition-colors">
         <div className="grid grid-cols-1 md:grid-cols-12 items-center">
           <div className="md:col-span-7 p-6 sm:p-10 space-y-3 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-gym-lime text-black shadow-lime-sm">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-black ">
               <MessageSquare className="w-3.5 h-3.5" />
               <span>Tester Community</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-900 dark:text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gym-text tracking-tight">
               Share Your Feedback
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md">
+            <p className="text-xs sm:text-sm text-gym-textMuted leading-relaxed max-w-md">
               Testing Syndiq Fit? Let us know what worked, what felt confusing, or any issues you encountered. No registration or password required.
             </p>
           </div>
@@ -129,7 +129,7 @@ export default function FeedbackPage() {
               src="/images/fitness-hero.jpg"
               alt="Syndiq Fit community athlete training"
               fill
-              className="object-cover opacity-85 object-center hover:scale-105 transition-transform duration-700"
+              className="object-cover opacity-85 object-center transition-transform duration-700"
               sizes="(max-width: 768px) 100vw, 40vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white dark:from-gym-card via-transparent to-transparent md:w-24 pointer-events-none" />
@@ -138,17 +138,17 @@ export default function FeedbackPage() {
       </div>
 
       {/* Main Feedback Form Card */}
-      <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-10 shadow-sm transition-colors">
+      <div className="bg-white dark:bg-gym-card rounded-2xl p-6 sm:p-10 transition-colors">
         {isSuccess ? (
           <div className="text-center py-10 space-y-6 animate-fadeIn">
-            <div className="w-16 h-16 mx-auto rounded-3xl bg-gym-lime/20 border border-gym-lime flex items-center justify-center text-gym-limeDark dark:text-gym-lime shadow-lime-sm">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-gym-lime/20 border border-gym-lime flex items-center justify-center text-gym-limeDark dark:text-gym-lime ">
               <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-zinc-900 dark:text-white">
+              <h2 className="text-2xl font-bold text-gym-text">
                 Feedback Received!
               </h2>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto">
+              <p className="text-sm text-gym-textMuted max-w-md mx-auto">
                 Thank you for helping us polish Syndiq Fit. Your comments are stored centrally for our team to review.
               </p>
             </div>
@@ -156,13 +156,13 @@ export default function FeedbackPage() {
               <button
                 type="button"
                 onClick={() => setIsSuccess(false)}
-                className="px-6 py-3 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-sm shadow-lime-sm transition-all hover:scale-105"
+                className="px-6 py-3 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-sm transition-all "
               >
                 Submit Another Comment
               </button>
               <Link
                 href="/program"
-                className="px-5 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-sm transition-colors"
+                className="px-5 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-gym-text font-bold text-sm transition-colors"
               >
                 Back to Workout Plan
               </Link>
@@ -182,12 +182,12 @@ export default function FeedbackPage() {
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="fb-username"
-                  className="text-xs font-black uppercase tracking-wider text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5"
+                  className="text-xs font-bold uppercase tracking-wider text-gym-silver flex items-center gap-1.5"
                 >
                   <User className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
                   <span>Your Name or Tester Nickname *</span>
                 </label>
-                <span className="text-[11px] text-zinc-400">No account required</span>
+                <span className="text-xs text-zinc-400">No account required</span>
               </div>
               <input
                 id="fb-username"
@@ -197,13 +197,13 @@ export default function FeedbackPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#121212] border border-zinc-200 dark:border-gym-border text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime ring-1 ring-transparent focus:ring-gym-lime transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-gym-cardAlt text-sm text-gym-text placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime ring-1 ring-transparent focus:ring-gym-lime transition-all"
               />
             </div>
 
             {/* Feedback Category */}
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-wider text-zinc-700 dark:text-zinc-300 block">
+              <label className="text-xs font-bold uppercase tracking-wider text-gym-silver block">
                 Category *
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -214,16 +214,16 @@ export default function FeedbackPage() {
                     onClick={() => setCategory(cat.id)}
                     className={`p-3.5 rounded-2xl border text-left flex items-start gap-3 transition-all min-h-[52px] ${
                       category === cat.id
-                        ? 'bg-gym-lime/15 border-gym-lime text-zinc-900 dark:text-white shadow-lime-sm ring-1 ring-gym-lime font-bold'
-                        : 'bg-slate-50 dark:bg-[#121212] border-zinc-200 dark:border-gym-border text-zinc-700 dark:text-zinc-300 hover:border-zinc-300'
+                        ? 'bg-gym-lime/15 border-gym-lime text-gym-text ring-1 ring-gym-lime font-bold'
+                        : 'bg-gym-cardAlt border-gym-border text-gym-silver hover:border-zinc-300'
                     }`}
                   >
-                    <div className="p-1 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shrink-0 mt-0.5">
+                    <div className="p-1 rounded-lg bg-gym-card shrink-0 mt-0.5">
                       {cat.icon}
                     </div>
                     <div className="min-w-0">
                       <span className="text-xs font-bold block">{cat.label}</span>
-                      <span className="text-[10px] text-zinc-500 block leading-tight">{cat.desc}</span>
+                      <span className="text-xs text-zinc-500 block leading-tight">{cat.desc}</span>
                     </div>
                   </button>
                 ))}
@@ -235,13 +235,13 @@ export default function FeedbackPage() {
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="fb-message"
-                  className="text-xs font-black uppercase tracking-wider text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5"
+                  className="text-xs font-bold uppercase tracking-wider text-gym-silver flex items-center gap-1.5"
                 >
                   <MessageSquare className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
                   <span>Feedback Message *</span>
                 </label>
                 <span
-                  className={`text-[11px] font-mono ${
+                  className={`text-xs font-mono ${
                     message.length > 1100 ? 'text-amber-500 font-bold' : 'text-zinc-400'
                   }`}
                 >
@@ -256,13 +256,13 @@ export default function FeedbackPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#121212] border border-zinc-200 dark:border-gym-border text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime ring-1 ring-transparent focus:ring-gym-lime transition-all resize-y"
+                className="w-full px-4 py-3 rounded-xl bg-gym-cardAlt text-sm text-gym-text placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime ring-1 ring-transparent focus:ring-gym-lime transition-all resize-y"
               />
             </div>
 
             {/* Submit Action */}
             <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <span className="text-[11px] text-zinc-400 flex items-center gap-1">
+              <span className="text-xs text-zinc-400 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-gym-limeDark dark:text-gym-lime" />
                 <span>Your submission is securely delivered directly to our app administrator.</span>
               </span>
@@ -270,7 +270,7 @@ export default function FeedbackPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-8 py-3.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-sm shadow-lime-md transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[48px]"
+                className="px-8 py-3.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 min-h-[48px]"
               >
                 {isSubmitting ? (
                   <span>Submitting...</span>

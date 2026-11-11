@@ -8,6 +8,10 @@ export function formatPortionFraction(multiplier: number): string {
       return '1¼ servings';
     case 1.5:
       return '1½ servings';
+    case 1.75:
+      return '1¾ servings';
+    case 2.0:
+      return '2 servings';
     default:
       return `${multiplier}x serving`;
   }

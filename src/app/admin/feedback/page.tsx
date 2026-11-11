@@ -143,15 +143,15 @@ export default function AdminFeedbackPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl transition-colors">
+        <div className="w-full max-w-md bg-white dark:bg-gym-card rounded-2xl p-6 sm:p-8 space-y-6 transition-colors">
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shadow-lime-sm">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-gym-cardInner flex items-center justify-center text-gym-limeDark dark:text-gym-lime ">
               <Lock className="w-7 h-7" />
             </div>
-            <h1 className="text-2xl font-black text-zinc-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-gym-text">
               Administrator Portal
             </h1>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-gym-textMuted">
               Enter your Syndiq Fit administrator key to review submissions and bug reports.
             </p>
           </div>
@@ -165,7 +165,7 @@ export default function AdminFeedbackPage() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              <label className="text-xs font-bold uppercase tracking-wider text-gym-textMuted">
                 Administrator Key
               </label>
               <input
@@ -174,14 +174,14 @@ export default function AdminFeedbackPage() {
                 value={keyInput}
                 onChange={(e) => setKeyInput(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#121212] border border-zinc-200 dark:border-gym-border text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime"
+                className="w-full px-4 py-3 rounded-xl bg-gym-cardAlt text-sm text-gym-text placeholder:text-zinc-400 focus:outline-none focus:border-gym-lime"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-sm shadow-lime-sm transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3.5 rounded-xl bg-gym-lime hover:bg-gym-limeLight text-black font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isLoading ? <span>Verifying...</span> : <span>Access Feedback Review</span>}
             </button>
@@ -194,20 +194,20 @@ export default function AdminFeedbackPage() {
   return (
     <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-8 animate-fadeIn">
       {/* Top Header Card */}
-      <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl transition-colors">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-200 dark:border-gym-border">
+      <div className="bg-white dark:bg-gym-card rounded-2xl p-6 sm:p-8 space-y-6 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gym-border">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-gym-lime text-black shadow-lime-sm flex items-center gap-1.5">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gym-lime text-black flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>Admin Review</span>
               </span>
               <span className="text-xs text-zinc-400">Authorized Session</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gym-text">
               Tester Submissions & Feedback
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs sm:text-sm text-gym-textMuted">
               Review, mark, and organize community feedback and bug reports across all tester devices.
             </p>
           </div>
@@ -217,7 +217,7 @@ export default function AdminFeedbackPage() {
               type="button"
               onClick={() => fetchFeedback(adminKey)}
               disabled={isLoading}
-              className="px-3.5 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold text-xs flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-gym-silver font-bold text-xs flex items-center gap-1.5 transition-colors"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
@@ -234,33 +234,33 @@ export default function AdminFeedbackPage() {
 
         {/* Analytics Statistics Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-zinc-800">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block">Total</span>
-            <span className="text-2xl font-black text-zinc-900 dark:text-white">{stats.total}</span>
+          <div className="p-4 rounded-2xl bg-gym-cardAlt ">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 block">Total</span>
+            <span className="text-2xl font-bold text-gym-text">{stats.total}</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
               Pending Review
             </span>
-            <span className="text-2xl font-black text-amber-600 dark:text-amber-400">{stats.unreviewed}</span>
+            <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.unreviewed}</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-zinc-800">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block">Suggestions</span>
-            <span className="text-2xl font-black text-zinc-900 dark:text-white">{stats.suggestions}</span>
+          <div className="p-4 rounded-2xl bg-gym-cardAlt ">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 block">Suggestions</span>
+            <span className="text-2xl font-bold text-gym-text">{stats.suggestions}</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#141414] border border-zinc-200 dark:border-zinc-800">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-red-500 block">Bug Reports</span>
-            <span className="text-2xl font-black text-red-500">{stats.bugs}</span>
+          <div className="p-4 rounded-2xl bg-gym-cardAlt ">
+            <span className="text-xs font-bold uppercase tracking-wider text-red-500 block">Bug Reports</span>
+            <span className="text-2xl font-bold text-red-500">{stats.bugs}</span>
           </div>
         </div>
 
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           {/* Status Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-[#121212] border border-zinc-200 dark:border-zinc-800 text-xs">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gym-cardInner text-xs">
             {(['all', 'unreviewed', 'reviewed'] as const).map((st) => (
               <button
                 key={st}
@@ -268,8 +268,8 @@ export default function AdminFeedbackPage() {
                 onClick={() => setFilterReviewed(st)}
                 className={`px-3 py-1.5 rounded-lg font-bold capitalize transition-all ${
                   filterReviewed === st
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                    ? 'bg-gym-card text-gym-text '
+                    : 'text-gym-textMuted hover:text-gym-text '
                 }`}
               >
                 {st}
@@ -286,8 +286,8 @@ export default function AdminFeedbackPage() {
                 onClick={() => setFilterCategory(cat)}
                 className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap capitalize border transition-all ${
                   filterCategory === cat
-                    ? 'bg-gym-lime text-black border-gym-lime shadow-lime-sm'
-                    : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    ? 'bg-gym-lime text-black border-gym-lime '
+                    : 'bg-gym-card border-gym-border text-gym-textMuted'
                 }`}
               >
                 {cat === 'all' ? 'All Categories' : cat}
@@ -307,10 +307,10 @@ export default function AdminFeedbackPage() {
       {/* Feedback Items List */}
       <div className="space-y-4">
         {filteredList.length === 0 ? (
-          <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl p-12 text-center space-y-3">
+          <div className="bg-white dark:bg-gym-card rounded-2xl p-12 text-center space-y-3">
             <MessageSquare className="w-10 h-10 mx-auto text-zinc-400" />
-            <h3 className="text-base font-bold text-zinc-900 dark:text-white">No Submissions Found</h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+            <h3 className="text-base font-bold text-gym-text">No Submissions Found</h3>
+            <p className="text-xs text-gym-textMuted max-w-sm mx-auto">
               No tester feedback matches the currently selected filter options.
             </p>
           </div>
@@ -318,23 +318,23 @@ export default function AdminFeedbackPage() {
           filteredList.map((item) => (
             <div
               key={item.id}
-              className={`rounded-2xl sm:rounded-3xl border transition-all p-5 sm:p-6 space-y-4 ${
+              className={`rounded-2xl sm:rounded-2xl border transition-all p-5 sm:p-6 space-y-4 ${
                 item.reviewed
-                  ? 'bg-white/60 dark:bg-gym-card/60 border-zinc-200 dark:border-zinc-800 opacity-85'
-                  : 'bg-white dark:bg-gym-card border-zinc-200 dark:border-gym-border shadow-sm ring-1 ring-amber-500/20'
+                  ? 'bg-gym-cardAlt border-gym-border opacity-85'
+                  : 'bg-white dark:bg-gym-card border-gym-border ring-1 ring-amber-500/20'
               }`}
             >
               {/* Header Info */}
               <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-200/80 dark:border-zinc-800/80">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
+                  <div className="w-7 h-7 rounded-lg bg-gym-cardInner flex items-center justify-center text-gym-silver">
                     <User className="w-3.5 h-3.5" />
                   </div>
-                  <span className="font-extrabold text-sm text-zinc-900 dark:text-white">
+                  <span className="font-semibold text-sm text-gym-text">
                     {item.username}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                    className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
                       item.category === 'bug'
                         ? 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30'
                         : item.category === 'suggestion'
@@ -348,8 +348,8 @@ export default function AdminFeedbackPage() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-                  <span className="flex items-center gap-1 font-mono text-[11px]">
+                <div className="flex items-center gap-3 text-xs text-gym-textMuted">
+                  <span className="flex items-center gap-1 font-mono text-xs">
                     <Clock className="w-3 h-3" />
                     {new Date(item.createdAt).toLocaleString(undefined, {
                       month: 'short',
@@ -360,12 +360,12 @@ export default function AdminFeedbackPage() {
                     })}
                   </span>
                   {item.reviewed ? (
-                    <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">
+                    <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
                       <CheckCircle2 className="w-3 h-3" />
                       <span>Reviewed</span>
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold text-[11px]">
+                    <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold text-xs">
                       <Clock className="w-3 h-3" />
                       <span>Unreviewed</span>
                     </span>
@@ -374,22 +374,22 @@ export default function AdminFeedbackPage() {
               </div>
 
               {/* Message Body */}
-              <div className="bg-slate-50 dark:bg-[#121212] p-4 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60">
-                <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed whitespace-pre-wrap">
+              <div className="bg-gym-cardAlt p-4 rounded-xl /60 dark:border-zinc-800/60">
+                <p className="text-xs sm:text-sm text-gym-text leading-relaxed whitespace-pre-wrap">
                   {item.message}
                 </p>
               </div>
 
               {/* Footer Actions */}
               <div className="flex items-center justify-between gap-2 pt-1 text-xs">
-                <span className="font-mono text-[10px] text-zinc-400">ID: {item.id}</span>
+                <span className="font-mono text-xs text-zinc-400">ID: {item.id}</span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => handleToggleReviewed(item)}
                     className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${
                       item.reviewed
-                        ? 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
+                        ? 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-gym-silver'
                         : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
                     }`}
                   >

@@ -17,7 +17,10 @@ import { VideoModal } from '@/components/program/VideoModal';
 import { ShareQrModal } from '@/components/program/ShareQrModal';
 import { BodyVisualizer } from '@/components/body/BodyVisualizer';
 import { adaptExerciseVolume, calculateWorkoutDuration } from '@/engine/volumeRules';
-import { Sparkles, Dumbbell, Trash2, X, AlertTriangle } from 'lucide-react';
+import { Sheet } from '@/components/ui/Sheet';
+import { toast } from '@/components/ui/Toaster';
+import { useWorkoutSession } from '@/context/WorkoutSessionContext';
+import { Sparkles, Trash2, X, Play } from 'lucide-react';
 
 function ProgramContent() {
   const router = useRouter();
@@ -26,6 +29,7 @@ function ProgramContent() {
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const workout = useWorkoutSession();
 
   // Active muscle highlight state for Body Visualizer
   const [hoveredPrimary, setHoveredPrimary] = useState<MuscleGroup[]>([]);
@@ -85,7 +89,7 @@ function ProgramContent() {
       (item) => item.exercise.id === newExercise.id && item.exercise.id !== selectedItemForSwap.exercise.id
     );
     if (isDuplicate) {
-      alert(`"${newExercise.name}" is already in your schedule for today. Please select an alternative exercise.`);
+      toast(`${newExercise.name} is already in today's session. Pick a different exercise.`);
       return;
     }
 
@@ -138,9 +142,22 @@ function ProgramContent() {
 
   if (isLoading) {
     return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <div className="w-10 h-10 border-4 border-gym-lime border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Loading workout program...</p>
+      <div className="page py-6 sm:py-10 space-y-8" aria-busy="true" aria-label="Loading workout program">
+        <div className="space-y-3">
+          <div className="skeleton h-4 w-28" />
+          <div className="skeleton h-9 w-3/4 max-w-md" />
+          <div className="skeleton h-4 w-full max-w-lg" />
+        </div>
+        <div className="flex gap-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-10 w-24 !rounded-full" />
+          ))}
+        </div>
+        <div className="space-y-4 max-w-2xl">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-24 w-full" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -148,43 +165,32 @@ function ProgramContent() {
   // Empty state if no program exists
   if (!program) {
     return (
-      <div className="w-full max-w-3xl mx-auto px-4 py-10 sm:py-16 animate-fadeIn space-y-6">
-        <div className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl overflow-hidden shadow-xl transition-colors">
-          <div className="relative h-60 sm:h-80 w-full bg-zinc-950 overflow-hidden">
-            <Image
-              src="/images/workout-empty.jpg"
-              alt="Syndiq Fit strength training equipment and weights"
-              fill
-              className="object-cover opacity-80 hover:scale-105 transition-transform duration-700"
-              sizes="(max-width: 768px) 100vw, 768px"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gym-lime text-black inline-block shadow-lime-sm">
-                Ready For Training
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black">No Active Workout Program</h2>
-            </div>
-          </div>
-
-          <div className="p-6 sm:p-10 space-y-6 text-center">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
-              You haven&apos;t generated a personalized workout program yet, or your previous schedule was cleared. Your questionnaire answers (experience, goal, and gym equipment) are kept safe so you can generate a new split in seconds.
+      <div className="page py-8 sm:py-14 max-w-3xl animate-fadeIn">
+        <div className="relative isolate overflow-hidden rounded-3xl">
+          <Image
+            src="/images/workout-empty.jpg"
+            alt=""
+            fill
+            className="object-cover -z-20"
+            sizes="(max-width: 768px) 100vw, 768px"
+            priority
+          />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/55 to-black/20" />
+          <div className="p-7 sm:p-10 pt-44 sm:pt-60 space-y-4 text-white">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gym-lime">Ready when you are</p>
+            <h1 className="text-3xl sm:text-4xl font-light tracking-tight leading-tight">
+              No active <strong className="font-semibold">workout program</strong>
+            </h1>
+            <p className="text-sm sm:text-base text-white/75 max-w-lg leading-relaxed">
+              You haven&apos;t generated a program yet, or your previous schedule was cleared. Your questionnaire answers are
+              kept, so a new split takes seconds.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/questionnaire"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-black font-extrabold text-sm shadow-lime-md transition-all hover:scale-105 min-h-[48px]"
-              >
-                <Sparkles className="w-4 h-4 fill-black" />
-                <span>Create New Program</span>
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <Link href="/questionnaire" className="btn-primary px-7">
+                <Sparkles className="w-4 h-4" /> Create new program
               </Link>
-              <Link
-                href="/meal-planner"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-sm transition-colors min-h-[48px]"
-              >
-                <span>View Meal Planner</span>
+              <Link href="/meal-planner" className="btn bg-white/15 text-white backdrop-blur hover:bg-white/25">
+                View meal planner
               </Link>
             </div>
           </div>
@@ -206,106 +212,96 @@ function ProgramContent() {
 
   return (
     <>
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10 animate-fadeIn">
-      {/* Plan Header */}
-      <PlanHeader
-        program={program}
-        onDownloadPdf={handleDownloadPdf}
-        onOpenShare={() => setIsShareModalOpen(true)}
-        onClearProgram={() => setIsClearModalOpen(true)}
-        isGeneratingPdf={isGeneratingPdf}
-      />
-
-      {/* Day Schedule Selection Tabs */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-extrabold text-zinc-900 dark:text-white">Training Schedule</h2>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Click a day to view exercises</span>
-        </div>
-        <DayTabs
-          days={program.days}
-          activeDayIndex={activeDayIndex}
-          onSelectDay={(idx) => {
-            setActiveDayIndex(idx);
-            setHoveredPrimary([]);
-            setHoveredSecondary([]);
-          }}
+      <div className="page py-6 sm:py-10 space-y-8 animate-fadeIn">
+        <PlanHeader
+          program={program}
+          onDownloadPdf={handleDownloadPdf}
+          onOpenShare={() => setIsShareModalOpen(true)}
+          onClearProgram={() => setIsClearModalOpen(true)}
+          isGeneratingPdf={isGeneratingPdf}
         />
-      </div>
 
-      {/* Main Grid: Left Exercise Cards, Right Sticky Body Visualizer */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Exercises */}
-        <div className="lg:col-span-7 min-w-0 space-y-4">
-          <div className="flex items-center justify-between bg-slate-50 dark:bg-[#121212] border border-zinc-200 dark:border-gym-border px-5 py-3.5 rounded-2xl transition-colors">
-            <div>
-              <span className="text-xs font-bold text-gym-limeDark dark:text-gym-lime uppercase tracking-wider block">
-                Day {currentDay.dayNumber} Routine
-              </span>
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white">{currentDay.title}</h3>
-            </div>
-            <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-              {currentDay.exercises.length} Exercises (~{currentDay.estimatedDuration} min)
-            </span>
-          </div>
-
-          <div className="space-y-3.5">
-            {currentDay.exercises.map((item, idx) => (
-              <ExerciseCard
-                key={`${item.exercise.id}-${idx}`}
-                item={item}
-                index={idx}
-                onOpenDetails={() => setSelectedItemForDetails(item)}
-                onOpenVideo={() => setSelectedExerciseForVideo(item.exercise)}
-                onOpenSwap={() => setSelectedItemForSwap(item)}
-                onHoverMuscles={(pri, sec) => {
-                  setHoveredPrimary(pri);
-                  setHoveredSecondary(sec);
-                }}
-                onLeaveMuscles={() => {
-                  setHoveredPrimary([]);
-                  setHoveredSecondary([]);
-                }}
-              />
-            ))}
-          </div>
+        <div className="space-y-3">
+          <h2 className="t-section">Training schedule</h2>
+          <DayTabs
+            days={program.days}
+            activeDayIndex={activeDayIndex}
+            onSelectDay={(idx) => {
+              setActiveDayIndex(idx);
+              setHoveredPrimary([]);
+              setHoveredSecondary([]);
+            }}
+          />
         </div>
 
-        {/* Right Column: Interactive Anatomical Muscle Map */}
-        <div className="lg:col-span-5 min-w-0 lg:sticky lg:top-24 space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-              Target Muscle Activation
-            </h3>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">Hover exercises to highlight</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="lg:col-span-7 min-w-0">
+            <div className="flex items-baseline justify-between gap-3 pb-1">
+              <h3 className="text-base sm:text-lg font-semibold text-gym-text">
+                {currentDay.title.replace(/^Day \d+\s*[—–-]\s*/, '')}
+              </h3>
+              <span className="t-small shrink-0">
+                {currentDay.exercises.length} exercises · ~{currentDay.estimatedDuration} min
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => workout.start(program, program.days.indexOf(currentDay))}
+              className="btn-primary mt-3 w-full sm:w-auto sm:px-7"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              {workout.isActiveFor(currentDay) ? 'Resume workout' : 'Start workout'}
+            </button>
+
+            <div className="divide-line">
+              {currentDay.exercises.map((item, idx) => (
+                <ExerciseCard
+                  key={`${item.exercise.id}-${idx}`}
+                  item={item}
+                  index={idx}
+                  onOpenDetails={() => setSelectedItemForDetails(item)}
+                  onOpenVideo={() => setSelectedExerciseForVideo(item.exercise)}
+                  onOpenSwap={() => setSelectedItemForSwap(item)}
+                  onHoverMuscles={(pri, sec) => {
+                    setHoveredPrimary(pri);
+                    setHoveredSecondary(sec);
+                  }}
+                  onLeaveMuscles={() => {
+                    setHoveredPrimary([]);
+                    setHoveredSecondary([]);
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
-          <BodyVisualizer
-            primaryMuscles={activeDayPrimary}
-            secondaryMuscles={activeDaySecondary}
-            interactive={true}
-            gender={program.userProfile.gender}
-            allowGenderToggle={false}
-          />
+          <div className="lg:col-span-5 min-w-0 lg:sticky lg:top-24 space-y-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <h3 className="t-eyebrow">Muscles worked</h3>
+              <span className="t-small hidden lg:inline">Hover an exercise to highlight</span>
+            </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#121212] border border-zinc-200 dark:border-gym-border text-xs text-zinc-600 dark:text-zinc-400 space-y-1 transition-colors">
-            <span className="font-bold text-zinc-900 dark:text-zinc-200 block">Biomechanical Balance:</span>
-            <p>
+            <BodyVisualizer
+              primaryMuscles={activeDayPrimary}
+              secondaryMuscles={activeDaySecondary}
+              interactive={true}
+              gender={program.userProfile.gender}
+              allowGenderToggle={false}
+            />
+
+            <p className="t-small leading-relaxed">
               Day {currentDay.dayNumber} targets{' '}
-              <strong className="text-gym-limeDark dark:text-gym-lime">{currentDay.focusMuscles.join(', ')}</strong> with compound volume and targeted assistance to prevent muscular asymmetries.
+              <strong className="text-gym-limeDark dark:text-gym-lime font-semibold">
+                {currentDay.focusMuscles.map((m) => m.replace('_', ' ')).join(', ')}
+              </strong>{' '}
+              with compound volume and targeted assistance to prevent muscular asymmetries.
             </p>
           </div>
         </div>
       </div>
-    </div>
 
-    {/* Modals rendered outside animated stacking context */}
-    <VideoModal
-        exercise={selectedExerciseForVideo}
-        isOpen={Boolean(selectedExerciseForVideo)}
-        onClose={() => setSelectedExerciseForVideo(null)}
-      />
-
+      {/* Modals rendered outside animated stacking context */}
       <ExerciseDetailModal
         item={selectedItemForDetails}
         isOpen={Boolean(selectedItemForDetails)}
@@ -324,6 +320,12 @@ function ProgramContent() {
         }}
       />
 
+      <VideoModal
+        exercise={selectedExerciseForVideo}
+        isOpen={Boolean(selectedExerciseForVideo)}
+        onClose={() => setSelectedExerciseForVideo(null)}
+      />
+
       <ExerciseSwapModal
         item={selectedItemForSwap}
         profile={program.userProfile}
@@ -339,64 +341,46 @@ function ProgramContent() {
         onClose={() => setIsShareModalOpen(false)}
       />
 
-      {/* Clear Active Program Confirmation Dialog */}
-      {isClearModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="clear-program-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn"
-          onClick={() => setIsClearModalOpen(false)}
-        >
-          <div
-            className="bg-white dark:bg-gym-card border border-zinc-200 dark:border-gym-border rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative animate-scaleUp"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between">
-              <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-600 dark:text-red-400">
-                <Trash2 className="w-6 h-6" />
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsClearModalOpen(false)}
-                className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl"
-                aria-label="Close dialog"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Clear Active Program Confirmation */}
+      <Sheet
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        labelledBy="clear-program-title"
+        maxWidth="max-w-md"
+      >
+        <div className="p-6 sm:p-8 space-y-6">
+          <div className="flex items-start justify-between">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+              <Trash2 className="w-6 h-6" />
+            </span>
+            <button type="button" onClick={() => setIsClearModalOpen(false)} className="btn-icon" aria-label="Close dialog">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-            <div className="space-y-2">
-              <h3 id="clear-program-title" className="text-xl font-black text-zinc-900 dark:text-white">
-                Clear Active Workout Program?
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                This will remove your current active workout schedule from this device. Your questionnaire answers (goals, equipment, and experience) will be kept safe so you can generate a new program anytime.
-              </p>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 pt-2 border-t border-zinc-200 dark:border-zinc-800">
-                Note: Your Nigerian meal planner, food inventory, and feedback comments are preserved.
-              </p>
-            </div>
+          <div className="space-y-2">
+            <h3 id="clear-program-title" className="t-section !text-xl">
+              Clear Active Workout Program?
+            </h3>
+            <p className="t-small leading-relaxed">
+              This removes the current schedule from this device. Your questionnaire answers are kept, so you can
+              generate a new program anytime.
+            </p>
+            <p className="t-small pt-2 border-t hairline">
+              Your meal plan, food inventory and feedback are not affected.
+            </p>
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setIsClearModalOpen(false)}
-                className="flex-1 px-4 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs sm:text-sm transition-colors min-h-[44px]"
-              >
-                Keep Program
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmClearProgram}
-                className="flex-1 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all min-h-[44px]"
-              >
-                Yes, Clear Program
-              </button>
-            </div>
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5">
+            <button type="button" onClick={() => setIsClearModalOpen(false)} className="btn-secondary flex-1">
+              Keep Program
+            </button>
+            <button type="button" onClick={handleConfirmClearProgram} className="btn flex-1 bg-red-600 text-white hover:bg-red-700">
+              Yes, Clear Program
+            </button>
           </div>
         </div>
-      )}
+      </Sheet>
     </>
   );
 }
@@ -405,10 +389,23 @@ export default function ProgramPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-          <div className="w-10 h-10 border-4 border-gym-lime border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Loading workout program...</p>
+        <div className="page py-6 sm:py-10 space-y-8" aria-busy="true" aria-label="Loading workout program">
+        <div className="space-y-3">
+          <div className="skeleton h-4 w-28" />
+          <div className="skeleton h-9 w-3/4 max-w-md" />
+          <div className="skeleton h-4 w-full max-w-lg" />
         </div>
+        <div className="flex gap-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-10 w-24 !rounded-full" />
+          ))}
+        </div>
+        <div className="space-y-4 max-w-2xl">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-24 w-full" />
+          ))}
+        </div>
+      </div>
       }
     >
       <ProgramContent />

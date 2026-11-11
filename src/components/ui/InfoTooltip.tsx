@@ -73,11 +73,11 @@ export function InfoTooltip({ title, content, className = '', iconSize = 14 }: I
           role="tooltip"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-64 sm:w-72 p-3 bg-zinc-900 text-white dark:bg-[#1c1c1c] dark:text-zinc-100 rounded-xl shadow-xl border border-zinc-700 dark:border-zinc-700 text-xs leading-relaxed animate-fadeIn"
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-64 sm:w-72 p-3 bg-zinc-900 text-white dark:bg-[#1c1c1c] dark:text-zinc-100 rounded-xl border border-zinc-700 dark:border-zinc-700 text-xs leading-relaxed animate-fadeIn"
           style={{ maxWidth: 'calc(100vw - 32px)' }}
         >
           {title && (
-            <div className="font-extrabold text-gym-lime mb-1 text-[11px] uppercase tracking-wider">
+            <div className="font-semibold text-gym-lime mb-1 text-xs uppercase tracking-wider">
               {title}
             </div>
           )}

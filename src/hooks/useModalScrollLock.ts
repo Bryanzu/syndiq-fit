@@ -3,21 +3,25 @@
 import { useEffect, useCallback } from 'react';
 
 let activeModalsCount = 0;
+let savedOriginalOverflow = '';
+let savedOriginalTouchAction = '';
 
 export function useModalScrollLock(isOpen: boolean, onClose?: () => void) {
   useEffect(() => {
     if (!isOpen) return;
 
+    if (activeModalsCount === 0) {
+      savedOriginalOverflow = document.body.style.overflow;
+      savedOriginalTouchAction = document.body.style.touchAction;
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      document.body.classList.add('modal-open');
+    }
     activeModalsCount++;
-    const originalOverflow = document.body.style.overflow;
-    const originalTouchAction = document.body.style.touchAction;
-
-    document.body.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none';
-    document.body.classList.add('modal-open');
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && onClose) {
+        e.stopPropagation();
         onClose();
       }
     };
@@ -27,8 +31,8 @@ export function useModalScrollLock(isOpen: boolean, onClose?: () => void) {
     return () => {
       activeModalsCount = Math.max(0, activeModalsCount - 1);
       if (activeModalsCount === 0) {
-        document.body.style.overflow = originalOverflow;
-        document.body.style.touchAction = originalTouchAction;
+        document.body.style.overflow = savedOriginalOverflow;
+        document.body.style.touchAction = savedOriginalTouchAction;
         document.body.classList.remove('modal-open');
       }
       window.removeEventListener('keydown', handleKeyDown);
@@ -39,6 +43,7 @@ export function useModalScrollLock(isOpen: boolean, onClose?: () => void) {
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (e.target === e.currentTarget && onClose) {
+        e.stopPropagation();
         onClose();
       }
     },

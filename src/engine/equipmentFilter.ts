@@ -2,9 +2,26 @@ import { Exercise } from '@/types/workout';
 import { SyndiqEquipmentId } from '@/types/equipment';
 
 /**
+ * Checks whether the user's selected equipment configuration represents Strict Bodyweight Only.
+ * True when no equipment is selected or only pure bodyweight markers (e.g. yoga mat / bodyweight_only) are present.
+ */
+export function isBodyweightOnlyEquipment(availableEquipment: SyndiqEquipmentId[]): boolean {
+  if (!availableEquipment || availableEquipment.length === 0) {
+    return true;
+  }
+  const nonBodyweightItems = availableEquipment.filter(
+    (item) =>
+      item !== 'bodyweight' &&
+      item !== 'bodyweight_only' &&
+      item !== 'yoga_mat'
+  );
+  return nonBodyweightItems.length === 0;
+}
+
+/**
  * Normalizes user equipment IDs to include equivalent and legacy identifiers.
  */
-function normalizeEquipmentSet(availableEquipment: SyndiqEquipmentId[]): Set<string> {
+export function normalizeEquipmentSet(availableEquipment: SyndiqEquipmentId[]): Set<string> {
   const normalized = new Set<string>();
 
   for (const item of availableEquipment) {
@@ -59,15 +76,23 @@ function normalizeEquipmentSet(availableEquipment: SyndiqEquipmentId[]): Set<str
 }
 
 /**
- * Validates whether an exercise can realistically be performed with the user's selected equipment.
+ * Validates whether an exercise can realistically and strictly be performed with the user's selected equipment.
+ * In Strict Bodyweight Only mode, EVERY exercise must be strictly equipment-free.
  */
 export function isExerciseAvailable(
   exercise: Exercise,
   availableEquipment: SyndiqEquipmentId[]
 ): boolean {
-  if (!availableEquipment || availableEquipment.length === 0) {
-    // If no equipment selected, only pure bodyweight exercises with no bar/mat requirement are available
-    return isPureBodyweight(exercise.id);
+  // STRICT BODYWEIGHT ONLY MODE:
+  // When user has no equipment or bodyweight only, ONLY exercises marked isStrictBodyweight qualify.
+  // Absolutely no dumbbells, barbells, pull-up bars, dip bars, bands, cables, machines, or benches.
+  if (isBodyweightOnlyEquipment(availableEquipment)) {
+    return Boolean(exercise.isStrictBodyweight);
+  }
+
+  // Pure equipment-free exercises can be performed in any gym or home setup
+  if (exercise.isStrictBodyweight) {
+    return true;
   }
 
   const equip = normalizeEquipmentSet(availableEquipment);
@@ -87,7 +112,7 @@ export function isExerciseAvailable(
       return equip.has('seated_row_machine') || equip.has('adjustable_cable_column');
     case 'machine-row':
     case 'chest-supported-row':
-      return equip.has('seated_row_machine') || (equip.has('dumbbells') && equip.has('adjustable_bench'));
+      return equip.has('seated_row_machine') || (equip.has('dumbbells') && (equip.has('adjustable_bench') || equip.has('flat_bench')));
     case 'pec-deck-fly':
     case 'reverse-pec-deck':
       return equip.has('pec_deck_machine') || equip.has('cable_crossover_machine');
@@ -124,14 +149,19 @@ export function isExerciseAvailable(
 
       // Heavy bench pressing requires a bench (flat or adjustable)
       if (id === 'barbell-bench-press' || id === 'close-grip-bench-press') {
-        return (equip.has('flat_bench') || equip.has('adjustable_bench')) &&
-               (equip.has('squat_rack') || equip.has('power_rack') || equip.has('flat_bench'));
+        return (equip.has('flat_bench') || equip.has('adjustable_bench'));
       }
       if (id === 'incline-barbell-press') {
-        return equip.has('adjustable_bench') && (equip.has('squat_rack') || equip.has('power_rack'));
+        return equip.has('adjustable_bench');
       }
       // Squats, good-mornings, and overhead presses require a rack to safely unrack
-      if (id === 'barbell-back-squat' || id === 'front-squat' || id === 'box-squat' || id === 'good-morning' || id === 'barbell-overhead-press') {
+      if (
+        id === 'barbell-back-squat' ||
+        id === 'front-squat' ||
+        id === 'box-squat' ||
+        id === 'good-morning' ||
+        id === 'barbell-overhead-press'
+      ) {
         return equip.has('squat_rack') || equip.has('power_rack');
       }
       // Rack pull requires safety pins in a rack
@@ -162,7 +192,7 @@ export function isExerciseAvailable(
         return equip.has('flat_bench') || equip.has('adjustable_bench');
       }
       // Unilateral leg elevations require a bench or jump box
-      if (id === 'bulgarian-split-squat' || id === 'step-up') {
+      if (id === 'bulgarian-split-squat' || id === 'dumbbell-bulgarian-split-squat' || id === 'step-up' || id === 'dumbbell-step-up') {
         return equip.has('flat_bench') || equip.has('adjustable_bench') || equip.has('plyo_box');
       }
       // Concentration curl requires any bench or seated surface
@@ -176,11 +206,16 @@ export function isExerciseAvailable(
       return equip.has('kettlebells') || equip.has('dumbbells');
 
     case 'cable':
-      return equip.has('adjustable_cable_column') || equip.has('cable_crossover_machine') || equip.has('resistance_bands');
+      return equip.has('adjustable_cable_column') || equip.has('cable_crossover_machine');
 
     case 'bodyweight': {
       // Pull-ups and hanging movements require a pull-up bar
-      if (id === 'pull-up' || id === 'chin-up' || id === 'hanging-leg-raise' || id === 'hanging-knee-raise') {
+      if (
+        id === 'pull-up' ||
+        id === 'chin-up' ||
+        id === 'hanging-leg-raise' ||
+        id === 'hanging-knee-raise'
+      ) {
         return equip.has('pull_up_bar');
       }
       // Dips require a dip station or stable bench
@@ -202,44 +237,24 @@ export function isExerciseAvailable(
       if (id === 'ab-wheel-rollout') {
         return equip.has('ab_wheel') || equip.has('barbell');
       }
-      // General calisthenics (push-ups, crunches, planks, bodyweight squats) are always doable
+      // Resistance band exercises require resistance bands
+      if (id.startsWith('band-')) {
+        return equip.has('resistance_bands');
+      }
+      // If marked strict bodyweight, it is always available
+      if (exercise.isStrictBodyweight) {
+        return true;
+      }
       return true;
     }
 
     case 'machine':
-      // Any generic machine not caught above
+      // Generic machine check
       return false;
 
     default:
-      return true;
+      return false;
   }
-}
-
-/**
- * Checks if an exercise is pure bodyweight requiring zero specialized apparatus.
- */
-function isPureBodyweight(id: string): boolean {
-  const pureList = new Set([
-    'push-up',
-    'incline-push-up',
-    'diamond-push-up',
-    'pike-push-up',
-    'bodyweight-squat',
-    'glute-bridge',
-    'single-leg-glute-bridge',
-    'single-leg-calf-raise',
-    'plank',
-    'side-plank',
-    'crunch',
-    'russian-twist',
-    'dead-bug',
-    'bird-dog',
-    'bicycle-crunch',
-    'mountain-climber',
-    'reverse-crunch',
-    'burpee',
-  ]);
-  return pureList.has(id);
 }
 
 /**

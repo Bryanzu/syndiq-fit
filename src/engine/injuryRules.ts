@@ -6,6 +6,9 @@ export function isContraindicated(
   exercise: Exercise,
   userInjuries: InjuryArea[]
 ): boolean {
+  if (!exercise || !exercise.contraindications) {
+    return false;
+  }
   if (!userInjuries || userInjuries.length === 0 || userInjuries.includes('none')) {
     return false;
   }
@@ -16,6 +19,7 @@ export function getInjurySubstitutionReason(
   exercise: Exercise,
   userInjuries: InjuryArea[]
 ): string {
+  if (!exercise || !exercise.contraindications) return 'General form adaptation';
   const matching = exercise.contraindications.filter((c) => userInjuries.includes(c));
   if (matching.length === 0) return 'General form adaptation';
 
