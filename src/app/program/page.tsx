@@ -17,8 +17,10 @@ import { VideoModal } from '@/components/program/VideoModal';
 import { ShareQrModal } from '@/components/program/ShareQrModal';
 import { BodyVisualizer } from '@/components/body/BodyVisualizer';
 import { adaptExerciseVolume, calculateWorkoutDuration } from '@/engine/volumeRules';
-import { useModalScrollLock } from '@/hooks/useModalScrollLock';
-import { Sparkles, Dumbbell, Trash2, X, AlertTriangle } from 'lucide-react';
+import { Sheet } from '@/components/ui/Sheet';
+import { toast } from '@/components/ui/Toaster';
+import { useWorkoutSession } from '@/context/WorkoutSessionContext';
+import { Sparkles, Trash2, X, Play } from 'lucide-react';
 
 function ProgramContent() {
   const router = useRouter();
@@ -27,6 +29,7 @@ function ProgramContent() {
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const workout = useWorkoutSession();
 
   // Active muscle highlight state for Body Visualizer
   const [hoveredPrimary, setHoveredPrimary] = useState<MuscleGroup[]>([]);
@@ -38,9 +41,6 @@ function ProgramContent() {
   const [selectedItemForSwap, setSelectedItemForSwap] = useState<WorkoutExerciseItem | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
-
-  // Lock scroll when clear modal is open
-  useModalScrollLock(isClearModalOpen, () => setIsClearModalOpen(false));
 
   // Load active plan from query param or localStorage
   useEffect(() => {
@@ -89,7 +89,7 @@ function ProgramContent() {
       (item) => item.exercise.id === newExercise.id && item.exercise.id !== selectedItemForSwap.exercise.id
     );
     if (isDuplicate) {
-      alert(`"${newExercise.name}" is already in your schedule for today. Please select an alternative exercise.`);
+      toast(`${newExercise.name} is already in today's session. Pick a different exercise.`);
       return;
     }
 
@@ -142,9 +142,22 @@ function ProgramContent() {
 
   if (isLoading) {
     return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <div className="w-10 h-10 border-4 border-gym-lime border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold uppercase tracking-wider text-gym-textMuted">Loading workout program...</p>
+      <div className="page py-6 sm:py-10 space-y-8" aria-busy="true" aria-label="Loading workout program">
+        <div className="space-y-3">
+          <div className="skeleton h-4 w-28" />
+          <div className="skeleton h-9 w-3/4 max-w-md" />
+          <div className="skeleton h-4 w-full max-w-lg" />
+        </div>
+        <div className="flex gap-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-10 w-24 !rounded-full" />
+          ))}
+        </div>
+        <div className="space-y-4 max-w-2xl">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-24 w-full" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -231,6 +244,15 @@ function ProgramContent() {
                 {currentDay.exercises.length} exercises · ~{currentDay.estimatedDuration} min
               </span>
             </div>
+
+            <button
+              type="button"
+              onClick={() => workout.start(program, program.days.indexOf(currentDay))}
+              className="btn-primary mt-3 w-full sm:w-auto sm:px-7"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              {workout.isActiveFor(currentDay) ? 'Resume workout' : 'Start workout'}
+            </button>
 
             <div className="divide-line">
               {currentDay.exercises.map((item, idx) => (
@@ -319,64 +341,46 @@ function ProgramContent() {
         onClose={() => setIsShareModalOpen(false)}
       />
 
-      {/* Clear Active Program Confirmation Dialog */}
-      {isClearModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="clear-program-title"
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 dark:bg-black/85 backdrop-blur-sm animate-fadeIn"
-          onClick={() => setIsClearModalOpen(false)}
-        >
-          <div
-            className="bg-white dark:bg-gym-card rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-6 relative animate-scaleUp"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between">
-              <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-600 dark:text-red-400">
-                <Trash2 className="w-6 h-6" />
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsClearModalOpen(false)}
-                className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl"
-                aria-label="Close dialog"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Clear Active Program Confirmation */}
+      <Sheet
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        labelledBy="clear-program-title"
+        maxWidth="max-w-md"
+      >
+        <div className="p-6 sm:p-8 space-y-6">
+          <div className="flex items-start justify-between">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+              <Trash2 className="w-6 h-6" />
+            </span>
+            <button type="button" onClick={() => setIsClearModalOpen(false)} className="btn-icon" aria-label="Close dialog">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-            <div className="space-y-2">
-              <h3 id="clear-program-title" className="text-xl font-bold text-gym-text">
-                Clear Active Workout Program?
-              </h3>
-              <p className="text-xs sm:text-sm text-gym-textMuted leading-relaxed">
-                This will remove your current active workout schedule from this device. Your questionnaire answers (goals, equipment, and experience) will be kept safe so you can generate a new program anytime.
-              </p>
-              <p className="text-xs text-gym-textMuted pt-2 border-t border-gym-border">
-                Note: Your Nigerian meal planner, food inventory, and feedback comments are preserved.
-              </p>
-            </div>
+          <div className="space-y-2">
+            <h3 id="clear-program-title" className="t-section !text-xl">
+              Clear Active Workout Program?
+            </h3>
+            <p className="t-small leading-relaxed">
+              This removes the current schedule from this device. Your questionnaire answers are kept, so you can
+              generate a new program anytime.
+            </p>
+            <p className="t-small pt-2 border-t hairline">
+              Your meal plan, food inventory and feedback are not affected.
+            </p>
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setIsClearModalOpen(false)}
-                className="flex-1 px-4 py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-gym-text font-bold text-xs sm:text-sm transition-colors min-h-[44px]"
-              >
-                Keep Program
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmClearProgram}
-                className="flex-1 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs sm:text-sm transition-all min-h-[44px]"
-              >
-                Yes, Clear Program
-              </button>
-            </div>
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5">
+            <button type="button" onClick={() => setIsClearModalOpen(false)} className="btn-secondary flex-1">
+              Keep Program
+            </button>
+            <button type="button" onClick={handleConfirmClearProgram} className="btn flex-1 bg-red-600 text-white hover:bg-red-700">
+              Yes, Clear Program
+            </button>
           </div>
         </div>
-      )}
+      </Sheet>
     </>
   );
 }
@@ -385,10 +389,23 @@ export default function ProgramPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-          <div className="w-10 h-10 border-4 border-gym-lime border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Loading workout program...</p>
+        <div className="page py-6 sm:py-10 space-y-8" aria-busy="true" aria-label="Loading workout program">
+        <div className="space-y-3">
+          <div className="skeleton h-4 w-28" />
+          <div className="skeleton h-9 w-3/4 max-w-md" />
+          <div className="skeleton h-4 w-full max-w-lg" />
         </div>
+        <div className="flex gap-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-10 w-24 !rounded-full" />
+          ))}
+        </div>
+        <div className="space-y-4 max-w-2xl">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-24 w-full" />
+          ))}
+        </div>
+      </div>
       }
     >
       <ProgramContent />

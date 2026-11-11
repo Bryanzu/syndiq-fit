@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useModalScrollLock } from '@/hooks/useModalScrollLock';
+import { Sheet } from '@/components/ui/Sheet';
 import { X, Copy, Check, Smartphone, Share2 } from 'lucide-react';
 
 interface ShareQrModalProps {
@@ -12,7 +12,6 @@ interface ShareQrModalProps {
 
 export function ShareQrModal({ shareUrl, isOpen, onClose }: ShareQrModalProps) {
   const [copied, setCopied] = useState(false);
-  const { handleBackdropClick } = useModalScrollLock(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -27,17 +26,7 @@ export function ShareQrModal({ shareUrl, isOpen, onClose }: ShareQrModalProps) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-black/80 dark:bg-black/85 backdrop-blur-sm animate-fadeIn"
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="share-qr-title"
-    >
-      <div
-        className="relative w-full max-w-md bg-white dark:bg-gym-card rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl animate-scaleUp max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Sheet isOpen={isOpen} onClose={onClose} labelledBy="share-qr-title" zClass="z-[100]" maxWidth="max-w-md">
         {/* Header - Fixed/Sticky */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gym-border bg-gym-cardAlt shrink-0 sticky top-0 z-10 transition-colors">
           <div className="flex items-center gap-2.5">
@@ -113,7 +102,6 @@ export function ShareQrModal({ shareUrl, isOpen, onClose }: ShareQrModalProps) {
             Your workout is saved to your browser and accessible across all devices via this link.
           </p>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

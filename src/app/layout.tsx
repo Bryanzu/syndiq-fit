@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { ExpandableNavDock } from '@/components/layout/ExpandableNavDock';
+import { TabBar } from '@/components/layout/TabBar';
+import { Toaster } from '@/components/ui/Toaster';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { WorkoutSessionProvider } from '@/context/WorkoutSessionContext';
+import { WorkoutPlayer } from '@/components/workout/WorkoutPlayer';
+import { MiniPlayer } from '@/components/workout/MiniPlayer';
+
+const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
 export const metadata: Metadata = {
   title: 'Syndiq fit — Intelligent Workout Program Generator',
@@ -31,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="en" suppressHydrationWarning className={`dark ${inter.variable}`}>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -57,10 +64,15 @@ export default function RootLayout({
       </head>
       <body className="bg-gym-bg text-gym-silver min-h-[100dvh] flex flex-col antialiased selection:bg-gym-lime selection:text-black">
         <ThemeProvider>
-          <Navbar />
-          <main className="flex-1 w-full">{children}</main>
-          <Footer />
-          <ExpandableNavDock />
+          <WorkoutSessionProvider>
+            <Navbar />
+            <main className="flex-1 w-full">{children}</main>
+            <Footer />
+            <MiniPlayer />
+            <TabBar />
+            <WorkoutPlayer />
+            <Toaster />
+          </WorkoutSessionProvider>
         </ThemeProvider>
       </body>
     </html>

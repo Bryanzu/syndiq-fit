@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { Sheet } from '@/components/ui/Sheet';
 import { PlannedMeal, NigerianRecipe } from '@/types/mealPlanner';
 import { getRecipesByMealType } from '@/data/nigerianRecipes';
 import { getRecipePracticalMeasurement } from '@/lib/portionHelpers';
@@ -41,16 +42,7 @@ export function MealSwapModal({
   const candidateRecipes = getRecipesByMealType(meal.mealType);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="meal-swap-title"
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="relative w-full max-w-2xl max-h-[92dvh] sm:max-h-[88vh] bg-white dark:bg-gym-card rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-scaleUp">
+    <Sheet isOpen={Boolean(meal)} onClose={onClose} labelledBy="meal-swap-title" zClass="z-[100]" maxWidth="max-w-2xl">
         {/* Sticky Header with Accessible Close Button */}
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-5 border-b border-gym-border bg-white dark:bg-gym-card">
           <div className="space-y-0.5 min-w-0 pr-3">
@@ -184,7 +176,6 @@ export function MealSwapModal({
             })}
           </div>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

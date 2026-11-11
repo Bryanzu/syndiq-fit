@@ -51,7 +51,7 @@ html {
 body {
   background-color: var(--gym-bg);
   color: var(--gym-silver);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-inter), Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   /* `clip` (not `hidden`) prevents stray horizontal scroll without creating a scroll container */
   overflow-x: clip;
@@ -119,6 +119,34 @@ body.modal-open nav {
 .animate-scaleUp { animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .animate-riseIn { animation: riseIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+/* Sheet: slides up from the bottom on phones, scales in as a centred dialog from sm up.
+   No fill-mode, so the drag-to-dismiss inline transform is never overridden. */
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.sheet-panel,
+.animate-sheetUp { animation: sheetUp 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (min-width: 640px) {
+  .sheet-panel { animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+}
+
+/* Press feedback for anything tappable */
+.tap { transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease; }
+.tap:active { transform: scale(0.94); }
+
+/* Loading placeholder */
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.skeleton {
+  border-radius: 0.75rem;
+  background: linear-gradient(90deg, var(--gym-card-alt) 25%, var(--gym-card-inner) 50%, var(--gym-card-alt) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -179,7 +207,7 @@ body.modal-open nav {
 
   /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 min-h-[44px] text-sm font-semibold transition-colors duration-200 select-none disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gym-lime/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gym-bg;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 min-h-[44px] text-sm font-semibold transition-[color,background-color,transform] duration-200 active:scale-[0.97] select-none disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gym-lime/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gym-bg;
   }
   .btn-primary {
     @apply btn bg-gym-lime text-gym-ink hover:bg-gym-limeLight;

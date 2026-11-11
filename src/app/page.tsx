@@ -27,6 +27,8 @@ import {
   undoSession,
 } from '@/lib/progress';
 import { WorkoutProgram } from '@/types/workout';
+import { useWorkoutSession } from '@/context/WorkoutSessionContext';
+import { WORKOUT_LOGGED_EVENT } from '@/lib/workoutSession';
 
 const WEEKDAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -189,7 +191,14 @@ function Welcome() {
 /* ------------------------------------------------------------------ */
 function Dashboard({ program, mealPlan }: { program: WorkoutProgram; mealPlan: any | null }) {
   const [log, setLog] = useState<SessionEntry[]>([]);
-  useEffect(() => setLog(loadWorkoutLog()), []);
+  useEffect(() => {
+    const refresh = () => setLog(loadWorkoutLog());
+    refresh();
+    // The workout player logs sessions while this page stays mounted
+    window.addEventListener(WORKOUT_LOGGED_EVENT, refresh);
+    return () => window.removeEventListener(WORKOUT_LOGGED_EVENT, refresh);
+  }, []);
+  const workout = useWorkoutSession();
 
   const todayISO = toLocalISODate();
   const todayEntry = log.find((e) => e.date === todayISO);
@@ -292,9 +301,10 @@ function Dashboard({ program, mealPlan }: { program: WorkoutProgram; mealPlan: a
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                  <Link href="/program" className="btn-primary px-6">
-                    Start workout <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  <button type="button" onClick={() => workout.start(program, nextIdx)} className="btn-primary px-6">
+                    {workout.isActiveFor(day) ? 'Resume workout' : 'Start workout'}{' '}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                   {todayEntry ? (
                     <button type="button" onClick={undo} className="btn bg-white/15 text-white backdrop-blur hover:bg-white/25">
                       <Check className="w-4 h-4" /> Done today <Undo2 className="w-3.5 h-3.5 opacity-70" />
@@ -384,6 +394,8 @@ function Dashboard({ program, mealPlan }: { program: WorkoutProgram; mealPlan: a
                       <p className="text-sm font-medium text-gym-text truncate">{e.title.replace(/^Day \d+\s*[—–-]\s*/, '')}</p>
                       <p className="t-small">
                         {new Date(e.date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}
+                        {e.durationMin ? ` · ${e.durationMin} min` : ''}
+                        {e.setsCompleted ? ` · ${e.setsCompleted} sets` : ''}
                       </p>
                     </div>
                   </li>

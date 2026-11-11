@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Sheet } from '@/components/ui/Sheet';
 import {
   X,
   Scale,
@@ -22,17 +23,7 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="portion-guide-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white dark:bg-gym-card rounded-3xl max-w-2xl w-full max-h-[90dvh] flex flex-col shadow-2xl relative animate-scaleUp overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Sheet isOpen={isOpen} onClose={onClose} labelledBy="portion-guide-title" zClass="z-[100]" maxWidth="max-w-2xl">
         {/* Sticky Header */}
         <div className="flex items-center justify-between p-6 border-b border-gym-border shrink-0 bg-gym-card backdrop-blur-md">
           <div className="flex items-center gap-3">
@@ -199,7 +190,6 @@ export function PortionGuideModal({ isOpen, onClose }: PortionGuideModalProps) {
             Got It
           </button>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

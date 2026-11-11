@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
+import { Sheet } from '@/components/ui/Sheet';
 import { Exercise } from '@/types/workout';
-import { useModalScrollLock } from '@/hooks/useModalScrollLock';
 import { X, ExternalLink, Play } from 'lucide-react';
 
 interface VideoModalProps {
@@ -12,24 +12,13 @@ interface VideoModalProps {
 }
 
 export function VideoModal({ exercise, isOpen, onClose }: VideoModalProps) {
-  const { handleBackdropClick } = useModalScrollLock(isOpen, onClose);
 
   if (!isOpen || !exercise) return null;
 
   const hasDirectEmbed = Boolean(exercise.youtubeId && exercise.youtubeId.trim().length > 0);
 
   return (
-    <div
-      className="fixed inset-0 z-[150] flex items-center justify-center p-2.5 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn"
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="video-modal-title"
-    >
-      <div
-        className="relative w-full max-w-3xl bg-white dark:bg-gym-card rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl animate-scaleUp max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Sheet isOpen={isOpen} onClose={onClose} labelledBy="video-modal-title" zClass="z-[150]" maxWidth="max-w-3xl">
         {/* Header - Fixed/Sticky */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gym-border bg-gym-cardAlt shrink-0 sticky top-0 z-10 transition-colors">
           <div className="flex items-center gap-3 pr-2">
@@ -110,7 +99,6 @@ export function VideoModal({ exercise, isOpen, onClose }: VideoModalProps) {
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

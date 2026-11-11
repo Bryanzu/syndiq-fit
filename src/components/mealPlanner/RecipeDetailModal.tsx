@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { Sheet } from '@/components/ui/Sheet';
 import { PlannedMeal } from '@/types/mealPlanner';
 import { X, Clock, ChefHat, Flame, Beef, CheckCircle, Utensils, Scale } from 'lucide-react';
 import { formatPortionFraction, getRecipePracticalMeasurement } from '@/lib/portionHelpers';
@@ -34,16 +35,7 @@ export function RecipeDetailModal({ meal, onClose }: RecipeDetailModalProps) {
   if (!meal) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="recipe-detail-title"
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="relative w-full max-w-2xl max-h-[92dvh] sm:max-h-[88vh] bg-white dark:bg-gym-card rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-scaleUp">
+    <Sheet isOpen={Boolean(meal)} onClose={onClose} labelledBy="recipe-detail-title" zClass="z-[100]" maxWidth="max-w-2xl">
         {/* Sticky Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-5 border-b border-gym-border bg-white dark:bg-gym-card">
           <div className="space-y-0.5 min-w-0 pr-3">
@@ -157,7 +149,6 @@ export function RecipeDetailModal({ meal, onClose }: RecipeDetailModalProps) {
             Close Guide
           </button>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
+import { Sheet } from '@/components/ui/Sheet';
 import { WorkoutExerciseItem, MuscleGroup } from '@/types/workout';
-import { useModalScrollLock } from '@/hooks/useModalScrollLock';
 import { X, Play, ArrowRightLeft, Clock, Dumbbell, ShieldAlert, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface ExerciseDetailModalProps {
@@ -20,7 +20,6 @@ export function ExerciseDetailModal({
   onOpenVideo,
   onOpenSwap,
 }: ExerciseDetailModalProps) {
-  const { handleBackdropClick } = useModalScrollLock(isOpen, onClose);
 
   if (!isOpen || !item) return null;
 
@@ -33,17 +32,7 @@ export function ExerciseDetailModal({
       .join(' ');
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-black/80 dark:bg-black/85 backdrop-blur-sm animate-fadeIn"
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="exercise-detail-title"
-    >
-      <div
-        className="relative w-full max-w-2xl bg-white dark:bg-gym-card rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl animate-scaleUp max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Sheet isOpen={isOpen} onClose={onClose} labelledBy="exercise-detail-title" zClass="z-[100]" maxWidth="max-w-2xl">
         {/* Modal Header - Fixed/Sticky */}
         <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gym-border bg-gym-cardAlt shrink-0 sticky top-0 z-10 transition-colors">
           <div className="space-y-1.5 pr-2">
@@ -186,7 +175,6 @@ export function ExerciseDetailModal({
             <span>Watch Video Demo</span>
           </button>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

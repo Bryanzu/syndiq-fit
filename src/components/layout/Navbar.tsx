@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Settings } from 'lucide-react';
+import { Settings, MessageSquare } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { NAV_ITEMS } from './navItems';
 
@@ -56,6 +56,13 @@ export function Navbar() {
 
         {/* Utilities (both breakpoints) */}
         <div className="flex items-center gap-1 shrink-0">
+          <Link
+            href="/feedback"
+            aria-label="Feedback"
+            className={`btn-icon lg:hidden ${pathname.startsWith('/feedback') ? 'text-gym-limeDark dark:text-gym-lime' : ''}`}
+          >
+            <MessageSquare className="w-5 h-5" strokeWidth={1.9} />
+          </Link>
           <ThemeToggle />
           <Link
             href="/settings"

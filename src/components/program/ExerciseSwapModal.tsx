@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { Sheet } from '@/components/ui/Sheet';
 import { Exercise, WorkoutExerciseItem, MuscleGroup } from '@/types/workout';
 import { getExerciseById, exercises } from '@/data/exercises';
 import { isContraindicated } from '@/engine/injuryRules';
 import { isExerciseAvailable } from '@/engine/equipmentFilter';
 import { adaptExerciseVolume } from '@/engine/volumeRules';
 import { UserProfile } from '@/types/questionnaire';
-import { useModalScrollLock } from '@/hooks/useModalScrollLock';
 import {
   X,
   ArrowRightLeft,
@@ -38,7 +38,6 @@ export function ExerciseSwapModal({
   currentWorkoutExercises = [],
 }: ExerciseSwapModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { handleBackdropClick } = useModalScrollLock(isOpen, onClose);
 
   // Format muscle helper
   const formatMuscle = (m: MuscleGroup) =>
@@ -130,17 +129,7 @@ export function ExerciseSwapModal({
   const currentExercise = item.exercise;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-black/80 dark:bg-black/85 backdrop-blur-sm animate-fadeIn"
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="exercise-swap-title"
-    >
-      <div
-        className="relative w-full max-w-2xl bg-white dark:bg-gym-card rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl animate-scaleUp flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh]"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Sheet isOpen={isOpen} onClose={onClose} labelledBy="exercise-swap-title" zClass="z-[100]" maxWidth="max-w-2xl">
         {/* Header - Fixed/Sticky */}
         <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gym-border bg-gym-cardAlt shrink-0 sticky top-0 z-20 transition-colors">
           <div className="flex items-center gap-3 pr-2">
@@ -333,7 +322,6 @@ export function ExerciseSwapModal({
             Accidental duplicates in this workout are automatically excluded.
           </span>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

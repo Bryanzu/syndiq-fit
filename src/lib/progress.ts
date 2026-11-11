@@ -8,6 +8,9 @@ export interface SessionEntry {
   dayNumber: number;
   title: string;
   completedAt: string;
+  /** Recorded when the session was done in the workout player */
+  durationMin?: number;
+  setsCompleted?: number;
 }
 
 const STORAGE_KEY_LOG = 'syndiq_workout_log';

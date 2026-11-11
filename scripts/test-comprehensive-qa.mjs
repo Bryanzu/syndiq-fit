@@ -204,11 +204,11 @@ assert(mealPlan.days[0].totalCalories > 1500, `Caloric targets properly computed
 // -----------------------------------------------------------------------------
 console.log('\n--- TEST 6: Navigation & Modal Architecture Integrity ---');
 
-const navDockPath = path.resolve('./src/components/layout/ExpandableNavDock.tsx');
-assert(fs.existsSync(navDockPath), 'ExpandableNavDock.tsx component exists');
+const navDockPath = path.resolve('./src/components/layout/TabBar.tsx');
+assert(fs.existsSync(navDockPath), 'TabBar.tsx component exists');
 
 const navDockContent = fs.readFileSync(navDockPath, 'utf8') + fs.readFileSync(path.resolve('./src/components/layout/navItems.ts'), 'utf8');
-assert(navDockContent.includes('Home') && navDockContent.includes('/program') && navDockContent.includes('/meal-planner') && navDockContent.includes('/feedback'), 'ExpandableNavDock covers all 6 key application sections');
+assert(navDockContent.includes('Home') && navDockContent.includes('/program') && navDockContent.includes('/meal-planner') && navDockContent.includes('/feedback'), 'Navigation covers all 6 key application sections');
 
 const videoModalContent = fs.readFileSync(path.resolve('./src/components/program/VideoModal.tsx'), 'utf8');
 assert(videoModalContent.includes('z-[150]'), 'VideoModal uses elevated z-[150] above ExerciseDetailModal');
