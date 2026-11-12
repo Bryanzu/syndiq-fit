@@ -94,7 +94,6 @@ Ideas not started:
 
 1. A photo per exercise (currently one per movement type) and embedded demo videos (`youtubeId` is empty)
 2. Expand animation for meal cards and body-map rows (only program exercise rows have it)
-3. `public/videos/page@*.webm` are leftover recordings that nothing uses
 
 
 ## Development Rules
