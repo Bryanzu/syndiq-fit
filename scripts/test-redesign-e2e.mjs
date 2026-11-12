@@ -152,9 +152,15 @@ console.log('\n--- Phone: first open, home, workout player ---');
   console.log('\n--- Phone: meal planner ---');
   await nav.locator('a[href="/meal-planner"]').click();
   await page.waitForURL('**/meal-planner');
-  await page.waitForSelector('text=Set your targets');
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await page.getByRole('button', { name: /Build my meal plan/ }).click();
+  const mealFlow = page.locator('[role="dialog"][aria-label="Plan your meals"]');
+  await mealFlow.waitFor();
+  check('Meal questions reuse the workout answers', (await mealFlow.innerText()).includes('From your program'));
+  for (let i = 0; i < 4; i++) {
+    await mealFlow.getByRole('button', { name: 'Continue' }).click();
+    await page.waitForTimeout(450);
+  }
+  await mealFlow.getByRole('button', { name: 'Build my meal plan' }).click();
+  await mealFlow.getByRole('button', { name: 'See my week' }).click();
   await page.waitForSelector('text=This week’s meals');
   const plan = await page.evaluate(() => JSON.parse(localStorage.getItem('syndiq_meal_plan')));
   const gap = Math.abs(plan.averageDailyCalories - plan.profile.targetCalories);
@@ -164,6 +170,62 @@ console.log('\n--- Phone: first open, home, workout player ---');
   await page.waitForSelector('text=Body map');
   await page.getByRole('button', { name: 'female', exact: true }).click();
   check('Body map switches to the female figure', (await page.locator('svg[aria-label*="female body"]').count()) === 1);
+  await ctx.close();
+}
+
+/* ------------------------------------------------------------------ */
+console.log('\n--- Phone: workout questionnaire ---');
+{
+  const { ctx, page } = await open({ width: 390, height: 844 });
+  const flow = page.locator('[role="dialog"][aria-label="Build your program"]');
+  const cont = async () => {
+    await flow.getByRole('button', { name: 'Continue' }).click();
+    await page.waitForTimeout(450);
+  };
+  await page.goto(BASE + '/questionnaire', { waitUntil: 'networkidle' });
+  await flow.waitFor();
+  check('Questionnaire opens full screen on its first question', (await flow.locator('h2').first().innerText()).includes('sex'));
+  await flow.getByRole('radio', { name: /Female/ }).click();
+  const wheel = flow.getByRole('spinbutton', { name: 'Age' });
+  await wheel.waitFor();
+  check('A single-choice answer moves on by itself', true);
+  await wheel.focus();
+  await page.keyboard.press('ArrowDown');
+  await page.waitForTimeout(800);
+  check('Age wheel responds to the keyboard', (await wheel.getAttribute('aria-valuetext')) === '27 years');
+  await cont();
+  await flow.getByRole('radio', { name: /1 to 3 years/ }).click();
+  await flow.getByRole('radio', { name: 'Shape' }).waitFor();
+  await cont();
+  await flow.getByRole('radio', { name: '3 days' }).click();
+  check('Days screen names the split', (await flow.innerText()).includes('Full body'));
+  await cont();
+  await cont();
+  await flow.getByRole('radio', { name: /Home gym/ }).click();
+  await flow.getByRole('button', { name: /Fine-tune the list/ }).click();
+  const sheet = page.locator('[role="dialog"][aria-labelledby="equipment-sheet-title"]');
+  await sheet.waitFor();
+  await sheet.getByRole('switch', { name: /Kettlebells/ }).click();
+  await sheet.getByRole('button', { name: 'Done' }).click();
+  await page.waitForTimeout(400);
+  check('Fine-tuning the kit leaves no setup selected', (await flow.locator('[role="radio"][aria-checked="true"]').count()) === 0);
+  await cont();
+  await flow.getByRole('checkbox', { name: 'Knee' }).click();
+  check('Picking a sore joint says what gets swapped', (await flow.innerText()).includes('leg press'));
+  await flow.getByRole('button', { name: 'Build my program' }).click();
+  await flow.getByRole('button', { name: 'See my program' }).waitFor({ timeout: 8000 });
+  const profile = await page.evaluate(() => JSON.parse(localStorage.getItem('syndiq_active_profile')));
+  check(
+    'Answers are saved with the program',
+    profile.gender === 'female' && profile.ageYears === 27 && profile.age === '21-30' && profile.frequency === 3 &&
+      profile.availableEquipment.includes('kettlebells') && profile.injuries.includes('knee'),
+    JSON.stringify(profile)
+  );
+  await flow.getByRole('button', { name: 'See my program' }).click();
+  await page.waitForURL('**/program');
+  await page.waitForSelector('article');
+  check('The result opens the new program', (await page.locator('article').count()) >= 3);
+  check('Page scroll is restored after the questionnaire', await page.evaluate(() => !document.body.classList.contains('modal-open')));
   await ctx.close();
 }
 

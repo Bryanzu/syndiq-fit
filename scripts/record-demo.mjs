@@ -54,30 +54,25 @@ try {
   /* 2. Questionnaire */
   chapter('Questionnaire');
   await page.locator('a:has-text("Build my program"):visible').first().click();
-  await page.waitForSelector('text=What is your sex?');
+  const flow = page.locator('[role="dialog"][aria-label="Build your program"]');
+  await flow.waitFor();
   await sleep(900);
-  await page.getByRole('radio', { name: /Female/ }).click();
-  await sleep(700);
-  for (let step = 0; step < 14; step++) {
-    const build = page.getByRole('button', { name: /Build my program/ });
+  await flow.getByRole('radio', { name: /Female/ }).click();
+  await sleep(1400);
+  for (let step = 0; step < 10; step++) {
+    const build = flow.getByRole('button', { name: 'Build my program' });
     if (await build.count()) {
       await sleep(900);
       await build.click();
       break;
     }
-    const preset = page.getByRole('button', { name: /Commercial Gym/ });
-    if (await preset.count()) {
-      await preset.first().click();
-      await sleep(900);
-      await smoothScroll(page, 500, 700);
-      await sleep(500);
-    }
-    const next = page.getByRole('button', { name: /^Next/ });
-    await next.scrollIntoViewIfNeeded();
-    await sleep(700);
-    await next.click();
     await sleep(900);
+    await flow.getByRole('button', { name: 'Continue' }).click();
+    await sleep(700);
   }
+  await flow.getByRole('button', { name: 'See my program' }).waitFor({ timeout: 10000 });
+  await sleep(1800);
+  await flow.getByRole('button', { name: 'See my program' }).click();
 
   /* 3. Program */
   chapter('Your program');
@@ -144,14 +139,17 @@ try {
   /* 6. Meals */
   chapter('Meals');
   await nav('/meal-planner').click();
-  await page.waitForSelector('text=Set your targets');
+  const mealFlow = page.locator('[role="dialog"][aria-label="Plan your meals"]');
+  await mealFlow.waitFor();
+  for (let step = 0; step < 4; step++) {
+    await sleep(1100);
+    await mealFlow.getByRole('button', { name: 'Continue' }).click();
+  }
   await sleep(1500);
-  await smoothScroll(page, 600);
-  await sleep(800);
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await page.waitForSelector('text=What’s in your kitchen?');
-  await sleep(1500);
-  await page.getByRole('button', { name: /Build my meal plan/ }).click();
+  await mealFlow.getByRole('button', { name: 'Build my meal plan' }).click();
+  await mealFlow.getByRole('button', { name: 'See my week' }).waitFor({ timeout: 10000 });
+  await sleep(1800);
+  await mealFlow.getByRole('button', { name: 'See my week' }).click();
   await page.waitForSelector('text=This week’s meals');
   await sleep(2000);
   await smoothScroll(page, 900, 1600);

@@ -43,6 +43,8 @@ export type FitnessGoal =
 export interface UserProfile {
   gender: Gender;
   age: AgeCategory;
+  /** Exact age in years, when the questionnaire asked for it. The engine uses `age`; the meal planner reuses this. */
+  ageYears?: number;
   experience: ExperienceLevel;
   goal: FitnessGoal;
   secondaryGoals?: FitnessGoal[];
