@@ -21,6 +21,7 @@ import { adaptExerciseVolume, calculateWorkoutDuration } from '@/engine/volumeRu
 import { Sheet } from '@/components/ui/Sheet';
 import { toast } from '@/components/ui/Toaster';
 import { useWorkoutSession } from '@/context/WorkoutSessionContext';
+import { track } from '@/lib/analytics/client';
 import { Sparkles, Trash2, X, Play } from 'lucide-react';
 
 function ProgramContent() {
@@ -100,6 +101,7 @@ function ProgramContent() {
         const generated = generateWorkoutProgram(decodedProfile);
         setProgram(generated);
         saveActiveProgram(generated);
+        track('share_opened');
         setIsLoading(false);
         return;
       }

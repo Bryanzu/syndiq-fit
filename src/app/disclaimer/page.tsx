@@ -66,6 +66,18 @@ export default function DisclaimerPage() {
             Physical resistance training carries inherent risks of physical injury. By utilizing Syndiq fit, you acknowledge that you are voluntarily participating in physical activity and assume all responsibility for your safety and physical well-being.
           </p>
         </div>
+
+        <div id="privacy" className="space-y-2 scroll-mt-24">
+          <h2 className="text-base sm:text-lg font-bold text-gym-text">5. Privacy</h2>
+          <p className="text-xs sm:text-sm text-gym-textMuted leading-relaxed">
+            Your programs, meal plans and workout logs stay in your browser. To see how many people use the app, we count a few
+            things anonymously: page visits, programs and meal plans built, workouts started and finished, and share links opened.
+          </p>
+          <p className="text-xs sm:text-sm text-gym-textMuted leading-relaxed">
+            Your browser gets a random ID so we can tell new visitors from returning ones. It isn&apos;t linked to you. We
+            don&apos;t use cookies and don&apos;t store names, emails or IP addresses. Clearing your browser data resets the ID.
+          </p>
+        </div>
       </div>
 
       {/* Footer Return CTA */}

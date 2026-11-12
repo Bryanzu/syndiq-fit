@@ -47,3 +47,6 @@ Thumbs.db
 # Claude Code: per-session worktrees and personal settings (launch.json stays tracked)
 .claude/worktrees/
 .claude/settings.local.json
+
+# Local anonymous usage counts (production keeps them in Redis)
+data/analytics.json

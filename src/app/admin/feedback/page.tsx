@@ -45,11 +45,14 @@ export default function AdminFeedbackPage() {
     }
   }, []);
 
+  // The key goes in a header, never the URL, so it stays out of logs and history
+  const authHeaders = (key: string) => ({ Authorization: `Bearer ${key}` });
+
   const fetchFeedback = async (key: string) => {
     setIsLoading(true);
     setAuthError(null);
     try {
-      const res = await fetch(`/api/feedback?key=${encodeURIComponent(key)}`);
+      const res = await fetch('/api/feedback', { headers: authHeaders(key), cache: 'no-store' });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Authentication failed. Please verify your administrator key.');
@@ -62,6 +65,7 @@ export default function AdminFeedbackPage() {
     } catch (err: any) {
       setAuthError(err.message || 'Access denied.');
       setIsAuthenticated(false);
+      if (typeof window !== 'undefined') sessionStorage.removeItem('syndiq_admin_key');
     } finally {
       setIsLoading(false);
     }
@@ -89,9 +93,9 @@ export default function AdminFeedbackPage() {
   const handleToggleReviewed = async (item: FeedbackItem) => {
     setActionError(null);
     try {
-      const res = await fetch(`/api/feedback?key=${encodeURIComponent(adminKey)}`, {
+      const res = await fetch('/api/feedback', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders(adminKey) },
         body: JSON.stringify({ id: item.id, reviewed: !item.reviewed }),
       });
       const data = await res.json();
@@ -112,8 +116,9 @@ export default function AdminFeedbackPage() {
 
     setActionError(null);
     try {
-      const res = await fetch(`/api/feedback?id=${encodeURIComponent(id)}&key=${encodeURIComponent(adminKey)}`, {
+      const res = await fetch(`/api/feedback?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
+        headers: authHeaders(adminKey),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete feedback entry.');

@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { WorkoutSessionProvider } from '@/context/WorkoutSessionContext';
 import { WorkoutPlayer } from '@/components/workout/WorkoutPlayer';
 import { MiniPlayer } from '@/components/workout/MiniPlayer';
+import { PageViewTracker } from '@/components/analytics/PageViewTracker';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
@@ -69,6 +70,7 @@ export default function RootLayout({
             <TabBar />
             <WorkoutPlayer />
             <Toaster />
+            <PageViewTracker />
           </WorkoutSessionProvider>
         </ThemeProvider>
       </body>

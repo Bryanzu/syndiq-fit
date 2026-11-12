@@ -11,6 +11,13 @@ import { exercisePhoto, mealPhoto } from '../src/lib/photos';
 import { PHOTO_CREDITS } from '../src/data/photoCredits';
 import { exerciseVideos } from '../src/data/exerciseVideos';
 import path from 'path';
+import os from 'os';
+import { randomUUID } from 'crypto';
+import { isAnalyticsEvent, isAnonId, normalizePath } from '../src/lib/analytics/events';
+import { addDays, lastDays } from '../src/lib/analytics/days';
+import { computeSummary } from '../src/lib/analytics/metrics';
+import { getAnalyticsStore, redisStore } from '../src/lib/analytics/store';
+import http from 'http';
 
 console.log('=================================================================');
 console.log('   SYNDIQ FIT — COMPREHENSIVE QA & VALIDATION SUITE');
@@ -279,6 +286,114 @@ const femaleGlutes = orderForBuild(exercises.filter((e) => e.primaryMuscles.incl
 assert(
   femaleGlutes[0].id === 'hip-thrust' && orderForBuild(exercises, 'male') === exercises,
   `Body map: female glute list starts with ${femaleGlutes[0].name}, male list keeps library order`
+);
+
+// -----------------------------------------------------------------------------
+// TEST 9: Anonymous analytics
+// -----------------------------------------------------------------------------
+console.log('\n--- TEST 9: Anonymous Analytics ---');
+
+assert(
+  normalizePath('/program?p=eyJnZW5kZXIiOiJtYWxlIn0') === '/program' &&
+    normalizePath('/Meal-Planner/') === '/meal-planner' &&
+    normalizePath('/someone@example.com') === '/other' &&
+    normalizePath(42) === '/other',
+  'Page paths drop the query string and map unknown pages to /other'
+);
+
+assert(
+  isAnonId(randomUUID()) && !isAnonId('user@example.com') && !isAnonId('') && isAnalyticsEvent('workout_finished') && !isAnalyticsEvent('purchase'),
+  'Only random browser IDs and the six known events are accepted'
+);
+
+// Four browsers over 10 days. a: day 1 and day 9. b: day 1 only. c: share link, workout on day 9. d: new today.
+const T = '2026-11-12';
+const day = (n) => addDays(T, n - 10);
+const snap = {
+  firstSeen: { a: day(1), b: day(1), c: day(9), d: T, old: '2026-09-01' },
+  lastSeen: { a: day(9), b: day(1), c: day(9), d: T, old: day(8) },
+  everDid: { program_built: ['a', 'b'], share_opened: ['c'], workout_finished: ['a', 'c', 'old'] },
+  days: lastDays(T, 30).map((d) => ({
+    day: d,
+    users: d === day(1) ? ['a', 'b'] : d === day(8) ? ['old'] : d === day(9) ? ['a', 'c'] : d === T ? ['d'] : [],
+    events: d === day(9) ? { visit: 3, workout_finished: 2 } : d === T ? { visit: 1 } : {},
+    pages: d === day(9) ? { '/program': 2, '/': 1 } : d === T ? { '/': 1 } : {},
+  })),
+};
+const sum = computeSummary(snap, T);
+assert(
+  sum.users.today === 1 && sum.users.week === 4 && sum.users.month === 5 && sum.users.allTime === 5 &&
+    sum.newVsReturning.newTotal === 4 && sum.newVsReturning.returningTotal === 1 &&
+    sum.newVsReturning.days.find((d) => d.day === day(9)).returning === 1,
+  `Unique, new and returning people are counted per browser (${JSON.stringify(sum.users)}, new ${sum.newVsReturning.newTotal}, returning ${sum.newVsReturning.returningTotal})`
+);
+assert(
+  sum.cameBack.eligible === 3 && sum.cameBack.returned === 2 &&
+    sum.funnel.visited === 5 && sum.funnel.builtProgram === 3 && sum.funnel.finishedWorkout === 2 &&
+    sum.events.totals.visit === 4 && sum.topPages[0].path === '/' && sum.topPages[0].views === 2,
+  `Came back after a week, funnel, event totals and top pages add up (${JSON.stringify({ cameBack: sum.cameBack, funnel: sum.funnel })})`
+);
+
+const tmpFile = path.join(os.tmpdir(), `syndiq-analytics-${process.pid}.json`);
+process.env.ANALYTICS_FILE = tmpFile;
+const store = getAnalyticsStore();
+const browserId = randomUUID();
+await store.record({ id: browserId, event: 'visit', path: '/', day: T });
+await store.record({ id: browserId, event: 'program_built', day: T });
+const stored = await store.snapshot([T]);
+fs.rmSync(tmpFile, { force: true });
+assert(
+  store.kind === 'file' && stored.firstSeen[browserId] === T && stored.days[0].events.visit === 1 &&
+    stored.days[0].pages['/'] === 1 && stored.everDid.program_built?.includes(browserId),
+  'Local store records visits and events and reads them back'
+);
+
+// A stand-in for Upstash's REST pipeline, with just the commands the store uses
+const kv = new Map();
+const fakeRedis = http.createServer((req, res) => {
+  let body = '';
+  req.on('data', (c) => (body += c));
+  req.on('end', () => {
+    if (req.url !== '/pipeline' || req.headers.authorization !== 'Bearer test-token') {
+      res.writeHead(401).end('[]');
+      return;
+    }
+    const hash = (k) => (kv.has(k) ? kv.get(k) : kv.set(k, new Map()).get(k));
+    const set = (k) => (kv.has(k) ? kv.get(k) : kv.set(k, new Set()).get(k));
+    const out = JSON.parse(body).map(([cmd, k, a, b]) => {
+      if (cmd === 'HSETNX') return { result: hash(k).has(a) ? 0 : (hash(k).set(a, String(b)), 1) };
+      if (cmd === 'HSET') return { result: (hash(k).set(a, String(b)), 1) };
+      if (cmd === 'HINCRBY') return { result: (hash(k).set(a, String(Number(hash(k).get(a) || 0) + b)), Number(hash(k).get(a))) };
+      if (cmd === 'SADD') return { result: (set(k).add(a), 1) };
+      if (cmd === 'HGETALL') return { result: kv.has(k) ? [...kv.get(k)].flat() : [] };
+      if (cmd === 'SMEMBERS') return { result: kv.has(k) ? [...kv.get(k)] : [] };
+      return { error: `ERR unknown command ${cmd}` };
+    });
+    res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(out));
+  });
+});
+await new Promise((r) => fakeRedis.listen(0, '127.0.0.1', r));
+const redis = redisStore({ url: `http://127.0.0.1:${fakeRedis.address().port}`, token: 'test-token' });
+const other = randomUUID();
+await redis.record({ id: browserId, event: 'visit', path: '/program', day: day(9) });
+await redis.record({ id: browserId, event: 'visit', path: '/program', day: T });
+await redis.record({ id: other, event: 'share_opened', day: T });
+await redis.record({ id: other, event: 'workout_finished', day: T });
+const fromRedis = computeSummary(await redis.snapshot(lastDays(T, 30)), T);
+fakeRedis.close();
+assert(
+  redis.kind === 'redis' && fromRedis.users.today === 2 && fromRedis.users.allTime === 2 &&
+    fromRedis.newVsReturning.days.at(-1).returning === 1 && fromRedis.funnel.finishedWorkout === 1 &&
+    fromRedis.topPages[0].path === '/program' && fromRedis.topPages[0].views === 2,
+  `Redis store round-trips through the Upstash REST pipeline (${JSON.stringify(fromRedis.users)})`
+);
+
+const feedbackRoute = fs.readFileSync(path.resolve('./src/app/api/feedback/route.ts'), 'utf8');
+const adminAuth = fs.readFileSync(path.resolve('./src/lib/adminAuth.ts'), 'utf8');
+assert(
+  !feedbackRoute.includes('syndiq-admin-2026') && !/searchParams\.get\(['"]key['"]\)/.test(feedbackRoute + adminAuth) &&
+    feedbackRoute.includes('checkAdmin') && fs.readFileSync(path.resolve('./src/app/api/analytics/route.ts'), 'utf8').includes('checkAdmin'),
+  'Admin APIs use the server-side key check: no fallback key, no key in the URL'
 );
 
 // -----------------------------------------------------------------------------

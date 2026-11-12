@@ -4,7 +4,7 @@
 
 Syndiq Fit is a fitness web app. A questionnaire (goal, experience, schedule, equipment, injuries) feeds a rule-based engine that generates a weekly workout program. A second engine builds a 7-day meal plan from Nigerian recipes, sized to the user's calorie and protein targets, with a shopping list. Users can swap exercises and meals, run a workout in a full-screen player, browse a muscle map, export PDFs and share a program by link or QR code.
 
-There are no accounts. Everything a user creates lives in their browser.
+There are no accounts. Everything a user creates lives in their browser. The only thing sent to the server is anonymous usage counts (see Analytics below).
 
 Repository: `Bryanzu/syndiq-fit` on GitHub.
 
@@ -13,10 +13,11 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 - **Frontend:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 3, `lucide-react` icons, `jspdf` for PDFs. Almost every page is a client component.
 - **Backend:** Next.js route handlers only, in `src/app/api/`:
   - `feedback` stores and lists user feedback (admin key protected)
+  - `analytics` records anonymous usage events (public `POST`) and returns the admin summary (`GET`, admin key protected)
   - `test-engine` runs sample profiles through the workout engine
   - `video` serves the demo video file
-- **Database:** none. User data is in `localStorage`; feedback is a JSON file at `data/feedback.json` (this will not persist on serverless hosting).
-- **Authentication:** none for users. The feedback admin page uses a shared key from `ADMIN_FEEDBACK_KEY` in `.env.local`. The code still has a hard-coded fallback key and accepts the key in the URL; both should be removed.
+- **Database:** none for user data, which is in `localStorage`. Feedback is a JSON file at `data/feedback.json` (this will not persist on serverless hosting). Usage counts go to Upstash Redis when `KV_REST_API_URL`/`KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`) are set; otherwise local runs write `data/analytics.json` (gitignored) and Vercel deployments drop them.
+- **Authentication:** none for users. The admin pages (`/admin/feedback`, `/admin/analytics`) check a shared key from `ADMIN_KEY` (or the older `ADMIN_FEEDBACK_KEY`) on the server, in `src/lib/adminAuth.ts`. There is no fallback key: without the env var the admin APIs answer 503. The key is only read from the `Authorization` header, never the URL. Ten wrong keys from one client lock it out for 10 minutes (per server instance).
 - **API structure:** REST-style JSON from the route handlers above. The generators run in the browser, not on the server.
 
 ### Where things live
@@ -34,14 +35,16 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 | Workout player | `src/components/workout/`, `src/context/WorkoutSessionContext.tsx`, `src/lib/workoutSession.ts` |
 | Demo videos | `src/data/exerciseVideos.ts` (a checked YouTube video per exercise), `src/lib/demoVideo.ts` (lookup and URLs), played in `src/components/program/VideoModal.tsx` |
 | Browser storage | `src/lib/storage.ts` (program, profile, meal plan, inventory), `src/lib/progress.ts` (workout log) |
+| Analytics | `src/lib/analytics/` (`events` list and checks, `client` with `track()`, `store` for Redis or file, `metrics`, `days`), `src/components/analytics/PageViewTracker.tsx` (mounted in the root layout), `src/app/api/analytics/route.ts` |
 | Design tokens | `src/app/globals.css` and `tailwind.config.ts` |
 
-`localStorage` keys: `syndiq_lift_history`, `syndiq_active_program`, `syndiq_active_profile`, `syndiq_meal_plan`, `syndiq_meal_inventory`, `syndiq_workout_log`, `syndiq_workout_session`, `syndiq_theme`, `syndiq_admin_key`, `syndiq_program_archive` (up to 3 replaced programs, deleted after 30 days; restored from Settings).
+`localStorage` keys: `syndiq_lift_history`, `syndiq_active_program`, `syndiq_active_profile`, `syndiq_meal_plan`, `syndiq_meal_inventory`, `syndiq_workout_log`, `syndiq_workout_session`, `syndiq_theme`, `syndiq_admin_key` (sessionStorage), `syndiq_program_archive` (up to 3 replaced programs, deleted after 30 days; restored from Settings), `syndiq_anon_id` (random browser ID for the anonymous usage counts).
 
 ### How the engines work
 
 - **Workout:** pick a split template by training frequency, then fill each slot by filtering exercises (equipment, injuries, age, dislikes) and ranking the rest. Sets, reps and rest are adapted per profile, and each day is tuned to the requested session length. The result is checked by `workoutValidator`. Fat loss and endurance keep the main lifts (only conditioning moves get a ranking boost); their reps and rest change in `volumeRules`.
 - **Female programs** (`gluteFocus.ts`, skipped for chest, back, shoulder and arm goals): every lower-body day gets a glute-led slot (the week's first is a hip thrust, or a pull-through or bridge for complete beginners; later ones rotate through bridges, pull-throughs and swings), and second knee-dominant slots prefer Bulgarian split squats, then reverse lunges, walking lunges and step-ups (beginners get reverse lunges and step-ups first). Upper-body days match the male plan, and the glute focus never changes a male plan. The body map's `orderForBuild()` uses the same rules: the female list puts glute work first and opens on the glutes.
+- **Analytics:** each browser gets a random UUID in `syndiq_anon_id`. `track()` sends `{ id, event, path? }` with `sendBeacon`; events are `visit` (every page, path only, unknown paths become `/other`), `program_built`, `meal_plan_built`, `workout_started`, `workout_finished` and `share_opened`. The server stores, per day (Lagos time, `ANALYTICS_TIMEZONE` to change), the set of IDs seen, event counts and page counts, plus each ID's first and last day and who ever did each event. No IP, user agent or cookie is kept. Admin pages and crawlers are not counted. Preview deployments keep separate counts (keys are prefixed with `VERCEL_ENV`). `computeSummary()` in `metrics.ts` turns this into the admin numbers and is the same for both stores. People are counted per browser, so one person on two devices counts twice.
 - **Meals:** calculate targets (Mifflin-St Jeor, using the user's height), score recipes, rotate through each meal type's pool, then size each meal's portion (0.75x to 2x) so the day lands on the calorie target. Excluded foods are never used; a meal type with no allowed recipe is skipped and reported.
 
 ## Design Direction
@@ -149,9 +152,9 @@ npm run test:e2e
 npm run dev
 ```
 
-- The QA suite runs both engines and checks file structure, photos and the demo video list; 27 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
+- The QA suite runs both engines and checks file structure, photos, the demo video list and the analytics rules (paths, IDs, metrics, the local store and the Redis store against a fake Upstash server); 34 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
 - `npm run test:engine` needs the dev server running on port 3000.
-- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 58 checks should pass. It needs the dev server running (set `BASE_URL` if it is not on port 3000), and network access to YouTube for the check that a demo video plays.
+- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 66 checks should pass. It needs the dev server running (set `BASE_URL` if it is not on port 3000), network access to YouTube for the check that a demo video plays, and `ADMIN_KEY` in `.env.local` (any random string; the dev server and the test both read it) for the admin checks. Its events land in the local `data/analytics.json`.
 - `npm run verify:videos` checks that every video in `src/data/exerciseVideos.ts` still exists and allows embedding (no dev server needed). A new exercise gets a video only after this kind of check (oEmbed, `playableInEmbed`, title matches the movement); without one, its demo falls back to a YouTube search. The lookup is by exercise id, so programs saved before a video was added still get it.
 - `npm run demo:record` re-records the `/demo` walkthrough video (also needs the dev server).
 - A program can be loaded without the questionnaire through a share link: `/program?p=<base64 of the profile JSON>`.
