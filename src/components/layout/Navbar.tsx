@@ -2,19 +2,27 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Settings, MessageSquare } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { NAV_ITEMS } from './navItems';
 
-function LogoMark({ size = 36 }: { size?: number }) {
+/** One piece of the logo, cut from the artwork as a mask so it takes the theme's colour */
+function BrandPiece({ src, className }: { src: string; className: string }) {
+  return <span aria-hidden className={`brand-mask block shrink-0 ${className}`} style={{ '--mask': `url(${src})` } as React.CSSProperties} />;
+}
+
+/** The lime S, on a clear background: lime on dark and on photos, deep green on the light theme */
+function LogoMark() {
+  return <BrandPiece src="/brand/syndiq-mark.png" className="animate-logoIn h-8 w-[47px] bg-[var(--brand-mark)]" />;
+}
+
+/** SYNDIQ over FIT, as in the logo. The wordmark follows the text colour so it never disappears. */
+function Wordmark() {
   return (
-    <span
-      className="animate-logoIn relative block shrink-0 overflow-hidden rounded-xl bg-black"
-      style={{ width: size, height: size }}
-    >
-      <Image src="/syndiq-logo.png" alt="" fill sizes={`${size}px`} className="object-contain p-0.5" priority />
+    <span aria-hidden className="flex flex-col items-center gap-[3px]">
+      <BrandPiece src="/brand/syndiq-wordmark.png" className="h-[15px] w-[97px] bg-gym-text" />
+      <BrandPiece src="/brand/syndiq-fit.png" className="h-[9px] w-[41px] bg-[var(--brand-mark)]" />
     </span>
   );
 }
@@ -52,13 +60,19 @@ function MobileTopBar({ pathname }: { pathname: string }) {
       <div className="flex h-14 items-center justify-between gap-3 px-4">
         <Link href="/" className="flex min-w-0 items-center gap-2.5" aria-label="Syndiq Fit home">
           <LogoMark />
-          <span
-            className={`truncate text-[17px] font-semibold tracking-tight text-gym-text transition-opacity duration-300 ${
-              scrolled ? 'opacity-100' : 'opacity-0'
-            }`}
-            aria-hidden={!scrolled}
-          >
-            {titleFor(pathname)}
+          {/* The wordmark gives way to the page title once the page scrolls */}
+          <span className="relative flex min-w-0 items-center">
+            <span className={`transition-opacity duration-300 ${scrolled ? 'opacity-0' : 'opacity-100'}`}>
+              <Wordmark />
+            </span>
+            <span
+              className={`absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap text-[17px] font-semibold tracking-tight text-gym-text transition-opacity duration-300 ${
+                scrolled ? 'opacity-100' : 'opacity-0'
+              }`}
+              aria-hidden={!scrolled}
+            >
+              {titleFor(pathname)}
+            </span>
           </span>
         </Link>
         <div className="flex shrink-0 items-center gap-2">
@@ -94,7 +108,7 @@ function DesktopTopBar({ pathname }: { pathname: string }) {
       <div className="page flex h-16 items-center justify-between gap-4">
         <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2.5" aria-label="Syndiq Fit home">
           <LogoMark />
-          <span className="truncate text-[17px] font-semibold tracking-tight text-gym-text">Syndiq Fit</span>
+          <Wordmark />
         </Link>
 
         <nav data-nav="desktop" aria-label="Primary" className="glass flex items-center gap-1 rounded-full p-1">

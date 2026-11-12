@@ -38,6 +38,12 @@ console.log('\n--- Phone: first open, home, workout player ---');
 {
   const { ctx, page } = await open({ width: 390, height: 844 });
   const nav = page.locator('nav[data-nav="mobile"]');
+  // A shrunk pill hides the other tabs, so go back to the top (which opens it) before tapping one
+  const tapTab = async (href) => {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(400);
+    await nav.locator(`a[href="${href}"]`).click();
+  };
   const player = page.locator('[role="dialog"][aria-label^="Workout in progress"]');
   const mini = page.locator('[data-mini-player]');
 
@@ -54,6 +60,13 @@ console.log('\n--- Phone: first open, home, workout player ---');
   await rowPhoto.scrollIntoViewIfNeeded();
   await page.waitForTimeout(800);
   check('Exercise rows show a photo', await rowPhoto.evaluate((img) => img.complete && img.naturalWidth > 0));
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await page.waitForTimeout(500);
+  check('Pill shrinks while scrolling down', (await nav.getAttribute('data-compact')) === 'true');
+  check('Shrunk pill keeps all five tabs in the page', (await nav.locator('a').count()) === 5);
+  await page.evaluate(() => window.scrollTo(0, 500));
+  await page.waitForTimeout(500);
+  check('Pill opens again when scrolling up', (await nav.getAttribute('data-compact')) === 'false');
 
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await page.waitForSelector('text=In this session');
@@ -118,7 +131,7 @@ console.log('\n--- Phone: first open, home, workout player ---');
 
   /* Body map */
   console.log('\n--- Phone: body map ---');
-  await nav.locator('a[href="/muscle-map"]').click();
+  await tapTab('/muscle-map');
   await page.waitForURL('**/muscle-map');
   await page.waitForSelector('text=Body map');
   check('Body map shows sets logged this week', /\d+ sets? this week/.test(await page.locator('main').innerText()));
@@ -132,7 +145,7 @@ console.log('\n--- Phone: first open, home, workout player ---');
 
   /* Sheets */
   console.log('\n--- Phone: sheets ---');
-  await nav.locator('a[href="/program"]').click();
+  await tapTab('/program');
   await page.waitForURL('**/program');
   await page.waitForSelector('article');
   await page.locator('article button[aria-label*="view instructions"]').first().click();
@@ -150,7 +163,7 @@ console.log('\n--- Phone: first open, home, workout player ---');
 
   /* Meals */
   console.log('\n--- Phone: meal planner ---');
-  await nav.locator('a[href="/meal-planner"]').click();
+  await tapTab('/meal-planner');
   await page.waitForURL('**/meal-planner');
   const mealFlow = page.locator('[role="dialog"][aria-label="Plan your meals"]');
   await mealFlow.waitFor();
@@ -166,7 +179,7 @@ console.log('\n--- Phone: first open, home, workout player ---');
   const gap = Math.abs(plan.averageDailyCalories - plan.profile.targetCalories);
   check('Meal plan lands within 150 kcal of the target', gap <= 150, `${plan.averageDailyCalories} vs ${plan.profile.targetCalories}`);
   check('Meal plan stores the height it was built with', typeof plan.profile.heightCm === 'number');
-  await nav.locator('a[href="/muscle-map"]').click();
+  await tapTab('/muscle-map');
   await page.waitForSelector('text=Body map');
   await page.getByRole('button', { name: 'female', exact: true }).click();
   check('Body map switches to the female figure', (await page.locator('svg[aria-label*="female body"]').count()) === 1);
