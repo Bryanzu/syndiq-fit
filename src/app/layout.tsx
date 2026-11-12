@@ -15,9 +15,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-int
 export const metadata: Metadata = {
   title: 'Syndiq Fit',
   description: 'Workout programs built around your gym, schedule and injuries, with Nigerian meal plans.',
-  icons: {
-    icon: '/syndiq-logo.png',
-  },
+  // Icons come from src/app/icon.png (browser tabs) and src/app/apple-icon.png (iPhone tabs and home screen)
 };
 
 // Explicit viewport: responsive width, and `cover` so env(safe-area-inset-*) works on notched phones.

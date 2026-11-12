@@ -30,6 +30,7 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 | Types | `src/types/` |
 | Layout and navigation | `src/components/layout/` (`Navbar`, `TabBar`, `Footer`, `navItems`) |
 | Shared UI | `src/components/ui/` (`Sheet`, `Toaster`, `InfoTooltip`, `ThemeToggle`) |
+| Question flows | `src/components/flow/` (`FlowShell`, `controls`, `pickers`, `BuildingView`), used by `questionnaire/QuestionnaireFlow.tsx` and `mealPlanner/MealPlannerFlow.tsx` |
 | Workout player | `src/components/workout/`, `src/context/WorkoutSessionContext.tsx`, `src/lib/workoutSession.ts` |
 | Browser storage | `src/lib/storage.ts` (program, profile, meal plan, inventory), `src/lib/progress.ts` (workout log) |
 | Design tokens | `src/app/globals.css` and `tailwind.config.ts` |
@@ -77,6 +78,14 @@ Built on branch `redesign/glass` (check whether it has been merged):
 - Exercise rows grow into their detail sheet (View Transitions API via `morphName` on `Sheet` and `ExerciseCard`; browsers without it just open the sheet)
 - Meal cards with a photo banner, glass wizard and questionnaire panels, questionnaire options as real radio controls
 - `/demo` page and `scripts/record-demo.mjs` rewritten for the redesign; the video was re-recorded
+
+Built on branch `redesign/questionnaires` (check whether it has been merged):
+
+- Workout questionnaire and meal plan questions rebuilt as full-screen, one-question-per-screen flows over a photo (mockups: the Questionnaires page of the canvas above). They replace `QuestionnaireWizard` and `MealPlannerWizard`.
+- The flows render into `document.body` through a portal, because the route's `page-enter` transform would otherwise trap a `position: fixed` overlay.
+- Age is asked as an exact number: `UserProfile.ageYears` is optional and the engine still reads the `age` bracket. Profiles saved without it get a typical age for their bracket.
+- The meal flow reuses sex, age and goal from the saved workout profile (Edit asks them again) and pre-picks activity from the number of training days. `/meal-planner?new=1` opens it even when a plan exists.
+- Single-choice screens (sex, experience, activity, meal goal) move on by themselves 300 ms after a tap.
 
 Ideas not started:
 
@@ -164,4 +173,3 @@ Rough ownership by feature: workout generation (`src/engine/*.ts`, `src/data/exe
 - The skipped-meal notice appears inside the protein shortfall report.
 - The mini player overlaps the bottom of page content on phones.
 - Exercises have no embedded videos (`youtubeId` is empty; demos open a YouTube search).
-- `QuestionnaireWizard.tsx` and `MealPlannerWizard.tsx` are very large and should be split before restyling.

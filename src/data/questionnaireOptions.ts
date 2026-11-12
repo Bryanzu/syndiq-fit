@@ -33,26 +33,26 @@ export const AGE_OPTIONS: OptionItem<AgeCategory>[] = [
 export const EXPERIENCE_OPTIONS: OptionItem<ExperienceLevel>[] = [
   {
     value: 'complete_beginner',
-    label: 'Complete Beginner',
-    description: 'Never lifted. We start with machines and light dumbbells.',
+    label: 'Just starting',
+    description: 'Never trained with weights',
     badge: 'Form First',
   },
   {
     value: 'beginner',
-    label: 'Beginner (< 1 Year)',
-    description: 'You know the machines and are ready for the big lifts.',
+    label: 'Under a year',
+    description: 'You know the main lifts',
     badge: 'Rapid Gains',
   },
   {
     value: 'intermediate',
-    label: 'Intermediate (1–3 Years)',
-    description: 'You train regularly and are comfortable with a barbell.',
+    label: '1 to 3 years',
+    description: 'Training most weeks',
     badge: 'Hypertrophy',
   },
   {
     value: 'advanced',
-    label: 'Advanced (3+ Years)',
-    description: 'Years under the bar. Ready for more volume.',
+    label: '3 years or more',
+    description: 'Comfortable under heavy loads',
     badge: 'High Volume',
   },
 ];
@@ -92,12 +92,12 @@ export const GOAL_OPTIONS: GoalItem[] = [
 ];
 
 export const FREQUENCY_OPTIONS: OptionItem<TrainingFrequency>[] = [
-  { value: 'recommend', label: 'Recommend for me', description: 'Syndiq fit will pick the ideal split based on your experience and goal.', badge: 'Recommended' },
-  { value: 2, label: '2 Days / Week', description: 'Full body express workouts for very busy schedules.' },
-  { value: 3, label: '3 Days / Week', description: 'Classic full-body split with rest days between sessions.' },
-  { value: 4, label: '4 Days / Week', description: 'Upper / Lower split allowing higher volume per muscle group.' },
-  { value: 5, label: '5 Days / Week', description: 'Push / Pull / Legs + Upper / Lower split for dedicated lifters.' },
-  { value: 6, label: '6 Days / Week', description: 'High-frequency 6-day split (PPL x 2) for maximum volume.' },
+  { value: 'recommend', label: 'We will pick', description: 'Based on your goal and experience.' },
+  { value: 2, label: 'Full body, twice', description: 'Two full-body sessions. Good for busy weeks.' },
+  { value: 3, label: 'Full body', description: 'Three full-body sessions with a rest day between.' },
+  { value: 4, label: 'Upper and lower', description: 'Two upper-body days and two lower-body days.' },
+  { value: 5, label: 'Push, pull, legs, upper, lower', description: 'Five sessions. Every muscle trained twice.' },
+  { value: 6, label: 'Push, pull, legs, twice', description: 'Six sessions. Every muscle trained twice.' },
 ];
 
 export const DURATION_OPTIONS: OptionItem<WorkoutDuration>[] = [
@@ -115,16 +115,16 @@ export interface InjuryOption {
 }
 
 export const INJURY_OPTIONS: InjuryOption[] = [
-  { id: 'none', label: 'No injuries', affectedMovements: 'Full exercise library available without restriction.' },
-  { id: 'shoulder', label: 'Shoulder Pain / Impingement', affectedMovements: 'Swaps heavy barbell overhead pressing for neutral-grip and machine presses.' },
-  { id: 'knee', label: 'Knee Pain / Patellar Issues', affectedMovements: 'Replaces deep squats and lunges with controlled leg press, glute bridges, and hamstring curls.' },
-  { id: 'lower_back', label: 'Lower Back / Spine Strain', affectedMovements: 'Substitutes spinal-loading deadlifts and squats with chest-supported rows and leg press.' },
-  { id: 'hip', label: 'Hip Pain / Impingement', affectedMovements: 'Adjusts stance width, avoids extreme deep hip flexion, prioritizes glute bridges.' },
-  { id: 'wrist', label: 'Wrist Pain / Weakness', affectedMovements: 'Replaces straight barbell curls/presses with dumbbell neutral grips and machines.' },
-  { id: 'elbow', label: 'Elbow Tendonitis (Tennis/Golfer)', affectedMovements: 'Swaps skull crushers and heavy barbell curls for cable pushdowns and hammer curls.' },
-  { id: 'ankle', label: 'Ankle Mobility Limitation', affectedMovements: 'Avoids deep calf drops and ankle-dependent squat depth.' },
-  { id: 'neck', label: 'Neck / Cervical Tension', affectedMovements: 'Avoids heavy shrugs, behind-the-neck movements, and decline setups.' },
-  { id: 'other', label: 'Other Limitation', affectedMovements: 'Describe your symptoms in the notes box below.' },
+  { id: 'none', label: 'Nothing hurts', affectedMovements: 'Every exercise is available.' },
+  { id: 'shoulder', label: 'Shoulder', affectedMovements: 'Heavy overhead pressing is swapped for neutral-grip and machine presses.' },
+  { id: 'knee', label: 'Knee', affectedMovements: 'Deep squats and lunges are swapped for leg press, glute bridges and hamstring curls.' },
+  { id: 'lower_back', label: 'Lower back', affectedMovements: 'Deadlifts and loaded squats are swapped for chest-supported rows and leg press.' },
+  { id: 'hip', label: 'Hip', affectedMovements: 'Wide stances and deep hip bends are avoided. Glute bridges come first.' },
+  { id: 'wrist', label: 'Wrist', affectedMovements: 'Straight-bar curls and presses become dumbbell, neutral-grip and machine versions.' },
+  { id: 'elbow', label: 'Elbow', affectedMovements: 'Skull crushers and heavy barbell curls are swapped for cable pushdowns and hammer curls.' },
+  { id: 'ankle', label: 'Ankle', affectedMovements: 'Deep calf drops and ankle-heavy squat depth are left out.' },
+  { id: 'neck', label: 'Neck', affectedMovements: 'Heavy shrugs, behind-the-neck moves and decline setups are left out.' },
+  { id: 'other', label: 'Something else', affectedMovements: 'Tell us what is going on in the note below.' },
 ];
 
 export function isGoalContradictory(

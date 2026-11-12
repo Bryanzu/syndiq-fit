@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   WeeklyMealPlan,
   PlannedMeal,
@@ -22,14 +23,13 @@ import {
 } from '@/engine/mealPlanner/mealPlanGenerator';
 import { generateShoppingList } from '@/engine/mealPlanner/shoppingList';
 import { generateMealPlanPdf } from '@/lib/mealPlanPdf';
-import { MealPlannerWizard } from '@/components/mealPlanner/MealPlannerWizard';
+import { MealPlannerFlow } from '@/components/mealPlanner/MealPlannerFlow';
 import { NutritionSummaryBar } from '@/components/mealPlanner/NutritionSummaryBar';
 import { MealCard } from '@/components/mealPlanner/MealCard';
 import { MealSwapModal } from '@/components/mealPlanner/MealSwapModal';
 import { RecipeDetailModal } from '@/components/mealPlanner/RecipeDetailModal';
 import { ShoppingListView } from '@/components/mealPlanner/ShoppingListView';
 import { PortionGuideModal } from '@/components/mealPlanner/PortionGuideModal';
-import Image from 'next/image';
 import {
   Utensils,
   ShoppingBag,
@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 
 export default function MealPlannerPage() {
+  const router = useRouter();
   const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
   const [inventory, setInventory] = useState<UserInventoryItem[]>([]);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -63,6 +64,8 @@ export default function MealPlannerPage() {
     if (savedPlan) {
       setMealPlan(savedPlan);
       setInventory(savedInv);
+      // "Plan my meals too" from the program result asks for a fresh plan
+      if (new URLSearchParams(window.location.search).get('new') === '1') setIsWizardOpen(true);
     } else {
       setIsWizardOpen(true);
     }
@@ -205,35 +208,25 @@ export default function MealPlannerPage() {
 
   return (
     <div className="page pb-8 pt-1 sm:py-10 space-y-8">
-      {/* Wizard Modal / Overlay if building a new plan */}
+      {/* Full-screen questions for a new plan */}
       {isWizardOpen && (
-        <div className="space-y-6">
-          <div className="on-photo relative isolate overflow-hidden rounded-[32px]">
-            <Image src="/images/meal-prep-healthy.jpg" alt="" fill priority sizes="(max-width: 1280px) 100vw, 1280px" className="-z-20 object-cover" />
-            <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
-            <div className="space-y-1.5 p-6 pt-28 sm:p-10 sm:pt-36">
-              <h1 className="t-large">Meals</h1>
-              <p className="text-[15px] text-white/85">A week of Nigerian food, portioned for your goal.</p>
-            </div>
-          </div>
-
-
-          <MealPlannerWizard
-            initialProfile={mealPlan?.profile}
-            initialInventory={inventory}
-            onCancel={mealPlan ? () => setIsWizardOpen(false) : undefined}
-            onComplete={(newPlan, newInventory) => {
-              setMealPlan(newPlan);
-              setInventory(newInventory);
-              saveActiveMealPlan(newPlan);
-              saveMealPlanInventory(newInventory);
-              setIsWizardOpen(false);
-              if (typeof window !== 'undefined') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-            }}
-          />
-        </div>
+        <MealPlannerFlow
+          initialProfile={mealPlan?.profile}
+          initialInventory={inventory}
+          onClose={() => {
+            if (mealPlan) setIsWizardOpen(false);
+            else router.push('/');
+          }}
+          onComplete={(newPlan, newInventory) => {
+            setMealPlan(newPlan);
+            setInventory(newInventory);
+            saveActiveMealPlan(newPlan);
+            saveMealPlanInventory(newInventory);
+            setIsWizardOpen(false);
+            if (window.location.search) router.replace('/meal-planner');
+            window.scrollTo({ top: 0 });
+          }}
+        />
       )}
 
       {/* Main Meal Plan View */}
