@@ -128,7 +128,7 @@ export default function SettingsPage() {
   return (
     <div className="page py-8 sm:py-12 max-w-3xl animate-fadeIn">
       <h1 className="t-title">Settings</h1>
-      <p className="t-body mt-2">Everything is stored on this device. Nothing is sent anywhere.</p>
+      <p className="t-body mt-2">Your plans and logs are stored on this device. Visits are counted anonymously, with no cookies or personal data.</p>
 
       <section className="mt-10" aria-labelledby="appearance">
         <h2 id="appearance" className="t-eyebrow mb-2">Appearance</h2>
@@ -224,7 +224,7 @@ export default function SettingsPage() {
           {[
             ['/feedback', 'Send feedback', 'Report a bug or suggest an improvement'],
             ['/about', 'About Syndiq Fit', 'How programs are built'],
-            ['/disclaimer', 'Health disclaimer', 'Important safety information'],
+            ['/disclaimer', 'Disclaimer and privacy', 'Safety information and what we count'],
             ['/demo', 'Product demo', 'Watch a walkthrough'],
           ].map(([href, label, sub]) => (
             <li key={href}>

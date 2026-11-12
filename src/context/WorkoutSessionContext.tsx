@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { WorkoutDay, WorkoutProgram } from '@/types/workout';
 import { logSession, toLocalISODate } from '@/lib/progress';
+import { track } from '@/lib/analytics/client';
 import {
   WORKOUT_LOGGED_EVENT,
   WorkoutSession,
@@ -40,11 +41,14 @@ export function WorkoutSessionProvider({ children }: { children: React.ReactNode
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  // Start time of the last session counted as started, so a restored session isn't counted again
+  const countedStart = useRef<number | null>(null);
 
   // Restore an in-progress session after a reload
   useEffect(() => {
     const saved = loadWorkoutSession();
     if (saved) {
+      countedStart.current = saved.startedAt;
       setSession(saved);
       // A finished-but-unseen summary reopens; an active workout comes back as the mini player
       setExpanded(Boolean(saved.finishedAt));
@@ -54,6 +58,13 @@ export function WorkoutSessionProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     if (hydrated) saveWorkoutSession(session);
+  }, [session, hydrated]);
+
+  // Count a workout as started once, when a new session begins
+  useEffect(() => {
+    if (!hydrated || !session || session.finishedAt || countedStart.current === session.startedAt) return;
+    countedStart.current = session.startedAt;
+    track('workout_started');
   }, [session, hydrated]);
 
   // End the rest period when its timer runs out
@@ -78,6 +89,7 @@ export function WorkoutSessionProvider({ children }: { children: React.ReactNode
       setsCompleted: completedSets(session),
     });
     window.dispatchEvent(new Event(WORKOUT_LOGGED_EVENT));
+    track('workout_finished');
     setSession({ ...session, logged: true });
   }, [session]);
 

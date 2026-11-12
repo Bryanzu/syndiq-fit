@@ -24,6 +24,7 @@ import {
 import { generateShoppingList } from '@/engine/mealPlanner/shoppingList';
 import { generateMealPlanPdf } from '@/lib/mealPlanPdf';
 import { MealPlannerFlow } from '@/components/mealPlanner/MealPlannerFlow';
+import { track } from '@/lib/analytics/client';
 import { NutritionSummaryBar } from '@/components/mealPlanner/NutritionSummaryBar';
 import { MealCard } from '@/components/mealPlanner/MealCard';
 import { MealSwapModal } from '@/components/mealPlanner/MealSwapModal';
@@ -222,6 +223,7 @@ export default function MealPlannerPage() {
             setInventory(newInventory);
             saveActiveMealPlan(newPlan);
             saveMealPlanInventory(newInventory);
+            track('meal_plan_built');
             setIsWizardOpen(false);
             if (window.location.search) router.replace('/meal-planner');
             window.scrollTo({ top: 0 });

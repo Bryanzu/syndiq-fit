@@ -10,6 +10,7 @@ import { GOAL_OPTIONS, INJURY_OPTIONS } from '@/data/questionnaireOptions';
 import { generateWorkoutProgram } from '@/engine/programAssembler';
 import { ARCHIVE_KEEP_DAYS, archiveActiveProgram, loadActiveProgram, loadSavedProfile, saveActiveProgram } from '@/lib/storage';
 import { toast } from '@/components/ui/Toaster';
+import { track } from '@/lib/analytics/client';
 import { FlowShell } from '@/components/flow/FlowShell';
 import { FlowButton, FlowSecondaryButton } from '@/components/flow/controls';
 import { BuildingView, ResultPanel } from '@/components/flow/BuildingView';
@@ -178,6 +179,7 @@ export function QuestionnaireFlow() {
       // Keep the program being replaced, unless it is the one built a moment ago in this flow
       if (loadActiveProgram()?.id !== program?.id) archiveActiveProgram();
       saveActiveProgram(next);
+      track('program_built');
       setProgram(next);
       setDirection(1);
       setPhase('building');

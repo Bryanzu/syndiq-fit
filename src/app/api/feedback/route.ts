@@ -6,9 +6,7 @@ import {
   deleteFeedbackItem,
   FeedbackCategory,
 } from '@/lib/feedbackStorage';
-
-// Admin key: from environment variable or secure default for development
-const ADMIN_KEY = process.env.ADMIN_FEEDBACK_KEY || 'syndiq-admin-2026';
+import { adminDenied, checkAdmin } from '@/lib/adminAuth';
 
 // In-memory rate limiting map (IP -> timestamps)
 const rateLimitMap = new Map<string, number[]>();
@@ -34,21 +32,6 @@ function sanitizeText(str: string): string {
   return str
     .replace(/<[^>]*>?/gm, '') // Remove HTML tags
     .trim();
-}
-
-function verifyAdminKey(req: NextRequest): boolean {
-  const authHeader = req.headers.get('authorization');
-  const xAdminKey = req.headers.get('x-admin-key');
-  const urlKey = req.nextUrl.searchParams.get('key');
-
-  if (xAdminKey && xAdminKey === ADMIN_KEY) return true;
-  if (urlKey && urlKey === ADMIN_KEY) return true;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.replace('Bearer ', '').trim();
-    if (token === ADMIN_KEY) return true;
-  }
-
-  return false;
 }
 
 // POST: Public submission endpoint for testers
@@ -126,12 +109,8 @@ export async function POST(req: NextRequest) {
 
 // GET: Admin-only retrieval
 export async function GET(req: NextRequest) {
-  if (!verifyAdminKey(req)) {
-    return NextResponse.json(
-      { error: 'Unauthorized: Valid administrator key is required to review feedback.' },
-      { status: 401 }
-    );
-  }
+  const access = checkAdmin(req);
+  if (access !== 'ok') return adminDenied(access);
 
   try {
     const list = await getFeedbackList();
@@ -146,9 +125,8 @@ export async function GET(req: NextRequest) {
 
 // PATCH: Admin-only review toggle
 export async function PATCH(req: NextRequest) {
-  if (!verifyAdminKey(req)) {
-    return NextResponse.json({ error: 'Unauthorized: Admin access required.' }, { status: 401 });
-  }
+  const access = checkAdmin(req);
+  if (access !== 'ok') return adminDenied(access);
 
   try {
     const body = await req.json().catch(() => null);
@@ -169,9 +147,8 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE: Admin-only removal of spam/inappropriate entries
 export async function DELETE(req: NextRequest) {
-  if (!verifyAdminKey(req)) {
-    return NextResponse.json({ error: 'Unauthorized: Admin access required.' }, { status: 401 });
-  }
+  const access = checkAdmin(req);
+  if (access !== 'ok') return adminDenied(access);
 
   try {
     const urlId = req.nextUrl.searchParams.get('id');

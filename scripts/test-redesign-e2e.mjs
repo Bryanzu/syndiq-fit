@@ -1,8 +1,16 @@
 // End-to-end check of the redesigned app in a real browser (Playwright).
 // Needs the dev server running:  npm run dev   then   npm run test:e2e
+// The admin checks need ADMIN_KEY, from the environment or .env.local (the same key the dev server reads).
 import { chromium } from 'playwright';
+import fs from 'fs';
 
 const BASE = process.env.BASE_URL || 'http://localhost:3000';
+const ADMIN_KEY =
+  process.env.ADMIN_KEY ||
+  (fs.existsSync('.env.local') ? fs.readFileSync('.env.local', 'utf8').match(/^ADMIN_KEY=(.*)$/m)?.[1]?.trim() : '') ||
+  '';
+// Every anonymous usage event the app sends during the run
+const sentEvents = [];
 // A share link: base64 of a UserProfile (male, intermediate, build muscle, 4 days, 60 min, barbell gym, knee injury)
 const PROFILE =
   'eyJnZW5kZXIiOiJtYWxlIiwiYWdlIjoiMjEtMzAiLCJleHBlcmllbmNlIjoiaW50ZXJtZWRpYXRlIiwiZ29hbCI6Im11c2NsZV9idWlsZGluZyIsImZyZXF1ZW5jeSI6NCwiZHVyYXRpb24iOjYwLCJhdmFpbGFibGVFcXVpcG1lbnQiOlsiZHVtYmJlbGxzIiwiYWRqdXN0YWJsZV9iZW5jaCIsImJhcmJlbGwiLCJzcXVhdF9yYWNrIiwicHVsbF91cF9iYXIiLCJhZGp1c3RhYmxlX2NhYmxlX2NvbHVtbiJdLCJpbmp1cmllcyI6WyJrbmVlIl19';
@@ -22,6 +30,16 @@ async function open(viewport, scheme = 'dark') {
   const ctx = await browser.newContext({ viewport, colorScheme: scheme, hasTouch: viewport.width < 600 });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => pageErrors.push(e.message));
+  // Playwright can't read sendBeacon bodies, so copy each one out before it is sent
+  await ctx.exposeBinding('__recordAnalytics', (_source, body) => sentEvents.push(body));
+  await ctx.addInitScript((appOrigin) => {
+    if (location.origin !== appOrigin) return; // leave embedded frames (YouTube) alone
+    const send = navigator.sendBeacon.bind(navigator);
+    navigator.sendBeacon = (url, data) => {
+      if (String(url).endsWith('/api/analytics') && data instanceof Blob) data.text().then((t) => window.__recordAnalytics(t));
+      return send(url, data);
+    };
+  }, new URL(BASE).origin);
   // The Next.js dev overlay badge sits over the bottom-left of the page and intercepts taps
   await page.addInitScript(() => {
     document.addEventListener('DOMContentLoaded', () => {
@@ -363,6 +381,73 @@ console.log('\n--- Desktop and light theme ---');
   await page.waitForTimeout(500);
   const box = await page.locator('.sheet-panel').boundingBox();
   check('On desktop the sheet is a centred dialog', box.x > 100 && box.y > 20, JSON.stringify(box));
+  await ctx.close();
+}
+
+/* ------------------------------------------------------------------ */
+console.log('\n--- Anonymous analytics and admin lock ---');
+{
+  const { ctx, page } = await open({ width: 390, height: 844 });
+  await page.goto(BASE + '/about', { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => localStorage.getItem('syndiq_anon_id'), null, { timeout: 10000 }).catch(() => {});
+  const anonId = await page.evaluate(() => localStorage.getItem('syndiq_anon_id'));
+  check('Each browser gets a random anonymous ID', /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(anonId || ''), anonId);
+  await page.waitForTimeout(500);
+
+  const bodies = sentEvents.map((b) => {
+    try {
+      return JSON.parse(b);
+    } catch {
+      return null;
+    }
+  });
+  const kinds = new Set(bodies.map((b) => b?.event));
+  const expected = ['visit', 'program_built', 'meal_plan_built', 'workout_started', 'workout_finished', 'share_opened'];
+  check('Visits, programs, meal plans, workouts and share links are all counted', expected.every((e) => kinds.has(e)), [...kinds].join(', '));
+  check(
+    'Events carry only an ID, the event name and a page path',
+    bodies.length > 0 &&
+      bodies.every((b) => b && Object.keys(b).every((k) => ['id', 'event', 'path'].includes(k)) && !String(b.path ?? '').includes('?')),
+    `${bodies.length} events`
+  );
+  check('Opening the about page is counted as a visit to /about', bodies.some((b) => b?.id === anonId && b.event === 'visit' && b.path === '/about'));
+
+  const api = ctx.request;
+  const noKey = await api.get(BASE + '/api/analytics');
+  const noKeyBody = await noKey.json().catch(() => ({}));
+  check('Admin counts are locked without the key', [401, 503].includes(noKey.status()) && !('users' in noKeyBody), String(noKey.status()));
+  const wrongKey = await api.get(BASE + '/api/analytics', { headers: { Authorization: 'Bearer not-the-key' } });
+  check('A wrong key is refused', [401, 429, 503].includes(wrongKey.status()), String(wrongKey.status()));
+  const inUrl = await api.get(`${BASE}/api/feedback?key=${encodeURIComponent(ADMIN_KEY || 'x')}`);
+  check('Feedback admin no longer accepts the key in the URL', !inUrl.ok(), String(inUrl.status()));
+
+  const withKey = await api.get(BASE + '/api/analytics', { headers: { Authorization: `Bearer ${ADMIN_KEY}` } });
+  const stats = await withKey.json().catch(() => ({}));
+  check(
+    'With the key, the counts include this run (set ADMIN_KEY in .env.local)',
+    withKey.ok() && stats.users?.today >= 1 && expected.every((e) => stats.events?.totals?.[e] >= 1) && stats.topPages?.length > 0,
+    withKey.ok() ? JSON.stringify(stats.users) : String(withKey.status())
+  );
+
+  // The admin page itself
+  await page.goto(BASE + '/admin/analytics', { waitUntil: 'networkidle' });
+  const keyField = page.getByLabel('Admin key');
+  check('Admin page shows only the key form without a key', (await keyField.count()) === 1 && (await page.locator('[data-tile]').count()) === 0);
+  await keyField.fill('not-the-key');
+  await page.getByRole('button', { name: 'Open' }).click();
+  // Next.js has its own role="alert" route announcer, so find the message by id
+  await page.locator('#admin-key-error').waitFor();
+  check('Admin page says when the key is wrong', (await page.locator('#admin-key-error').innerText()).includes('didn’t work'));
+  await keyField.fill(ADMIN_KEY);
+  await page.getByRole('button', { name: 'Open' }).click();
+  await page.locator('[data-tile="All time"]').waitFor({ timeout: 10000 }).catch(() => {});
+  const allTime = Number(((await page.locator('[data-tile="All time"]').innerText().catch(() => '')) || '').replace(/\D/g, ''));
+  check(
+    'The right key opens the dashboard with the counts',
+    allTime >= 1 && (await page.locator('[data-event]').count()) === 6 && (await page.getByRole('heading', { name: 'Top pages' }).count()) === 1,
+    String(allTime)
+  );
+  check('Admin pages are not counted as visits', !sentEvents.some((b) => b.includes('"/admin')));
   await ctx.close();
 }
 
