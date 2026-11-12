@@ -86,6 +86,8 @@ Built on branch `redesign/questionnaires` (check whether it has been merged):
 - Age is asked as an exact number: `UserProfile.ageYears` is optional and the engine still reads the `age` bracket. Profiles saved without it get a typical age for their bracket.
 - The meal flow reuses sex, age and goal from the saved workout profile (Edit asks them again) and pre-picks activity from the number of training days. `/meal-planner?new=1` opens it even when a plan exists.
 - Single-choice screens (sex, experience, activity, meal goal) move on by themselves 300 ms after a tap.
+- Phone pill nav shrinks to the active tab while scrolling down and opens again on scroll up or tap (`TabBar.tsx`, `data-compact`). It uses `.glass-liquid`; the SVG refraction (`.refract`) only renders in Chromium, other browsers get blur only.
+- Header logo is the S mark plus the SYNDIQ / FIT wordmark, drawn as CSS masks from `public/brand/` (`.brand-mask`, `--brand-mark`) so it follows the theme. No box behind it.
 
 Ideas not started:
 
