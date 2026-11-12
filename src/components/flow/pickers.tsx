@@ -252,23 +252,79 @@ interface StopPickerProps<T extends number> {
 }
 
 export function StopPicker<T extends number>({ values, value, onChange, label }: StopPickerProps<T>) {
+  const track = useRef<HTMLDivElement>(null);
+  /** Where the finger is, as a fraction of the track width, while dragging */
+  const [drag, setDrag] = useState<number | null>(null);
+  const n = values.length;
   const i = Math.max(0, values.indexOf(value));
-  const width = 100 / values.length;
+  const first = 0.5 / n;
+  const last = 1 - 0.5 / n;
+
+  const read = (clientX: number) => {
+    const r = track.current!.getBoundingClientRect();
+    const f = clamp((clientX - r.left) / r.width, first, last);
+    return { f, idx: clamp(Math.round(f * n - 0.5), 0, n - 1) };
+  };
+  const follow = (clientX: number) => {
+    const { f, idx } = read(clientX);
+    setDrag(f);
+    if (values[idx] !== value) onChange(values[idx]);
+  };
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    follow(e.clientX);
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (drag !== null) follow(e.clientX);
+  };
+  const onPointerEnd = () => setDrag(null);
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const to = { ArrowLeft: i - 1, ArrowDown: i - 1, ArrowRight: i + 1, ArrowUp: i + 1, Home: 0, End: n - 1 }[e.key];
+    if (to !== undefined) {
+      e.preventDefault();
+      onChange(values[clamp(to, 0, n - 1)]);
+    }
+  };
+
+  const left = drag ?? (i + 0.5) / n;
+
   return (
     <div className="w-full">
-      <div className="relative h-16">
+      <div
+        ref={track}
+        role="slider"
+        tabIndex={0}
+        aria-label={label}
+        aria-valuemin={values[0]}
+        aria-valuemax={values[n - 1]}
+        aria-valuenow={value}
+        aria-valuetext={`${value} minutes`}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerEnd}
+        onPointerCancel={onPointerEnd}
+        onKeyDown={onKeyDown}
+        className="relative h-[72px] cursor-grab touch-pan-y select-none rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gym-lime/70 active:cursor-grabbing"
+      >
         <div
           aria-hidden
-          className="absolute inset-x-0 top-[18px] h-7"
+          className="pointer-events-none absolute inset-x-0 top-[26px] h-7"
           style={{ background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.42) 0 2px, transparent 2px 14px)' }}
         />
         <span
           aria-hidden
-          className="absolute top-0 h-16 w-1 -translate-x-1/2 rounded-full bg-gym-lime transition-[left] duration-500 ease-[cubic-bezier(0.3,1.4,0.5,1)] motion-reduce:transition-none"
-          style={{ left: `${(i + 0.5) * width}%` }}
-        />
+          className={`pointer-events-none absolute top-0 flex h-full w-7 -translate-x-1/2 flex-col items-center ${
+            drag === null ? 'transition-[left] duration-500 ease-[cubic-bezier(0.3,1.4,0.5,1)] motion-reduce:transition-none' : ''
+          }`}
+          style={{ left: `${left * 100}%` }}
+        >
+          <span className={`size-7 rounded-full bg-gym-lime shadow-[0_4px_14px_rgba(0,0,0,0.45)] transition-transform ${drag !== null ? 'scale-110' : ''}`} />
+          <span className="-mt-1 w-1 flex-1 rounded-full bg-gym-lime" />
+        </span>
       </div>
-      <div role="radiogroup" aria-label={label} className="grid" style={{ gridTemplateColumns: `repeat(${values.length}, minmax(0, 1fr))` }}>
+      <div role="radiogroup" aria-label={label} className="grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
         {values.map((v) => (
           <button
             key={v}

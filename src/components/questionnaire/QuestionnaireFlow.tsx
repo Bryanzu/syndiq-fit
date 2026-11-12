@@ -8,7 +8,7 @@ import { WorkoutProgram } from '@/types/workout';
 import { STANDARD_COMMERCIAL_GYM_IDS } from '@/data/equipment';
 import { GOAL_OPTIONS, INJURY_OPTIONS } from '@/data/questionnaireOptions';
 import { generateWorkoutProgram } from '@/engine/programAssembler';
-import { loadSavedProfile, saveActiveProgram } from '@/lib/storage';
+import { ARCHIVE_KEEP_DAYS, archiveActiveProgram, loadActiveProgram, loadSavedProfile, saveActiveProgram } from '@/lib/storage';
 import { toast } from '@/components/ui/Toaster';
 import { FlowShell } from '@/components/flow/FlowShell';
 import { FlowButton, FlowSecondaryButton } from '@/components/flow/controls';
@@ -134,15 +134,22 @@ export function QuestionnaireFlow() {
   const [answers, setAnswers] = useState<WorkoutAnswers>(DEFAULT_ANSWERS);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
-  const [phase, setPhase] = useState<'questions' | 'building' | 'ready'>('questions');
+  const [phase, setPhase] = useState<'existing' | 'questions' | 'building' | 'ready'>('questions');
+  const [existing, setExisting] = useState<WorkoutProgram | null>(null);
   const [program, setProgram] = useState<WorkoutProgram | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const timer = useRef<number | undefined>(undefined);
 
-  // Pre-fill from the last program's answers
+  // Pre-fill from the last program's answers. With a program already in use, ask first,
+  // unless the person came from "Edit answers" (?edit=1) and has already chosen to change it.
   useEffect(() => {
     const saved = loadSavedProfile();
     if (saved) setAnswers(answersFromProfile(saved));
+    const current = loadActiveProgram();
+    if (current && new URLSearchParams(window.location.search).get('edit') !== '1') {
+      setExisting(current);
+      setPhase('existing');
+    }
   }, []);
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
@@ -168,6 +175,8 @@ export function QuestionnaireFlow() {
     window.clearTimeout(timer.current);
     try {
       const next = generateWorkoutProgram(profileFromAnswers(answers));
+      // Keep the program being replaced, unless it is the one built a moment ago in this flow
+      if (loadActiveProgram()?.id !== program?.id) archiveActiveProgram();
       saveActiveProgram(next);
       setProgram(next);
       setDirection(1);
@@ -181,14 +190,15 @@ export function QuestionnaireFlow() {
   const props: StepProps = { answers, update, autoNext };
   const building = phase === 'building' && program !== null;
   const ready = phase === 'ready' && program !== null;
-  const questions = !building && !ready;
+  const asking = phase === 'existing' && existing !== null;
+  const questions = !building && !ready && !asking;
 
   return (
     <FlowShell
       label="Build your program"
       photo={questions ? PHOTO[step] : PHOTO.done}
-      shade={building ? 'blur' : ready ? 'result' : 'question'}
-      screenKey={building ? 'building' : ready ? 'ready' : step}
+      shade={building ? 'blur' : ready || asking ? 'result' : 'question'}
+      screenKey={building ? 'building' : ready ? 'ready' : asking ? 'existing' : step}
       direction={direction}
       step={questions ? index + 1 : undefined}
       total={questions ? STEPS.length : undefined}
@@ -202,7 +212,7 @@ export function QuestionnaireFlow() {
           ? () => goTo(index - 1)
           : undefined
       }
-      onClose={questions && index === 0 ? () => router.push('/') : undefined}
+      onClose={asking || (questions && index === 0) ? () => router.push('/') : undefined}
       footer={
         questions ? (
           <FlowButton onClick={isLast ? build : () => goTo(index + 1)}>{isLast ? 'Build my program' : 'Continue'}</FlowButton>
@@ -217,6 +227,28 @@ export function QuestionnaireFlow() {
         />
       }
     >
+      {asking && existing && (
+        <ResultPanel>
+          <p className="text-[13px] font-semibold text-gym-lime">Current program</p>
+          <h2 className="text-[34px] font-bold leading-[1.08] tracking-[-0.035em] text-gym-text">You already have a program</h2>
+          <p className="text-[15px] font-semibold text-gym-text">{existing.name}</p>
+          <p className="text-sm leading-relaxed text-gym-textMuted">
+            Build a new one and this one moves to Settings, where you can bring it back for {ARCHIVE_KEEP_DAYS} days. Your
+            workout history and lift weights stay.
+          </p>
+          <div className="flex flex-col gap-2.5 pt-1">
+            <FlowButton onClick={() => router.push('/program')}>Go to my program</FlowButton>
+            <FlowSecondaryButton
+              onClick={() => {
+                setDirection(1);
+                setPhase('questions');
+              }}
+            >
+              Build a new one
+            </FlowSecondaryButton>
+          </div>
+        </ResultPanel>
+      )}
       {building && program && (
         <BuildingView
           title="Building your program"

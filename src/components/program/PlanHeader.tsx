@@ -84,7 +84,7 @@ export function PlanHeader({
           <button type="button" onClick={onOpenShare} className="glass-btn !min-h-[48px] gap-2 px-4 text-sm font-semibold">
             <QrCode className="h-4 w-4" /> Send to phone
           </button>
-          <Link href="/questionnaire" className="glass-btn !min-h-[48px] !min-w-[48px]" title="Edit answers" aria-label="Edit answers">
+          <Link href="/questionnaire?edit=1" className="glass-btn !min-h-[48px] !min-w-[48px]" title="Edit answers" aria-label="Edit answers">
             <RotateCcw className="h-[18px] w-[18px]" />
           </Link>
           {onClearProgram && (

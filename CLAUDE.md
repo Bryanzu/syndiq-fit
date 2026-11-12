@@ -35,7 +35,7 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 | Browser storage | `src/lib/storage.ts` (program, profile, meal plan, inventory), `src/lib/progress.ts` (workout log) |
 | Design tokens | `src/app/globals.css` and `tailwind.config.ts` |
 
-`localStorage` keys: `syndiq_lift_history`, `syndiq_active_program`, `syndiq_active_profile`, `syndiq_meal_plan`, `syndiq_meal_inventory`, `syndiq_workout_log`, `syndiq_workout_session`, `syndiq_theme`, `syndiq_admin_key`.
+`localStorage` keys: `syndiq_lift_history`, `syndiq_active_program`, `syndiq_active_profile`, `syndiq_meal_plan`, `syndiq_meal_inventory`, `syndiq_workout_log`, `syndiq_workout_session`, `syndiq_theme`, `syndiq_admin_key`, `syndiq_program_archive` (up to 3 replaced programs, deleted after 30 days; restored from Settings).
 
 ### How the engines work
 

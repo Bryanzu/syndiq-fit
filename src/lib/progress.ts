@@ -80,8 +80,11 @@ export function getWeekDates(ref: Date = new Date()): Date[] {
 export function getNextDayIndex(program: WorkoutProgram, log: SessionEntry[]): number {
   const count = program.days.length;
   if (count === 0) return 0;
-  if (log.length === 0) return 0;
-  const last = [...log].sort((a, b) => a.completedAt.localeCompare(b.completedAt))[log.length - 1];
+  // Only sessions done since this program was built count, so a new program starts on its first day
+  const since = Date.parse(program.createdAt);
+  const relevant = Number.isNaN(since) ? log : log.filter((e) => Date.parse(e.completedAt) >= since);
+  if (relevant.length === 0) return 0;
+  const last = [...relevant].sort((a, b) => a.completedAt.localeCompare(b.completedAt))[relevant.length - 1];
   const lastIdx = program.days.findIndex((d) => d.dayNumber === last.dayNumber);
   return lastIdx === -1 ? 0 : (lastIdx + 1) % count;
 }

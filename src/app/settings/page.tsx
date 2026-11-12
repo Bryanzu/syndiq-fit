@@ -2,12 +2,21 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Moon, Sun, ChevronRight, Trash2 } from 'lucide-react';
+import { Moon, Sun, ChevronRight, Trash2, RotateCcw } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
-import { clearActiveProgram, hasActiveProgram } from '@/lib/storage';
+import {
+  ARCHIVE_KEEP_DAYS,
+  ArchivedProgram,
+  archiveDaysLeft,
+  clearActiveProgram,
+  deleteArchivedProgram,
+  hasActiveProgram,
+  loadProgramArchive,
+  restoreArchivedProgram,
+} from '@/lib/storage';
 import { clearWorkoutLog, loadWorkoutLog } from '@/lib/progress';
 
-const DATA_KEYS = ['syndiq_active_program', 'syndiq_active_profile', 'syndiq_meal_plan', 'syndiq_meal_inventory', 'syndiq_workout_log'];
+const DATA_KEYS = ['syndiq_active_program', 'syndiq_active_profile', 'syndiq_meal_plan', 'syndiq_meal_inventory', 'syndiq_workout_log', 'syndiq_program_archive'];
 
 function ConfirmAction({
   label,
@@ -54,15 +63,60 @@ function ConfirmAction({
   );
 }
 
+function PreviousProgram({
+  entry,
+  onRestore,
+  onDelete,
+}: {
+  entry: ArchivedProgram;
+  onRestore: () => void;
+  onDelete: () => void;
+}) {
+  const [armed, setArmed] = useState(false);
+  const replaced = new Date(entry.archivedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const left = archiveDaysLeft(entry);
+  return (
+    <li className="row justify-between flex-wrap gap-y-3">
+      <div className="min-w-0 flex-1 basis-56">
+        <p className="text-sm sm:text-base font-medium text-gym-text">{entry.program.name}</p>
+        <p className="t-small">
+          Replaced {replaced} · deleted in {left} day{left === 1 ? '' : 's'}
+        </p>
+      </div>
+      {armed ? (
+        <div className="flex items-center gap-2">
+          <button type="button" className="btn-ghost btn-sm" onClick={() => setArmed(false)}>
+            Cancel
+          </button>
+          <button type="button" className="btn-danger btn-sm" onClick={onDelete}>
+            <Trash2 className="w-4 h-4" /> Delete now
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <button type="button" className="btn-secondary btn-sm" onClick={onRestore}>
+            <RotateCcw className="w-4 h-4" /> Restore
+          </button>
+          <button type="button" className="btn-icon" aria-label={`Delete ${entry.program.name}`} onClick={() => setArmed(true)}>
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </li>
+  );
+}
+
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [hasProgram, setHasProgram] = useState(false);
   const [sessions, setSessions] = useState(0);
+  const [archive, setArchive] = useState<ArchivedProgram[]>([]);
   const [note, setNote] = useState('');
 
   const refresh = () => {
     setHasProgram(hasActiveProgram());
     setSessions(loadWorkoutLog().length);
+    setArchive(loadProgramArchive());
   };
   useEffect(refresh, []);
 
@@ -98,6 +152,30 @@ export default function SettingsPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="mt-10" aria-labelledby="previous">
+        <h2 id="previous" className="t-eyebrow mb-2">Previous programs</h2>
+        {archive.length ? (
+          <ul className="divide-line">
+            {archive.map((entry) => (
+              <PreviousProgram
+                key={entry.program.id}
+                entry={entry}
+                onRestore={() => {
+                  restoreArchivedProgram(entry.program.id);
+                  done(`${entry.program.name} is your program again.`);
+                }}
+                onDelete={() => {
+                  deleteArchivedProgram(entry.program.id);
+                  done('Previous program deleted.');
+                }}
+              />
+            ))}
+          </ul>
+        ) : (
+          <p className="t-small py-2">Programs you replace are kept here for {ARCHIVE_KEEP_DAYS} days.</p>
+        )}
       </section>
 
       <section className="mt-10" aria-labelledby="data">
