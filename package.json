@@ -10,7 +10,8 @@
     "test:engine": "node scripts/test-engine.mjs",
     "test:qa": "npx tsx scripts/test-comprehensive-qa.mjs",
     "test:e2e": "node scripts/test-redesign-e2e.mjs",
-    "demo:record": "node scripts/record-demo.mjs"
+    "demo:record": "node scripts/record-demo.mjs",
+    "verify:videos": "node scripts/verify-demo-videos.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

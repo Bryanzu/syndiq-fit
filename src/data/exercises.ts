@@ -1,4 +1,5 @@
 import type { Exercise, MuscleGroup, InjuryArea, EquipmentType, MovementPattern } from '@/types/workout';
+import { exerciseVideos } from './exerciseVideos';
 
 const yt = (name: string) =>
   `https://www.youtube.com/results?search_query=${encodeURIComponent(name + ' proper form')}`;
@@ -35,8 +36,8 @@ const E = (
   contraindications,
   instructions,
   whyIncluded,
-  youtubeId: '',
-  youtubeUrl: yt(name),
+  youtubeId: exerciseVideos[id]?.id ?? '',
+  youtubeUrl: exerciseVideos[id] ? `https://www.youtube.com/watch?v=${exerciseVideos[id].id}` : yt(name),
   alternatives,
   defaultSets,
   defaultReps,

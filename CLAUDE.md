@@ -32,6 +32,7 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 | Shared UI | `src/components/ui/` (`Sheet`, `Toaster`, `InfoTooltip`, `ThemeToggle`) |
 | Question flows | `src/components/flow/` (`FlowShell`, `controls`, `pickers`, `BuildingView`), used by `questionnaire/QuestionnaireFlow.tsx` and `mealPlanner/MealPlannerFlow.tsx` |
 | Workout player | `src/components/workout/`, `src/context/WorkoutSessionContext.tsx`, `src/lib/workoutSession.ts` |
+| Demo videos | `src/data/exerciseVideos.ts` (a checked YouTube video per exercise), `src/lib/demoVideo.ts` (lookup and URLs), played in `src/components/program/VideoModal.tsx` |
 | Browser storage | `src/lib/storage.ts` (program, profile, meal plan, inventory), `src/lib/progress.ts` (workout log) |
 | Design tokens | `src/app/globals.css` and `tailwind.config.ts` |
 
@@ -90,9 +91,13 @@ Built on branch `redesign/questionnaires` (check whether it has been merged):
 - Phone pill nav shrinks to the active tab while scrolling down and opens again on scroll up or tap (`TabBar.tsx`, `data-compact`). It uses `.glass-liquid`; the SVG refraction (`.refract`) only renders in Chromium, other browsers get blur only.
 - Header logo is the S mark plus the SYNDIQ / FIT wordmark, drawn as CSS masks from `public/brand/` (`.brand-mask`, `--brand-mark`) so it follows the theme. No box behind it.
 
+Built on branch `feature/embedded-demo-videos` (check whether it has been merged):
+
+- Exercise demos play inside the app. `VideoModal` embeds the exercise's video from `youtube-nocookie.com`, and the player is only mounted while the sheet is open. The YouTube thumbnail shows until the player loads, the channel is credited, and the first three cues are listed. All 134 exercises have a checked video; the PDF links to it too.
+
 Ideas not started:
 
-1. A photo per exercise (currently one per movement type) and embedded demo videos (`youtubeId` is empty)
+1. A photo per exercise (currently one per movement type)
 2. Expand animation for meal cards and body-map rows (only program exercise rows have it)
 
 
@@ -144,9 +149,10 @@ npm run test:e2e
 npm run dev
 ```
 
-- The QA suite runs both engines and checks file structure and photos; 26 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
+- The QA suite runs both engines and checks file structure, photos and the demo video list; 27 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
 - `npm run test:engine` needs the dev server running on port 3000.
-- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 51 checks should pass. It needs the dev server running (set `BASE_URL` if it is not on port 3000).
+- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 58 checks should pass. It needs the dev server running (set `BASE_URL` if it is not on port 3000), and network access to YouTube for the check that a demo video plays.
+- `npm run verify:videos` checks that every video in `src/data/exerciseVideos.ts` still exists and allows embedding (no dev server needed). A new exercise gets a video only after this kind of check (oEmbed, `playableInEmbed`, title matches the movement); without one, its demo falls back to a YouTube search. The lookup is by exercise id, so programs saved before a video was added still get it.
 - `npm run demo:record` re-records the `/demo` walkthrough video (also needs the dev server).
 - A program can be loaded without the questionnaire through a share link: `/program?p=<base64 of the profile JSON>`.
 - The dev server prints an SWC "not a valid Win32 application" warning; the app still compiles.
@@ -174,4 +180,3 @@ Rough ownership by feature: workout generation (`src/engine/*.ts`, `src/data/exe
 - There is no week-to-week progression in workout programs.
 - The skipped-meal notice appears inside the protein shortfall report.
 - The mini player overlaps the bottom of page content on phones.
-- Exercises have no embedded videos (`youtubeId` is empty; demos open a YouTube search).

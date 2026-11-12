@@ -1,5 +1,6 @@
 import { WorkoutProgram } from '@/types/workout';
 import { plainReason } from '@/lib/exerciseCopy';
+import { demoLink } from '@/lib/demoVideo';
 
 export async function generateWorkoutPdf(program: WorkoutProgram): Promise<void> {
   const { jsPDF } = await import('jspdf');
@@ -165,7 +166,7 @@ export async function generateWorkoutPdf(program: WorkoutProgram): Promise<void>
       doc.setTextColor(16, 185, 129);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
-      doc.textWithLink('Watch Video Demo', pageWidth - margin - 105, y + 30, { url: ex.youtubeUrl });
+      doc.textWithLink('Watch Video Demo', pageWidth - margin - 105, y + 30, { url: demoLink(ex) });
 
       // If substituted
       if (item.isSubstituted) {

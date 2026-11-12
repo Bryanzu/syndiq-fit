@@ -9,6 +9,7 @@ import fs from 'fs';
 import { NIGERIAN_RECIPES } from '../src/data/nigerianRecipes';
 import { exercisePhoto, mealPhoto } from '../src/lib/photos';
 import { PHOTO_CREDITS } from '../src/data/photoCredits';
+import { exerciseVideos } from '../src/data/exerciseVideos';
 import path from 'path';
 
 console.log('=================================================================');
@@ -216,6 +217,14 @@ assert(navDockContent.includes('Home') && navDockContent.includes('/program') &&
 
 const videoModalContent = fs.readFileSync(path.resolve('./src/components/program/VideoModal.tsx'), 'utf8');
 assert(videoModalContent.includes('z-[150]'), 'VideoModal uses elevated z-[150] above ExerciseDetailModal');
+
+const strayVideos = Object.keys(exerciseVideos).filter((id) => !getExerciseById(id));
+const badVideoIds = Object.entries(exerciseVideos).filter(([, v]) => !/^[\w-]{11}$/.test(v.id)).map(([id]) => id);
+const withVideo = exercises.filter((e) => e.youtubeId && e.youtubeId === exerciseVideos[e.id]?.id).length;
+assert(
+  strayVideos.length === 0 && badVideoIds.length === 0 && withVideo > 0,
+  `Demo videos: ${withVideo} of ${exercises.length} exercises have one (unknown exercises: ${strayVideos.join(', ') || 'none'}, bad ids: ${badVideoIds.join(', ') || 'none'})`
+);
 
 const exerciseDetailModalContent = fs.readFileSync(path.resolve('./src/components/program/ExerciseDetailModal.tsx'), 'utf8');
 assert(exerciseDetailModalContent.includes('z-[100]'), 'ExerciseDetailModal uses z-[100]');

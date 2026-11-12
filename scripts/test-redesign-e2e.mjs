@@ -287,6 +287,68 @@ console.log('\n--- Phone: workout questionnaire ---');
 }
 
 /* ------------------------------------------------------------------ */
+console.log('\n--- Phone: demo videos ---');
+{
+  const { ctx, page } = await open({ width: 390, height: 844 });
+  const player = page.locator('[data-demo-player]');
+  const embed = page.locator('[data-demo-player="embed"] iframe');
+  const openFirstDemo = async () => {
+    await page.locator('article button:has-text("Demo")').first().click();
+    await player.waitFor();
+  };
+  // Saved programs keep a copy of each exercise; rewrite the first one and reload
+  const editFirstExercise = async (fn) => {
+    await page.evaluate((src) => {
+      const program = JSON.parse(localStorage.getItem('syndiq_active_program'));
+      new Function('ex', src)(program.days[0].exercises[0].exercise);
+      localStorage.setItem('syndiq_active_program', JSON.stringify(program));
+    }, fn);
+    await page.goto(BASE + '/program', { waitUntil: 'networkidle' });
+    await page.waitForSelector('article');
+  };
+
+  await page.goto(`${BASE}/program?p=${PROFILE}`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('article');
+  await openFirstDemo();
+  const src = (await embed.getAttribute('src')) || '';
+  check('Demo opens a YouTube player inside the app', /^https:\/\/www\.youtube-nocookie\.com\/embed\/[\w-]{11}\?/.test(src), src);
+  const video = page.frameLocator('[data-demo-player="embed"] iframe').locator('video');
+  let playing = null;
+  try {
+    await video.waitFor({ state: 'attached', timeout: 20000 });
+    await page.waitForTimeout(5000);
+    playing = await video.evaluate((v) => ({ paused: v.paused, time: Math.round(v.currentTime * 10) / 10 }));
+  } catch (err) {
+    playing = { error: err.message.split('\n')[0] };
+  }
+  check('Demo video plays embedded', playing?.paused === false && playing.time > 0, JSON.stringify(playing));
+  check('Demo credits the video’s channel', /^Video by .+/.test(await page.locator('[role="dialog"] h3 + p').innerText()));
+  await page.getByRole('button', { name: 'Close dialog' }).click();
+  await page.waitForTimeout(300);
+  check('Closing the demo removes the player', (await player.count()) === 0);
+
+  await editFirstExercise("ex.youtubeId = ''; ex.youtubeUrl = 'https://www.youtube.com/results?search_query=x';");
+  await openFirstDemo();
+  check('Programs saved before the videos still play them', (await embed.count()) === 1);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+
+  await editFirstExercise("ex.id = 'not-in-the-library'; ex.youtubeId = ''; ex.youtubeUrl = 'https://www.youtube.com/results?search_query=x';");
+  await openFirstDemo();
+  check(
+    'An exercise without a video falls back to a YouTube search',
+    (await embed.count()) === 0 && (await page.locator('[data-demo-player="search"] a[href*="youtube.com/results"]').count()) === 1
+  );
+  await page.keyboard.press('Escape');
+
+  await page.goto(BASE + '/muscle-map', { waitUntil: 'networkidle' });
+  await page.locator('button[aria-label$=" demo"]').first().click();
+  await player.waitFor();
+  check('Body map demo buttons play the video too', (await embed.count()) === 1);
+  await ctx.close();
+}
+
+/* ------------------------------------------------------------------ */
 console.log('\n--- Desktop and light theme ---');
 {
   const { ctx, page } = await open({ width: 1280, height: 800 }, 'light');
