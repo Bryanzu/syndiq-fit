@@ -200,6 +200,13 @@ console.log('\n--- Phone: workout questionnaire ---');
   await flow.getByRole('radio', { name: '3 days' }).click();
   check('Days screen names the split', (await flow.innerText()).includes('Full body'));
   await cont();
+  const slider = flow.getByRole('slider', { name: 'Minutes per session' });
+  const track = await slider.boundingBox();
+  await page.mouse.move(track.x + track.width * 0.5, track.y + 20);
+  await page.mouse.down();
+  await page.mouse.move(track.x + track.width * 0.72, track.y + 20, { steps: 8 });
+  await page.mouse.up();
+  check('Dragging the session pointer snaps to the next stop', (await slider.getAttribute('aria-valuenow')) === '90');
   await cont();
   await flow.getByRole('radio', { name: /Home gym/ }).click();
   await flow.getByRole('button', { name: /Fine-tune the list/ }).click();
@@ -226,6 +233,40 @@ console.log('\n--- Phone: workout questionnaire ---');
   await page.waitForSelector('article');
   check('The result opens the new program', (await page.locator('article').count()) >= 3);
   check('Page scroll is restored after the questionnaire', await page.evaluate(() => !document.body.classList.contains('modal-open')));
+
+  // With a program in use, the questionnaire asks first and keeps the old program
+  const ids = () =>
+    page.evaluate(() => ({
+      active: JSON.parse(localStorage.getItem('syndiq_active_program')).id,
+      archive: JSON.parse(localStorage.getItem('syndiq_program_archive') || '[]').map((e) => e.program.id),
+    }));
+  const firstId = (await ids()).active;
+  await page.goto(BASE + '/questionnaire', { waitUntil: 'networkidle' });
+  await flow.waitFor();
+  check('A second visit asks before replacing the program', (await flow.innerText()).includes('You already have a program'));
+  await flow.getByRole('button', { name: 'Build a new one' }).click();
+  await page.waitForTimeout(450);
+  for (let i = 0; i < 7; i++) await cont();
+  await flow.getByRole('button', { name: 'Build my program' }).click();
+  await flow.getByRole('button', { name: 'See my program' }).waitFor({ timeout: 8000 });
+  const built = await ids();
+  check('Building a new program keeps the old one', built.active !== firstId && built.archive.join() === firstId, JSON.stringify(built));
+  await page.goto(BASE + '/settings', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: 'Restore' }).click();
+  await page.waitForTimeout(300);
+  const restored = await ids();
+  check('Restoring a previous program swaps it back', restored.active === firstId && restored.archive.join() === built.active, JSON.stringify(restored));
+  await page.evaluate(() => {
+    const list = JSON.parse(localStorage.getItem('syndiq_program_archive'));
+    list[0].archivedAt = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
+    localStorage.setItem('syndiq_program_archive', JSON.stringify(list));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  check('Programs older than 30 days are deleted', await page.evaluate(() => !localStorage.getItem('syndiq_program_archive')));
+  await page.goto(`${BASE}/questionnaire?edit=1`, { waitUntil: 'networkidle' });
+  await flow.waitFor();
+  check('"Edit answers" goes straight to the questions', (await flow.innerText()).includes('1 of 8'));
   await ctx.close();
 }
 
