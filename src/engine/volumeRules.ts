@@ -118,6 +118,8 @@ export function adaptExerciseVolume(
     exercise.primaryMuscles.includes('glutes') ||
     exercise.primaryMuscles.includes('hamstrings') ||
     exercise.movementPattern === 'hip_hinge';
+  // Glute cues only go on movements that train the glutes (not leg curls or good mornings)
+  const trainsGlutes = exercise.primaryMuscles.includes('glutes');
 
   // 1. Duration Scaling
   if (profile.duration === 30) {
@@ -132,8 +134,8 @@ export function adaptExerciseVolume(
   if (isFemale) {
     if (isPosteriorOrGlute && profile.duration >= 45) {
       sets = Math.min(4, sets + 1);
-      if (!intensityNote) {
-        intensityNote = 'Focus on peak glute contraction at top of movement with a 1-second squeeze.';
+      if (!intensityNote && trainsGlutes) {
+        intensityNote = 'Squeeze your glutes for a second at the top.';
       }
     }
     // Females often benefit from slightly crisper rest intervals without compromising power output
@@ -149,18 +151,18 @@ export function adaptExerciseVolume(
       reps = '10-15';
     }
     restSeconds = Math.max(60, restSeconds);
-    intensityNote = 'Focus on controlled form and smooth cadence. Stop with 2-3 reps in reserve.';
+    intensityNote = 'Move slowly and stop with 2 or 3 reps left in the tank.';
   } else if (profile.experience === 'advanced') {
     if (exercise.tier === 1 && (profile.goal === 'build_strength' || profile.goal === 'overall_strength')) {
       reps = '4-6';
       restSeconds = Math.max(120, restSeconds + 30);
-      intensityNote = 'Heavy compound work. Rest fully between working sets (RPE 8-9).';
+      intensityNote = 'Go heavy. Rest fully between sets and stop 1 or 2 reps short of failure.';
     }
   } else if (profile.experience === 'intermediate') {
     if (exercise.tier === 1 && (profile.goal === 'build_strength' || profile.goal === 'overall_strength')) {
       reps = '5-8';
       restSeconds = Math.max(120, restSeconds);
-      intensityNote = 'Strength focus: add load when you hit the top of the rep range on every set (RPE 8).';
+      intensityNote = 'Add weight once every set reaches the top of the rep range. Stop about 2 reps short of failure.';
     }
   }
 
@@ -173,11 +175,11 @@ export function adaptExerciseVolume(
       reps = '12-15';
     }
     if (!intensityNote) {
-      intensityNote = 'Keep rest periods crisp to maintain elevated heart rate and workout density.';
+      intensityNote = 'Keep rests short so your heart rate stays up.';
     }
   } else if (profile.goal === 'glute_emphasis' && isPosteriorOrGlute) {
     sets = Math.min(4, sets + 1);
-    intensityNote = 'Target muscle priority: full range of motion with intentional mind-muscle connection.';
+    intensityNote = 'Use the full range and lower the weight slowly.';
   }
 
   // 4b. Secondary Goals Nuance (complements primary goal)
@@ -193,20 +195,20 @@ export function adaptExerciseVolume(
       }
       restSeconds = Math.max(90, restSeconds + 15);
       if (!intensityNote) {
-        intensityNote = 'Secondary strength priority: maintain strict form with progressive overload on this compound.';
+        intensityNote = 'Keep strict form and add weight a little at a time.';
       }
     } else if (hasSecondaryEndurance && exercise.tier === 3) {
       restSeconds = Math.max(45, restSeconds - 15);
       if (!intensityNote) {
-        intensityNote = 'Secondary endurance priority: maintain crisp pacing and elevated heart rate.';
+        intensityNote = 'Keep a steady pace and short rests.';
       }
-    } else if (hasSecondaryGlute && isPosteriorOrGlute && profile.goal !== 'glute_emphasis') {
+    } else if (hasSecondaryGlute && trainsGlutes && profile.goal !== 'glute_emphasis') {
       if (!intensityNote) {
-        intensityNote = 'Secondary glute priority: maintain full hip extension and deliberate glute contraction.';
+        intensityNote = 'Finish each rep with your hips fully straight and your glutes squeezed.';
       }
     } else if (hasSecondaryCore && (exercise.primaryMuscles.includes('abs') || exercise.primaryMuscles.includes('obliques'))) {
       if (!intensityNote) {
-        intensityNote = 'Secondary core stability: maintain continuous abdominal bracing and control.';
+        intensityNote = 'Keep your stomach braced for the whole set.';
       }
     }
   }
@@ -219,7 +221,7 @@ export function adaptExerciseVolume(
       reps = '8-10';
     }
     if (exercise.tier === 1) {
-      intensityNote = (intensityNote ? intensityNote + ' ' : '') + 'Take warm-up sets progressively; prioritize joint comfort over load.';
+      intensityNote = (intensityNote ? intensityNote + ' ' : '') + 'Build up with a few warm-up sets. Comfortable joints matter more than the weight.';
     }
   }
 

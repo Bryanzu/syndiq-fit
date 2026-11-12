@@ -170,6 +170,9 @@ console.log('\n--- Phone: first open, home, workout player ---');
   await page.waitForSelector('text=Body map');
   await page.getByRole('button', { name: 'female', exact: true }).click();
   check('Body map switches to the female figure', (await page.locator('svg[aria-label*="female body"]').count()) === 1);
+  await page.waitForTimeout(300);
+  const firstMove = await page.locator('section ul li p').first().innerText();
+  check('Female body map opens on the glutes, hip thrust first', (await page.locator('main h2').first().innerText()) === 'Glutes' && firstMove.includes('Hip Thrust'), firstMove);
   await ctx.close();
 }
 
