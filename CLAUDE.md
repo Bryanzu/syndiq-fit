@@ -24,7 +24,7 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 
 | Area | Path |
 |---|---|
-| Pages | `src/app/<route>/page.tsx` (home, questionnaire, program, meal-planner, muscle-map, feedback, settings, about, demo, disclaimer, admin/feedback) |
+| Pages | `src/app/<route>/page.tsx` (home, questionnaire, program, meal-planner, muscle-map, feedback, settings, about, demo, disclaimer, admin/feedback, admin/analytics) |
 | Workout engine | `src/engine/` (`programAssembler`, `volumeRules`, `equipmentFilter`, `injuryRules`, `patternClassifier`, `workoutValidator`, `gluteFocus`) |
 | Meal engine | `src/engine/mealPlanner/` (`mealPlanGenerator`, `nutritionCalculator`, `shoppingList`) |
 | Data | `src/data/` (134 exercises, split templates, equipment, 57 foods, 24 recipes) |
@@ -35,7 +35,7 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 | Workout player | `src/components/workout/`, `src/context/WorkoutSessionContext.tsx`, `src/lib/workoutSession.ts` |
 | Demo videos | `src/data/exerciseVideos.ts` (a checked YouTube video per exercise), `src/lib/demoVideo.ts` (lookup and URLs), played in `src/components/program/VideoModal.tsx` |
 | Browser storage | `src/lib/storage.ts` (program, profile, meal plan, inventory), `src/lib/progress.ts` (workout log) |
-| Analytics | `src/lib/analytics/` (`events` list and checks, `client` with `track()`, `store` for Redis or file, `metrics`, `days`), `src/components/analytics/PageViewTracker.tsx` (mounted in the root layout), `src/app/api/analytics/route.ts` |
+| Analytics | `src/lib/analytics/` (`events` list and checks, `client` with `track()`, `store` for Redis or file, `metrics`, `days`), `src/components/analytics/PageViewTracker.tsx` (mounted in the root layout), `src/app/api/analytics/route.ts`, `src/app/admin/analytics/page.tsx` (dashboard; mockup on the Admin page of the canvas above) |
 | Design tokens | `src/app/globals.css` and `tailwind.config.ts` |
 
 `localStorage` keys: `syndiq_lift_history`, `syndiq_active_program`, `syndiq_active_profile`, `syndiq_meal_plan`, `syndiq_meal_inventory`, `syndiq_workout_log`, `syndiq_workout_session`, `syndiq_theme`, `syndiq_admin_key` (sessionStorage), `syndiq_program_archive` (up to 3 replaced programs, deleted after 30 days; restored from Settings), `syndiq_anon_id` (random browser ID for the anonymous usage counts).
@@ -154,7 +154,7 @@ npm run dev
 
 - The QA suite runs both engines and checks file structure, photos, the demo video list and the analytics rules (paths, IDs, metrics, the local store and the Redis store against a fake Upstash server); 34 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
 - `npm run test:engine` needs the dev server running on port 3000.
-- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 66 checks should pass. It needs the dev server running (set `BASE_URL` if it is not on port 3000), network access to YouTube for the check that a demo video plays, and `ADMIN_KEY` in `.env.local` (any random string; the dev server and the test both read it) for the admin checks. Its events land in the local `data/analytics.json`.
+- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 70 checks should pass. It needs the dev server running (set `BASE_URL` if it is not on port 3000), network access to YouTube for the check that a demo video plays, and `ADMIN_KEY` in `.env.local` (any random string; the dev server and the test both read it) for the admin checks. Its events land in the local `data/analytics.json`.
 - `npm run verify:videos` checks that every video in `src/data/exerciseVideos.ts` still exists and allows embedding (no dev server needed). A new exercise gets a video only after this kind of check (oEmbed, `playableInEmbed`, title matches the movement); without one, its demo falls back to a YouTube search. The lookup is by exercise id, so programs saved before a video was added still get it.
 - `npm run demo:record` re-records the `/demo` walkthrough video (also needs the dev server).
 - A program can be loaded without the questionnaire through a share link: `/program?p=<base64 of the profile JSON>`.

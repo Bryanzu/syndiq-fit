@@ -32,13 +32,14 @@ async function open(viewport, scheme = 'dark') {
   page.on('pageerror', (e) => pageErrors.push(e.message));
   // Playwright can't read sendBeacon bodies, so copy each one out before it is sent
   await ctx.exposeBinding('__recordAnalytics', (_source, body) => sentEvents.push(body));
-  await ctx.addInitScript(() => {
+  await ctx.addInitScript((appOrigin) => {
+    if (location.origin !== appOrigin) return; // leave embedded frames (YouTube) alone
     const send = navigator.sendBeacon.bind(navigator);
     navigator.sendBeacon = (url, data) => {
       if (String(url).endsWith('/api/analytics') && data instanceof Blob) data.text().then((t) => window.__recordAnalytics(t));
       return send(url, data);
     };
-  });
+  }, new URL(BASE).origin);
   // The Next.js dev overlay badge sits over the bottom-left of the page and intercepts taps
   await page.addInitScript(() => {
     document.addEventListener('DOMContentLoaded', () => {
@@ -427,6 +428,26 @@ console.log('\n--- Anonymous analytics and admin lock ---');
     withKey.ok() && stats.users?.today >= 1 && expected.every((e) => stats.events?.totals?.[e] >= 1) && stats.topPages?.length > 0,
     withKey.ok() ? JSON.stringify(stats.users) : String(withKey.status())
   );
+
+  // The admin page itself
+  await page.goto(BASE + '/admin/analytics', { waitUntil: 'networkidle' });
+  const keyField = page.getByLabel('Admin key');
+  check('Admin page shows only the key form without a key', (await keyField.count()) === 1 && (await page.locator('[data-tile]').count()) === 0);
+  await keyField.fill('not-the-key');
+  await page.getByRole('button', { name: 'Open' }).click();
+  // Next.js has its own role="alert" route announcer, so find the message by id
+  await page.locator('#admin-key-error').waitFor();
+  check('Admin page says when the key is wrong', (await page.locator('#admin-key-error').innerText()).includes('didn’t work'));
+  await keyField.fill(ADMIN_KEY);
+  await page.getByRole('button', { name: 'Open' }).click();
+  await page.locator('[data-tile="All time"]').waitFor({ timeout: 10000 }).catch(() => {});
+  const allTime = Number(((await page.locator('[data-tile="All time"]').innerText().catch(() => '')) || '').replace(/\D/g, ''));
+  check(
+    'The right key opens the dashboard with the counts',
+    allTime >= 1 && (await page.locator('[data-event]').count()) === 6 && (await page.getByRole('heading', { name: 'Top pages' }).count()) === 1,
+    String(allTime)
+  );
+  check('Admin pages are not counted as visits', !sentEvents.some((b) => b.includes('"/admin')));
   await ctx.close();
 }
 
