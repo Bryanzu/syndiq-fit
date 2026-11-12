@@ -1,6 +1,7 @@
 import { exercises, getExerciseById } from '../src/data/exercises';
 import { generateWorkoutProgram } from '../src/engine/programAssembler';
 import { validateWorkoutProgram } from '../src/engine/workoutValidator';
+import { LOWER_BODY_MUSCLES, isGluteLed, orderForBuild } from '../src/engine/gluteFocus';
 import { BODYWEIGHT_ONLY_IDS, HOME_GYM_DUMBBELLS_IDS, ALL_SYNDIQ_EQUIPMENT_IDS } from '../src/data/equipment';
 import { isContraindicated } from '../src/engine/injuryRules';
 import { generateWeeklyMealPlan } from '../src/engine/mealPlanner/mealPlanGenerator';
@@ -236,6 +237,40 @@ assert(missingPhotos.length === 0, `Every exercise and recipe photo exists on di
 const credited = new Set(PHOTO_CREDITS.map((c) => c.file));
 const uncredited = [...usedPhotos].filter((p) => !credited.has(p));
 assert(uncredited.length === 0, `Every photo in use has a credit entry (uncredited: ${uncredited.join(', ') || 'none'})`);
+
+// -----------------------------------------------------------------------------
+// TEST 8: Female glute focus
+// -----------------------------------------------------------------------------
+console.log('\n--- TEST 8: Female Glute Focus ---');
+
+const sexProfile = {
+  age: '21-30',
+  experience: 'intermediate',
+  goal: 'muscle_building',
+  frequency: 4,
+  duration: 60,
+  availableEquipment: ALL_SYNDIQ_EQUIPMENT_IDS,
+  injuries: ['none'],
+};
+const malePlan = generateWorkoutProgram({ ...sexProfile, gender: 'male' });
+const femalePlan = generateWorkoutProgram({ ...sexProfile, gender: 'female' });
+const lowerDays = (p) => p.days.filter((d) => d.focusMuscles.some((m) => LOWER_BODY_MUSCLES.includes(m)));
+const upperIds = (p) => JSON.stringify(p.days.filter((d) => !lowerDays(p).includes(d)).map((d) => d.exercises.map((x) => x.exercise.id)));
+const gluteSets = (p) => p.days.flatMap((d) => d.exercises).filter((x) => x.exercise.primaryMuscles.includes('glutes')).reduce((s, x) => s + x.sets, 0);
+
+assert(
+  lowerDays(femalePlan).every((d) => d.exercises.some((x) => isGluteLed(x.exercise))) &&
+    femalePlan.days.some((d) => d.exercises.some((x) => x.exercise.id === 'hip-thrust')) &&
+    gluteSets(femalePlan) > gluteSets(malePlan) &&
+    upperIds(femalePlan) === upperIds(malePlan),
+  `Female plan: glute-led move on every lower day, hip thrust in the week, more glute sets (${gluteSets(femalePlan)} vs ${gluteSets(malePlan)}), upper days unchanged`
+);
+
+const femaleGlutes = orderForBuild(exercises.filter((e) => e.primaryMuscles.includes('glutes')), 'female');
+assert(
+  femaleGlutes[0].id === 'hip-thrust' && orderForBuild(exercises, 'male') === exercises,
+  `Body map: female glute list starts with ${femaleGlutes[0].name}, male list keeps library order`
+);
 
 // -----------------------------------------------------------------------------
 // SUMMARY

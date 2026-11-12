@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { exercisePhoto } from '@/lib/photos';
 import { Play } from 'lucide-react';
 import { MuscleGroup, Exercise } from '@/types/workout';
 import { getExercisesByMuscle } from '@/data/exercises';
+import { orderForBuild } from '@/engine/gluteFocus';
 import { BodyBuild, BodyFigure, BodyView, FRONT_MUSCLES, BACK_MUSCLES } from '@/components/body/BodyFigure';
 import { loadSavedProfile } from '@/lib/storage';
 import { VideoModal } from '@/components/program/VideoModal';
@@ -24,6 +25,9 @@ const GROUPS: { name: string; muscles: MuscleGroup[] }[] = [
 /** Sets in a week at which a muscle shows at full brightness */
 const FULL_BRIGHTNESS_SETS = 10;
 
+/** The muscle each build opens on, until the user picks one */
+const START_MUSCLE: Record<BodyBuild, MuscleGroup> = { male: 'chest', female: 'glutes' };
+
 const formatMuscle = (m: MuscleGroup) =>
   m.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
@@ -31,11 +35,22 @@ export default function MuscleMapPage() {
   const [selected, setSelected] = useState<MuscleGroup>('chest');
   const [view, setView] = useState<BodyView>('front');
   const [build, setBuild] = useState<BodyBuild>('male');
+  const pickedMuscle = useRef(false);
+
+  // The female build opens on the glutes, the male on the chest, until a muscle is picked
+  const changeBuild = (next: BodyBuild) => {
+    setBuild(next);
+    if (pickedMuscle.current) return;
+    const muscle = START_MUSCLE[next];
+    setSelected(muscle);
+    setView(FRONT_MUSCLES.includes(muscle) ? 'front' : 'back');
+  };
 
   // Start with the build from the user's questionnaire answers, if they have any
   useEffect(() => {
     const gender = loadSavedProfile()?.gender;
-    if (gender) setBuild(gender);
+    if (gender) changeBuild(gender);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [videoExercise, setVideoExercise] = useState<Exercise | null>(null);
   const [load, setLoad] = useState<Partial<Record<MuscleGroup, MuscleLoad>>>({});
@@ -56,12 +71,14 @@ export default function MuscleMapPage() {
   }, [load]);
 
   const hasHistory = Object.values(load).some((l) => (l?.setsThisWeek ?? 0) > 0);
-  const exercises = getExercisesByMuscle(selected);
+  // Same muscle, different order: the female list leads with glute work
+  const exercises = useMemo(() => orderForBuild(getExercisesByMuscle(selected), build), [selected, build]);
   const selectedLoad = load[selected];
   const group = GROUPS.find((g) => g.muscles.includes(selected)) ?? GROUPS[0];
 
   // Choosing a muscle that is only on the other side turns the figure around
   const select = (muscle: MuscleGroup) => {
+    pickedMuscle.current = true;
     setSelected(muscle);
     const visible = view === 'front' ? FRONT_MUSCLES : BACK_MUSCLES;
     if (!visible.includes(muscle)) setView(view === 'front' ? 'back' : 'front');
@@ -101,7 +118,7 @@ export default function MuscleMapPage() {
               key={b}
               type="button"
               aria-pressed={build === b}
-              onClick={() => setBuild(b)}
+              onClick={() => changeBuild(b)}
               className={`tap h-9 rounded-full px-4 text-[13px] capitalize ${
                 build === b ? 'bg-gym-lime font-bold text-gym-ink' : 'font-semibold text-gym-text'
               }`}
@@ -155,7 +172,7 @@ export default function MuscleMapPage() {
 
         {/* Selected muscle */}
         <section className="min-w-0 lg:col-span-6" aria-live="polite">
-          <div key={selected} className="glass animate-riseIn rounded-[32px] p-5">
+          <div key={`${selected}-${build}`} className="glass animate-riseIn rounded-[32px] p-5">
             <div className="flex items-end justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="text-2xl font-bold tracking-[-0.03em] text-gym-text">{formatMuscle(selected)}</h2>

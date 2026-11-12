@@ -24,7 +24,7 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 | Area | Path |
 |---|---|
 | Pages | `src/app/<route>/page.tsx` (home, questionnaire, program, meal-planner, muscle-map, feedback, settings, about, demo, disclaimer, admin/feedback) |
-| Workout engine | `src/engine/` (`programAssembler`, `volumeRules`, `equipmentFilter`, `injuryRules`, `patternClassifier`, `workoutValidator`) |
+| Workout engine | `src/engine/` (`programAssembler`, `volumeRules`, `equipmentFilter`, `injuryRules`, `patternClassifier`, `workoutValidator`, `gluteFocus`) |
 | Meal engine | `src/engine/mealPlanner/` (`mealPlanGenerator`, `nutritionCalculator`, `shoppingList`) |
 | Data | `src/data/` (134 exercises, split templates, equipment, 57 foods, 24 recipes) |
 | Types | `src/types/` |
@@ -39,7 +39,8 @@ Repository: `Bryanzu/syndiq-fit` on GitHub.
 
 ### How the engines work
 
-- **Workout:** pick a split template by training frequency, then fill each slot by filtering exercises (equipment, injuries, age, dislikes) and ranking the rest. Sets, reps and rest are adapted per profile, and each day is tuned to the requested session length. The result is checked by `workoutValidator`.
+- **Workout:** pick a split template by training frequency, then fill each slot by filtering exercises (equipment, injuries, age, dislikes) and ranking the rest. Sets, reps and rest are adapted per profile, and each day is tuned to the requested session length. The result is checked by `workoutValidator`. Fat loss and endurance keep the main lifts (only conditioning moves get a ranking boost); their reps and rest change in `volumeRules`.
+- **Female programs** (`gluteFocus.ts`, skipped for chest, back, shoulder and arm goals): every lower-body day gets a glute-led slot (the week's first is a hip thrust, later ones rotate through bridges, pull-throughs and swings), and second knee-dominant slots prefer lunges, split squats and step-ups. Upper-body days match the male plan, and male plans are unchanged. The body map's `orderForBuild()` uses the same rules: the female list puts glute work first and opens on the glutes.
 - **Meals:** calculate targets (Mifflin-St Jeor, using the user's height), score recipes, rotate through each meal type's pool, then size each meal's portion (0.75x to 2x) so the day lands on the calorie target. Excluded foods are never used; a meal type with no allowed recipe is skipped and reported.
 
 ## Design Direction
@@ -142,9 +143,9 @@ npm run test:e2e
 npm run dev
 ```
 
-- The QA suite runs both engines and checks file structure and photos; 24 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
+- The QA suite runs both engines and checks file structure and photos; 26 checks should pass. It asserts that `TabBar.tsx` exists, `VideoModal` contains `z-[150]` and `ExerciseDetailModal` contains `z-[100]`, so update it when those change.
 - `npm run test:engine` needs the dev server running on port 3000.
-- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 31 checks should pass. It needs the dev server running.
+- `npm run test:e2e` (`scripts/test-redesign-e2e.mjs`) drives the redesigned app in a browser with Playwright; 42 checks should pass. It needs the dev server running (set `BASE_URL` if it is not on port 3000).
 - `npm run demo:record` re-records the `/demo` walkthrough video (also needs the dev server).
 - A program can be loaded without the questionnaire through a share link: `/program?p=<base64 of the profile JSON>`.
 - The dev server prints an SWC "not a valid Win32 application" warning; the app still compiles.

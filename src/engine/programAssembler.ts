@@ -12,6 +12,7 @@ import {
   calculateWorkoutDuration,
 } from './volumeRules';
 import { validateWorkoutProgram } from './workoutValidator';
+import { LOWER_BODY_MUSCLES, gluteKneeRank, gluteSlotScore, usesGluteFocus, withGluteSlot } from './gluteFocus';
 
 const enhancedExercises: Exercise[] = exercises.map(enhanceExercise);
 const enhancedById = new Map(enhancedExercises.map((e) => [e.id, e]));
@@ -28,8 +29,6 @@ const AXIAL_SPINAL_LOAD_IDS = new Set([
   'good-morning',
 ]);
 
-const LOWER_BODY_MUSCLES: MuscleGroup[] = ['quads', 'hamstrings', 'glutes', 'calves'];
-
 /**
  * Generates an individualized, rule-driven workout program tailored to Syndiq Fit's verified
  * equipment, user biomechanics, injury profile, sex/gender, age, duration, and goals.
@@ -40,7 +39,8 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
   const template = TEMPLATES_BY_FREQUENCY[frequency] || TEMPLATES_BY_FREQUENCY[3];
   const targetExerciseCount = getTargetExerciseCount(profile.duration);
 
-  const isFemale = profile.gender === 'female';
+  const gluteFocus = usesGluteFocus(profile);
+  const isDisliked = (ex: Exercise) => Boolean(profile.dislikedExercises?.includes(ex.id));
   const isSenior = profile.age === '51-60' || profile.age === '61+';
 
   const prefersLoaded = !isBodyweightOnlyEquipment(profile.availableEquipment);
@@ -58,33 +58,23 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
   // How many times each exercise has been used on earlier days. Used as a ranking tie-breaker
   // so repeated slots across the week (e.g. Push A / Push B) rotate through different movements.
   const weeklyUsage = new Map<string, number>();
+  let gluteSlotsSoFar = 0;
 
   // 2. Assemble each workout day
   const days: WorkoutDay[] = template.days.map((dayTemplate, dayIndex) => {
     const selectedExerciseIds = new Set<string>();
     const dayExercises: WorkoutExerciseItem[] = [];
 
-    // Calibrate slots based on Gender and Goal
     let activeSlots: TemplateSlot[] = [...dayTemplate.slots];
 
-    // For female users: adjust high-frequency push isolations towards posterior chain / glutes
-    // unless user explicitly selected upper-body focus goals
-    // Only on days that already train the lower body, so a hinge never lands on a push/upper day.
+    // Female programs (unless the goal is upper-body size) give every lower-body day a glute-led
+    // exercise. The first one of the week is a main lift (hip thrust); later ones rotate
+    // through bridges, pull-throughs and swings. Upper-body days are left alone.
     const dayTrainsLowerBody = dayTemplate.focusMuscles.some((m) => LOWER_BODY_MUSCLES.includes(m));
-    if (isFemale && dayTrainsLowerBody && profile.goal !== 'chest_emphasis' && profile.goal !== 'arm_emphasis') {
-      let replacedOne = false;
-      activeSlots = activeSlots.map((slot) => {
-        if (!replacedOne && (slot.pattern === 'isolation_triceps' || slot.pattern === 'isolation_delts')) {
-          replacedOne = true;
-          return {
-            pattern: 'hip_hinge',
-            preferredMuscles: ['glutes', 'hamstrings'],
-            isEssential: false,
-            tierPreference: 2,
-          };
-        }
-        return slot;
-      });
+    if (gluteFocus && dayTrainsLowerBody) {
+      const mainLift = gluteSlotsSoFar === 0 && profile.experience !== 'complete_beginner';
+      activeSlots = withGluteSlot(activeSlots, mainLift ? 1 : 2);
+      gluteSlotsSoFar++;
     }
 
     // Filter slots based on requested workout duration
@@ -110,6 +100,17 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
       let isSubstituted = false;
       let substitutionReason: string | undefined;
 
+      // Why a safety-net pick was needed: an injury, if it ruled out a movement the user has the gear for
+      const fallbackReason = (): string => {
+        const blocked = enhancedExercises.find(
+          (ex) =>
+            ex.movementPattern === slot.pattern &&
+            isExerciseAvailable(ex, profile.availableEquipment) &&
+            isContraindicated(ex, profile.injuries)
+        );
+        return blocked ? getInjurySubstitutionReason(blocked, profile.injuries) : 'Swapped to fit your equipment';
+      };
+
       // 3a. Find direct safe & available candidates
       const candidates = enhancedExercises.filter((ex) => {
         if (selectedExerciseIds.has(ex.id)) return false;
@@ -129,6 +130,13 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
       if (candidates.length > 0) {
         // Multi-factor deterministic ranking
         candidates.sort((a, b) => {
+          // Glute focus: the glute slot goes to a glute-led movement, the second knee slot to a lunge
+          if (gluteFocus) {
+            const aGlute = gluteSlotScore(a, slot);
+            const bGlute = gluteSlotScore(b, slot);
+            if (aGlute !== bGlute) return bGlute - aGlute;
+          }
+
           // Goal priority match (Primary goal > Secondary goals > Neutral)
           const aGoalScore = getGoalPriorityScore(a, profile.goal, profile.secondaryGoals, profile.musclePreferences);
           const bGoalScore = getGoalPriorityScore(b, profile.goal, profile.secondaryGoals, profile.musclePreferences);
@@ -176,6 +184,12 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
           if (aMuscleMatch && !bMuscleMatch) return -1;
           if (!aMuscleMatch && bMuscleMatch) return 1;
 
+          // Glute focus: split squats before lunges (easier lunges first for new lifters)
+          if (gluteFocus && slot.pattern === 'quad_dominant') {
+            const rank = gluteKneeRank(a, profile.experience) - gluteKneeRank(b, profile.experience);
+            if (rank !== 0) return rank;
+          }
+
           return 0;
         });
 
@@ -195,7 +209,7 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
               profile.availableEquipment,
               getEnhancedExercise
             );
-            if (safeAlt && !selectedExerciseIds.has(safeAlt.id)) {
+            if (safeAlt && !selectedExerciseIds.has(safeAlt.id) && !isDisliked(safeAlt)) {
               chosenExercise = safeAlt;
               isSubstituted = true;
               substitutionReason = 'Swapped to go easier on your spine';
@@ -208,7 +222,7 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
               getEnhancedExercise
             );
 
-            if (safeAlt && !selectedExerciseIds.has(safeAlt.id)) {
+            if (safeAlt && !selectedExerciseIds.has(safeAlt.id) && !isDisliked(safeAlt)) {
               chosenExercise = safeAlt;
               isSubstituted = true;
               substitutionReason = getInjurySubstitutionReason(theoreticalIdeal, profile.injuries);
@@ -225,12 +239,13 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
             ex.primaryMuscles.some((m) => slot.preferredMuscles.includes(m)) &&
             !isContraindicated(ex, profile.injuries) &&
             isExerciseAvailable(ex, profile.availableEquipment) &&
+            !isDisliked(ex) &&
             (!isSenior || !AXIAL_SPINAL_LOAD_IDS.has(ex.id))
         );
         if (fallback) {
           chosenExercise = fallback;
           isSubstituted = true;
-          substitutionReason = 'Swapped to fit your equipment';
+          substitutionReason = fallbackReason();
         }
       }
 
@@ -242,12 +257,13 @@ export function generateWorkoutProgram(profile: UserProfile): WorkoutProgram {
             (ex.primaryMuscles.some((m) => dayTemplate.focusMuscles.includes(m)) || ex.movementPattern === 'core' || ex.movementPattern === 'conditioning') &&
             !isContraindicated(ex, profile.injuries) &&
             isExerciseAvailable(ex, profile.availableEquipment) &&
+            !isDisliked(ex) &&
             (!isSenior || !AXIAL_SPINAL_LOAD_IDS.has(ex.id))
         );
         if (fallbackAny) {
           chosenExercise = fallbackAny;
           isSubstituted = true;
-          substitutionReason = 'Swapped to fit your equipment';
+          substitutionReason = fallbackReason();
         }
       }
 
@@ -376,8 +392,9 @@ function matchesGoal(exercise: Exercise, goal: string): boolean {
     (exercise.tier === 1 || exercise.movementPattern === 'conditioning' || exercise.movementPattern === 'carry')
   )
     return true;
-  if (goal === 'fat_loss' && (exercise.movementPattern === 'conditioning' || exercise.tier === 3)) return true;
-  if (goal === 'endurance' && (exercise.movementPattern === 'conditioning' || exercise.tier === 3)) return true;
+  // Fat loss and endurance keep the main lifts: heavy work holds on to muscle. Their reps and
+  // rest change in volumeRules; only conditioning moves get a ranking boost here.
+  if ((goal === 'fat_loss' || goal === 'endurance') && exercise.movementPattern === 'conditioning') return true;
   return false;
 }
 

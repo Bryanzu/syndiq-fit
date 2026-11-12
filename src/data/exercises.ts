@@ -237,7 +237,7 @@ export const exercises: Exercise[] = [
     ['Stand facing high cable, arms nearly straight, slight forward torso hinge', 'Sweep bar down in an arc to touch upper thighs using lats only', 'Return slowly without bending elbows'],
     'Completely isolates the lats by removing biceps flexion from the pulling equation.',
     ['lat-pulldown', 'seated-cable-row'],
-    { tier: 3, movementPattern: 'horizontal_pull', category: 'back', difficulty: 'intermediate', exerciseType: 'isolation', isStrictBodyweight: false }
+    { tier: 3, movementPattern: 'vertical_pull', category: 'back', difficulty: 'intermediate', exerciseType: 'isolation', isStrictBodyweight: false }
   ),
   E('barbell-row', 'Bent-Over Barbell Row', 'barbell', ['lats', 'upper_back'], ['biceps', 'rear_delts', 'lower_back'], ['lower_back'], 4, '6-10', 120,
     ['Hinge at hips with flat back at 45 degrees, grip bar outside knees', 'Pull bar into lower ribcage, pinching shoulder blades', 'Lower bar under strict control without torso bobbing'],
@@ -330,7 +330,7 @@ export const exercises: Exercise[] = [
     ['machine-shoulder-press', 'barbell-overhead-press', 'pike-push-up'],
     { tier: 2, movementPattern: 'vertical_push', category: 'shoulders', difficulty: 'intermediate', exerciseType: 'compound', isStrictBodyweight: false }
   ),
-  E('machine-shoulder-press', 'Selectorized Machine Shoulder Press', 'machine', ['front_delts', 'side_delts'], ['triceps'], [], 3, '10-12', 75,
+  E('machine-shoulder-press', 'Selectorized Machine Shoulder Press', 'machine', ['front_delts', 'side_delts'], ['triceps'], ['shoulder'], 3, '10-12', 75,
     ['Adjust seat height so handles sit at chin level', 'Press overhead smoothly without locking elbows', 'Lower with control to stretch position'],
     'Stable, beginner-friendly overhead pressing option that isolates the deltoids safely.',
     ['dumbbell-shoulder-press', 'pike-push-up'],
@@ -456,19 +456,19 @@ export const exercises: Exercise[] = [
   E('triceps-pushdown', 'Cable Triceps Pushdown (Straight Bar)', 'cable', ['triceps'], [], ['elbow'], 3, '10-15', 60,
     ['Stand upright, elbows pinned to sides at 90 degrees', 'Push bar down until arms are fully extended', 'Control the return up to chest height'],
     'The standard cable builder for lateral and medial triceps heads.',
-    ['rope-pushdown', 'overhead-cable-extension', 'diamond-push-up'],
+    ['rope-pushdown', 'overhead-dumbbell-extension', 'diamond-push-up'],
     { tier: 3, movementPattern: 'isolation_triceps', category: 'triceps', difficulty: 'beginner', exerciseType: 'isolation', isStrictBodyweight: false }
   ),
   E('rope-pushdown', 'Cable Triceps Rope Pushdown', 'cable', ['triceps'], [], [], 3, '10-15', 60,
     ['Hold rope attachment, elbows tucked to ribs', 'Push down and flare ends of rope outward at bottom lockout', 'Return smoothly to 90 degrees'],
     'Flaring the rope at the bottom provides maximum contraction on the lateral triceps head.',
-    ['triceps-pushdown', 'overhead-cable-extension'],
+    ['triceps-pushdown', 'overhead-dumbbell-extension'],
     { tier: 3, movementPattern: 'isolation_triceps', category: 'triceps', difficulty: 'beginner', exerciseType: 'isolation', isStrictBodyweight: false }
   ),
   E('overhead-dumbbell-extension', 'Seated Overhead Dumbbell Triceps Extension', 'dumbbell', ['triceps'], [], ['elbow', 'shoulder'], 3, '10-12', 60,
     ['Hold one dumbbell with both hands overhead, seated upright', 'Lower dumbbell behind head by bending elbows to 90 degrees', 'Extend arms back to top lockout'],
     'Places the long head of the triceps in a deep stretch for complete upper-arm sweep.',
-    ['overhead-cable-extension', 'triceps-pushdown'],
+    ['skull-crusher', 'triceps-pushdown'],
     { tier: 3, movementPattern: 'isolation_triceps', category: 'triceps', difficulty: 'intermediate', exerciseType: 'isolation', isStrictBodyweight: false }
   ),
   E('skull-crusher', 'Lying Barbell Triceps Extension (Skull Crusher)', 'barbell', ['triceps'], [], ['elbow', 'wrist'], 3, '8-12', 75,
@@ -680,7 +680,7 @@ export const exercises: Exercise[] = [
   E('good-morning', 'Barbell Good Morning', 'barbell', ['hamstrings', 'lower_back'], ['glutes'], ['lower_back'], 3, '8-12', 90,
     ['Bar across upper back, slight bend in knees', 'Hinge hips backward until torso is nearly parallel to floor', 'Contract hamstrings to stand tall'],
     'Builds resilience in the posterior chain and spinal erectors.',
-    ['romanian-deadlift', 'back-extension'],
+    ['romanian-deadlift', 'cable-pull-through'],
     { tier: 2, movementPattern: 'hip_hinge', category: 'hamstrings', difficulty: 'advanced', exerciseType: 'compound', isStrictBodyweight: false }
   ),
   E('hip-abduction-machine', 'Seated Hip Abduction Machine', 'machine', ['glutes'], [], ['hip'], 3, '12-20', 45,
