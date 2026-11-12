@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sheet } from '@/components/ui/Sheet';
 import { Exercise } from '@/types/workout';
-import { X, ExternalLink, Play } from 'lucide-react';
+import { X, ExternalLink, Loader2 } from 'lucide-react';
+import { demoLink, demoVideo, youtubeEmbedUrl, youtubeThumbnailUrl } from '@/lib/demoVideo';
 
 interface VideoModalProps {
   exercise: Exercise | null;
@@ -11,94 +12,111 @@ interface VideoModalProps {
   onClose: () => void;
 }
 
+const formatLength = (seconds?: number) =>
+  seconds ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}` : '';
+
+/**
+ * The exercise demo. Plays the exercise's YouTube video inside the sheet (privacy-enhanced embed);
+ * an exercise without one gets a YouTube search link instead.
+ * The player is only mounted while the sheet is open, so nothing loads from YouTube until then.
+ */
 export function VideoModal({ exercise, isOpen, onClose }: VideoModalProps) {
+  const video = exercise ? demoVideo(exercise) : null;
+  const [playerReady, setPlayerReady] = useState(false);
+
+  useEffect(() => {
+    setPlayerReady(false);
+  }, [video?.id, isOpen]);
 
   if (!isOpen || !exercise) return null;
 
-  const hasDirectEmbed = Boolean(exercise.youtubeId && exercise.youtubeId.trim().length > 0);
+  const link = demoLink(exercise);
+  const cues = exercise.instructions.slice(0, 3);
+  const credit = video
+    ? [video.channel && `Video by ${video.channel}`, formatLength(video.seconds)].filter(Boolean).join(' · ')
+    : 'Opens a YouTube search';
 
   return (
     <Sheet isOpen={isOpen} onClose={onClose} labelledBy="video-modal-title" zClass="z-[150]" maxWidth="max-w-3xl">
-        {/* Header - Fixed/Sticky */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gym-border bg-gym-cardAlt shrink-0 sticky top-0 z-10 transition-colors">
-          <div className="flex items-center gap-3 pr-2">
-            <div className="w-8 h-8 rounded-lg bg-gym-lime/15 border border-gym-lime/40 flex items-center justify-center text-gym-limeDark dark:text-gym-lime shrink-0">
-              <Play className="w-4 h-4 fill-gym-limeDark dark:fill-gym-lime" />
-            </div>
-            <div>
-              <h3
-                id="video-modal-title"
-                className="font-bold text-base sm:text-lg text-gym-text"
-              >
-                {exercise.name}
-              </h3>
-              <p className="text-xs text-gym-textMuted">
-                Demo
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="p-2 rounded-2xl text-gym-textMuted hover:text-gym-text hover:brightness-110 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Video Player or Fallback - Scrollable container */}
-        <div className="overflow-y-auto overscroll-contain flex-1 min-h-0 bg-black flex items-center justify-center modal-content-scroll">
-          <div className="relative aspect-video w-full bg-black flex items-center justify-center">
-            {hasDirectEmbed ? (
-              <iframe
-                src={`https://www.youtube-nocookie.com/embed/${exercise.youtubeId}?autoplay=1&rel=0`}
-                title={`${exercise.name} demonstration`}
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain bg-gym-cardAlt modal-content-scroll">
+        {/* Player */}
+        <div className="px-3 pt-1 sm:px-5 sm:pt-5">
+          <div className="relative aspect-video w-full overflow-hidden rounded-[20px] bg-black" data-demo-player={video ? 'embed' : 'search'}>
+            {video ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element -- YouTube's own thumbnail, shown until the player paints */}
+                <img
+                  src={youtubeThumbnailUrl(video.id)}
+                  alt=""
+                  aria-hidden
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${playerReady ? 'opacity-0' : 'opacity-100'}`}
+                />
+                <iframe
+                  key={video.id}
+                  src={youtubeEmbedUrl(video.id)}
+                  title={`${exercise.name} demo`}
+                  className="absolute inset-0 h-full w-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  onLoad={() => setPlayerReady(true)}
+                />
+                {!playerReady && (
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden>
+                    <span className="flex size-14 items-center justify-center rounded-full bg-black/45 backdrop-blur-sm">
+                      <Loader2 className="h-6 w-6 animate-spin text-gym-lime" />
+                    </span>
+                  </span>
+                )}
+              </>
             ) : (
-              <div className="text-center p-6 sm:p-8 max-w-md">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full bg-gym-lime/15 border border-gym-lime/40 flex items-center justify-center text-gym-lime">
-                  <Play className="w-7 h-7 sm:w-8 sm:h-8 ml-1 fill-gym-lime" />
-                </div>
-                <h4 className="text-white font-semibold text-base sm:text-lg mb-2">
-                  Video Demonstration
-                </h4>
-                <p className="text-xs sm:text-sm text-zinc-300 mb-6 leading-relaxed">
-                  Watch verified form cues and biomechanical execution guide for{' '}
-                  <strong className="text-white">{exercise.name}</strong> on YouTube.
-                </p>
-                <a
-                  href={exercise.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gym-lime hover:bg-gym-limeLight text-gym-ink font-semibold text-xs sm:text-sm transition-all min-h-[44px]"
-                >
-                  <span>Watch on YouTube</span>
-                  <ExternalLink className="w-4 h-4" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gym-cardInner p-6 text-center">
+                <p className="t-small">No demo for this one yet</p>
+                <a href={link} target="_blank" rel="noopener noreferrer" className="btn-primary">
+                  Find it on YouTube
+                  <ExternalLink className="h-4 w-4" />
                 </a>
               </div>
             )}
           </div>
         </div>
 
-        {/* Footer with key cues - Fixed/Sticky */}
-        <div className="p-3.5 sm:p-4 bg-gym-cardAlt border-t border-gym-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0 sticky bottom-0 z-10 transition-colors">
-          <div className="text-xs text-gym-textMuted max-w-xl">
-            <span className="font-semibold text-gym-limeDark dark:text-gym-lime">Coach Tip:</span>{' '}
-            {exercise.instructions[0] || 'Perform with controlled tempo and full range of motion.'}
+        {/* Title and credit */}
+        <div className="flex items-start gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+          <div className="min-w-0 flex-1">
+            <h3 id="video-modal-title" className="text-[22px] font-bold leading-tight tracking-tight text-gym-text sm:text-[26px]">
+              {exercise.name}
+            </h3>
+            <p className="t-small mt-1 truncate">{credit}</p>
           </div>
-          <a
-            href={exercise.youtubeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-gym-textMuted hover:text-gym-limeDark dark:hover:text-gym-lime transition-colors shrink-0 font-medium"
-          >
-            <span>Open in YouTube app</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+          <button type="button" onClick={onClose} aria-label="Close dialog" className="btn-icon tap shrink-0 bg-gym-cardInner">
+            <X className="h-5 w-5" />
+          </button>
         </div>
+
+        {/* Form cues */}
+        {cues.length > 0 && (
+          <ol className="space-y-2.5 px-4 pt-4 sm:px-6">
+            {cues.map((cue, i) => (
+              <li key={i} className="flex gap-3 text-sm leading-relaxed text-gym-text">
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-gym-lime/15 text-[11px] font-semibold text-gym-limeDark dark:text-gym-lime">
+                  {i + 1}
+                </span>
+                <span>{cue}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        <div className="px-4 pb-5 pt-5 sm:px-6 sm:pb-6">
+          {video && (
+            <a href={link} target="_blank" rel="noopener noreferrer" className="btn-secondary w-full">
+              <ExternalLink className="h-4 w-4" />
+              Open on YouTube
+            </a>
+          )}
+        </div>
+      </div>
     </Sheet>
   );
 }
