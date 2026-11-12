@@ -62,7 +62,7 @@ function MobileTopBar({ pathname }: { pathname: string }) {
           <LogoMark />
           {/* The wordmark gives way to the page title once the page scrolls */}
           <span className="relative flex min-w-0 items-center">
-            <span className={`transition-opacity duration-300 ${scrolled ? 'opacity-0' : 'opacity-100'}`}>
+            <span className={`transition-opacity duration-300 max-[359px]:hidden ${scrolled ? 'opacity-0' : 'opacity-100'}`}>
               <Wordmark />
             </span>
             <span
